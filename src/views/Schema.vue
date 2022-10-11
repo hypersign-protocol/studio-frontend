@@ -104,9 +104,16 @@
                 </div>
                 <div class="form-group card">
                   <div class="card-header">
-                    <b-button v-b-toggle.collapse-1 variant="link">Fields Configurations</b-button>
+                    <b-button block v-b-toggle.accordion-1 style="text-decoration:none" variant="link"
+                    :aria-expanded="visible ? 'true' : 'false'"
+                    @click="visible = !visible"
+                    aria-controls="collapse-1"
+                    class="text-left"
+                    title="Create schema configuration">Fields Configurations
+                    <i :class="!visible ? 'fa fa-arrow-down' : 'fa fa-arrow-up'" style="float:right;"></i>
+                    </b-button>
                   </div>
-                  <b-collapse id="collapse-1" class="mt-2" style="padding:10px">
+                  <b-collapse id="collapse-1" class="mt-2" v-model="visible" style="padding:10px">
                     <div class="form-group tile" v-if="attributes.length > 0">
                       <div v-for="attr in attributes" :key="attr.type">
                         <div class="sm-tiles">
@@ -123,8 +130,11 @@
                     </div>
                     <div class="form-group row">
                       <label for="type" class="col-sm-2 col-form-label">Type</label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control"  v-model="attributeTypes" id="type" placeholder="">
+                      <div class="col-sm-10">  
+                        <hf-select-drop-down
+                        :options="options"
+                        @selected="e =>(attributeTypes=e)"
+                        ></hf-select-drop-down>
                       </div>
                     </div>
                     <div class="form-group row">
@@ -158,7 +168,7 @@
                   <div class="col-md-12">
                     <hr/>                    
                     <hf-buttons 
-                      name="Create"        
+                      name="Save"        
                       class="btn btn-primary"
                       @executeAction="createSchema()"
                     ></hf-buttons>
@@ -202,8 +212,8 @@
 
               <td style="word-wrap: break-word;min-width: 200px;max-width: 200px;">
                 <a target="_blank"
-                  :href="`${$config.explorer.BASE_URL}explorer/txdetails?hash=0x${row.transactionHash}`"
-                  v-if="row.transactionHash">{{ shorten('0x' + row.transactionHash) }}</a>
+                  :href="`${$config.explorer.BASE_URL}tx/${row.transactionHash}`"
+                  v-if="row.transactionHash">{{ shorten(row.transactionHash) }}</a>
                 <span v-else>-</span>
               </td>
               <td>{{ row.status }}</td>
@@ -226,9 +236,11 @@ import Loading from "vue-loading-overlay";
 import config from "../config";
 import StudioSideBar from "../components/element/StudioSideBar.vue";
 import HfButtons from "../components/element/HfButtons.vue"
+import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
+import EventBus from "../eventbus"
 export default {
   name: "IssueCredential",
-  components: { QrcodeVue, Info, Loading, StudioSideBar, HfButtons },
+  components: { QrcodeVue, Info, Loading, StudioSideBar, HfButtons, HfSelectDropDown },
   computed: {
     schemaList() {
       return this.$store.state.schemaList;
@@ -243,10 +255,18 @@ export default {
       active: 0,
       host: location.hostname,
       user: {},
+      options: [
+          { text: "Select Type", value: null },
+          { text: "String", value: "STRING" },
+          { text: "Int", value: "INT" },
+          { text: "float", value: "FLOAT" },
+          { text: "Date", value: "DATE" },
+        ],
       page: 1,
+      visible:false,
       prevRoute: null,
       attributeName: "",
-      attributeTypes: "",
+      attributeTypes: null,
       attributeFormat: "",
       attributeRequired: false,
       attributes: [],
@@ -292,12 +312,16 @@ export default {
       this.$router.push(`${id}`);
     },
     clearAll(){
+      this.visible=false
+      this.credentialName = ''
+      this.credentialDescription = ''
       this.attributeName = ''
-      this.attributeTypes = ''
+      this.attributeTypes = null
       this.attributeFormat = ''
       this.attributeRequired = false
+      this.additionalProperties = false
       this.attributes = []
-
+      
     },
     addBlankAttrBox() {
       console.log(this.attributeName, this.attributeTypes);
@@ -311,7 +335,7 @@ export default {
         }
         this.attributes.push(obj)
         this.attributeName = "";
-        this.attributeTypes = "";
+        EventBus.$emit("resetOption",this.attributeTypes)
         this.attributeFormat = "";
         this.attributeRequired = false;
       } else {
