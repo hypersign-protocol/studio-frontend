@@ -233,7 +233,6 @@ import QrcodeVue from "qrcode.vue";
 import Info from '@/components/Info.vue';
 import UtilsMixin from '../mixins/utils';
 import Loading from "vue-loading-overlay";
-import config from "../config";
 import StudioSideBar from "../components/element/StudioSideBar.vue";
 import HfButtons from "../components/element/HfButtons.vue"
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
