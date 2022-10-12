@@ -69,13 +69,15 @@
           <ul style="list-style-type: none;padding-left: 0px;min-height: 80px;">
             <li>
               <span class="card-title"><a target="_blank" :href="`${$config.explorer.BASE_URL}identity/${eachOrg.orgDid}`">{{ truncate(eachOrg.orgDid,45) }}</a></span>
+              <span v-if="eachOrg.status === 'Registered'" @click="copyToClip(eachOrg.orgDid,'Org DID')"
+              ><i class="far fa-copy"></i></span>
             </li>
             <li>
               <span class="card-title">{{ eachOrg.network }}</span>
 
             </li>
             <li>
-              <span class="card-title">{{ eachOrg.domain }}</span>
+              <span class="card-title">{{truncate(eachOrg.domain,40)}}</span>
             </li>
           </ul>
           <footer>
@@ -116,6 +118,12 @@
   </div>
 </template>
   <style scoped>
+  .far{
+cursor: pointer;
+color: grey;
+display: inline;
+padding-left: 5px;
+}
   .home {
     margin-left: auto;
     margin-right: auto;
@@ -226,6 +234,23 @@ export default {
 
 
       }
+    },
+    copyToClip(textToCopy,contentType) {
+        if (textToCopy) {
+            navigator.clipboard
+                .writeText(textToCopy)
+                .then(() => {
+                    this.notifySuccess(
+                        `${contentType} copied!`
+                    );
+                })
+                .catch((err) => {
+                    this.notifyErr(
+                        'Error while copying',
+                        err
+                    );
+                });
+        }
     },
     switchOrg(orgDid) {
       localStorage.setItem('selectedOrg',orgDid)
