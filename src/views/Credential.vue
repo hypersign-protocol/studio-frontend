@@ -106,8 +106,7 @@
             <tr v-for="row in vcList" :key="row.vc_id">
             
               <td>
-                <a :href="`${row.vc_id}:`" target="_blank>" v-if="row.vc_id">{{ shorten(row.vc_id) }}</a>
-                <span>-</span>
+                <a :href="`${row.vc_id}:`" target="_blank>" v-if="row.vc_id">{{ removeUrl(row.vc_id) }}</a>
               </td>
               <td>
                 <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.SCHEMA_GET_REST}${row.schemaId}:`" target="_blank">{{ shorten(row.schemaId) }}</a>
@@ -223,6 +222,10 @@ export default {
     });
   },
   methods: {
+    removeUrl(url) {
+      const chars = url.split('credential/');
+      return this.shorten(chars[1])      
+    },
     copyToClip(textToCopy,contentType) {
         if (textToCopy) {
             navigator.clipboard
@@ -251,7 +254,6 @@ export default {
       const sse = new EventSource(`${this.$config.studioServer.CRED_SSE}${id}`);
       sse.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log(data);
         if (data.status === "Registered" || data.status === "Failed") {
           
           sse.close();
@@ -343,7 +345,6 @@ export default {
           attributesMap[e.name] = e.value;
         });
       }
-      console.log(attributesMap);
       return attributesMap;
     },
     async issueCredential() {
