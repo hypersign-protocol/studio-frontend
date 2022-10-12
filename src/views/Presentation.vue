@@ -71,9 +71,13 @@
                     </div> -->
                     <div class="form-group">
                       <label for="forselectschema"><strong>Select Schema</strong></label>
-                      <b-form-select v-model="selected" :options="selectOptions"
+                      <!-- <b-form-select v-model="selected" :options="selectOptions"
                         @change="OnSchemaSelectDropDownChange($event)" size="md" class="mt-3">
-                      </b-form-select>
+                      </b-form-select> -->
+                      <hf-select-drop-down
+                      :options="selectOptions"
+                       @selected="e =>{OnSchemaSelectDropDownChange(e)}"
+                      ></hf-select-drop-down>
                       <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>              
                     </div>              
                     <div class="form-group">
@@ -96,7 +100,7 @@
                   </form>
                   <hr />
                   <hf-buttons 
-                    name="Generate"            
+                    name="Save"            
                     class="btn btn-primary"
                     @executeAction="generatePresentation()"
                   ></hf-buttons>
@@ -155,9 +159,11 @@ import QrcodeVue from "qrcode.vue";
 import Info from '@/components/Info.vue'
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
+import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
+import EventBus from "../eventbus"
 export default {
   name: "Presentation",
-  components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading},
+  components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading, HfSelectDropDown},
   computed:{
     templateList(){
       return this.$store.state.templateList;
@@ -244,19 +250,20 @@ export default {
     },
     OnSchemaSelectDropDownChange(event) {
       if (event) {     
+        this.selected = event
         this.presentationTemplate.schemaId=this.selected
       } else {
         this.schemaId = '';
       }
     },
     clearAll() {
+      EventBus.$emit("resetOption",this.selected)
       this.presentationTemplate.issuerDid = ''
       this.presentationTemplate.domain = ''
       this.presentationTemplate.name = ''
       this.presentationTemplate.required = true
       this.presentationTemplate.callbackUrl = ''
       this.presentationTemplate.reason = ''
-      this.selected = null
     },
     openSlider() {
       this.clearAll()
@@ -368,6 +375,8 @@ export default {
       } catch (e) {
         this.isLoading = false
         this.notifyErr(e.message)
+      } finally {
+        this.isLoading = false
       }
     },
     viewPresentation() {

@@ -19,7 +19,12 @@
     text-decoration: underline;
     cursor: pointer;
 }
-
+.far{
+  color: gray;
+  font-size: 20px;
+  padding-top: 10px;
+  cursor: pointer;
+}
 </style>
 <template>
   <div class="home">
@@ -50,9 +55,13 @@
                     </div>
                     <div class="form-group">
                       <label for="forselectschema"><strong>Select Schemmma</strong></label>
-                      <b-form-select v-model="selected" :options="selectOptions"
+                      <!-- <b-form-select v-model="selected" :options="selectOptions"
                         @change="OnSchemaSelectDropDownChange($event)" size="md" class="mt-3">
-                      </b-form-select>
+                      </b-form-select> -->
+                      <hf-select-drop-down
+                      :options="selectOptions"
+                       @selected="e =>{OnSchemaSelectDropDownChange(e)}"
+                      ></hf-select-drop-down>
                     </div>
                     <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>              
                     <div class="form-group" v-for="attr in issueCredAttributes" :key="attr.name">
@@ -124,7 +133,13 @@
         </table>
         <hf-pop-up Header="Accept Credential URL"> 
             <Info message="Copy and send this URL to the credential owner so that they can accept in their wallet" />
-            <p style="max-width: 500px; word-wrap: break-word;">{{ credUrl}}</p>
+            <i
+            style="float:right"
+            class="far fa-copy"
+            title="copy url"
+            @click="copyToClip(credUrl,'Url')"
+            ></i>
+            <p style="max-width: 500px; word-wrap: break-word; padding:10px;">{{ credUrl}}</p>
         </hf-pop-up>
       </div>
     </div>
@@ -139,9 +154,11 @@ import HfPopUp from "../components/element/hfPopup.vue";
 import Loading from "vue-loading-overlay";
 import StudioSideBar from "../components/element/StudioSideBar.vue";
 import HfButtons from "../components/element/HfButtons.vue"
+import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
+import EventBus from "../eventbus"
 export default {
   name: "IssueCredential",
-  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons },
+  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown },
   computed: {
     vcList(){
       return this.$store.state.vcList;
@@ -207,6 +224,23 @@ export default {
     });
   },
   methods: {
+    copyToClip(textToCopy,contentType) {
+        if (textToCopy) {
+            navigator.clipboard
+                .writeText(textToCopy)
+                .then(() => {
+                    this.notifySuccess(
+                        `${contentType} copied!`
+                    );
+                })
+                .catch((err) => {
+                    this.notifyErr(
+                        'Error while copying',
+                        err
+                    );
+                });
+        }
+    },
     goToSchema() {
       this.$router.push('schema')
     },
@@ -272,6 +306,7 @@ export default {
     OnSchemaSelectDropDownChange(event) {
       if (event) {
         this.issueCredAttributes = [];
+        this.selected = event;
         const id = this.issueCredAttributes.length;
         const selectedSchema = this.$store.getters.findSchemaBySchemaID(event);
         const schemaMap =  selectedSchema.schemaDetails.schema.properties;
@@ -367,8 +402,8 @@ export default {
     },
     clearAll() {
       this.holderDid = "";
-      this.selected = null;
       this.issueCredAttributes = []
+      EventBus.$emit("resetOption",this.selected)
     }
   },
   mixins: [UtilsMixin],

@@ -28,13 +28,13 @@ const config = {
         DID_RESOLVE_EP: EnvProvider.value('NODE_SERVER_DID_RERSOLVE_EP') || "hypersign-protocol/hidnode/ssi/did/"
     },
     explorer: {
-        BASE_URL: EnvProvider.value('EXPLORER_BASE_URL'),
+        BASE_URL: EnvProvider.value('EXPLORER_BASE_URL') || 'https://explorer.hypersign.id/hypersign-testnet/',
         NEW_DID_EP: EnvProvider.value('EXPLORER_NEW_DID_EP') || "newdid"
     },
     app: {
         name: EnvProvider.value('TITLE') || "Hypersign Studio",
         decription: EnvProvider.value('DESC'),
-        version: EnvProvider.value('VERSION')
+        version: EnvProvider.value('VERSION') || "v1.0.0"
     },
 
 }
