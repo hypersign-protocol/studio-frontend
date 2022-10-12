@@ -145,7 +145,7 @@
                     </div>
                     <div class="form-group row">
                       <label for="required" class="col-sm-2 col-form-label">Required?</label>
-                      <div class="col-sm-10">
+                      <div class="col-sm-10" style="display:flex;">
                         <input type="checkbox" v-model="attributeRequired" id="required" >
                       </div>
                     </div>
@@ -162,7 +162,7 @@
                 </div>
                 <div class="form-group">
                   <label for="schDescription"><strong>Additional Properties?:</strong></label>
-                  <input v-model="additionalProperties" type="checkbox" />
+                  <input v-model="additionalProperties" type="checkbox" style="margin-left:5px;"/>
                 </div>
                 <div class="form-group row">
                   <div class="col-md-12">
@@ -259,7 +259,7 @@ export default {
           { text: "Select Type", value: null },
           { text: "String", value: "STRING" },
           { text: "Int", value: "INT" },
-          { text: "float", value: "FLOAT" },
+          { text: "Float", value: "FLOAT" },
           { text: "Date", value: "DATE" },
         ],
       page: 1,

@@ -54,7 +54,7 @@
                         v-model="holderDid" />
                     </div>
                     <div class="form-group">
-                      <label for="forselectschema"><strong>Select Schemmma</strong></label>
+                      <label for="forselectschema"><strong>Select Schema</strong></label>
                       <!-- <b-form-select v-model="selected" :options="selectOptions"
                         @change="OnSchemaSelectDropDownChange($event)" size="md" class="mt-3">
                       </b-form-select> -->
@@ -193,7 +193,6 @@ export default {
       ],
       selected: null,
       attributeValues: {},
-      authToken: localStorage.getItem("authToken"),
       vcCredStatusMap: {}, 
       schemaList: [],
       fullPage: true,

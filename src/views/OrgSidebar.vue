@@ -64,11 +64,11 @@
     <div class="row" v-if="orgList.length > 0">
       <div class="col-lg-4" v-for="eachOrg in orgList" :key="eachOrg._id">
 
-        <b-card :title="eachOrg.name" tag="article" style="max-width: 30rem; margin-top: 10px; max-height:25rem"
+        <b-card :title="truncate(eachOrg.name,20)" tag="article" style="max-width: 30rem; margin-top: 10px; max-height:25rem"
           class="mb-2 eventCard" img-top>
           <ul style="list-style-type: none;padding-left: 0px;min-height: 80px;">
             <li>
-              <span class="card-title">{{ eachOrg.orgDid }}</span>
+              <span class="card-title"><a target="_blank" :href="`${$config.explorer.BASE_URL}identity/${eachOrg.orgDid}`">{{ truncate(eachOrg.orgDid,45) }}</a></span>
             </li>
             <li>
               <span class="card-title">{{ eachOrg.network }}</span>
@@ -99,7 +99,7 @@
             </li>
             </ul>
             </div>
-                <div class="pt-1 pl-2">            
+                <div class="pt-1 pl-2" v-if="eachOrg.status === 'Registered'">            
                 <i class="fas fa-pencil-alt"
                 @click="editOrg(eachOrg._id)" title="Click to edit this event" style="cursor: pointer"
                 ></i>

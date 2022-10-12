@@ -1,7 +1,7 @@
 
 <template>
     <div>
-      <b-sidebar id="sidebar-right" width="40%" :title="title" right shadow backdrop>
+      <b-sidebar id="sidebar-right" width="40%" :title="title" right shadow backdrop no-close-on-backdrop>
         <slot />
       </b-sidebar>
     </div>
