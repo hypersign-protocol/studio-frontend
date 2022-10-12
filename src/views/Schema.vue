@@ -95,10 +95,12 @@
           <StudioSideBar title="Create Schema">
               <div class="container">
                 <div class="form-group">
+                  <tool-tip infoMessage="Name of the schema"></tool-tip>
                   <label for="schemaName"><strong>Schema Name:</strong></label>
                   <input type="text" class="form-control" id="schemaName" v-model="credentialName" aria-describedby="schemaNameHelp">
                 </div>
                 <div class="form-group">
+                  <tool-tip infoMessage="Description for the schema"></tool-tip>
                   <label for="schDescription"><strong>Description:</strong></label>
                   <textarea type="text" class="form-control" id="schDescription" v-model="credentialDescription"  rows="5" cols="20" aria-describedby="orgNameHelp"></textarea>
                 </div>
@@ -122,34 +124,52 @@
                         </div>
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label for="ipattributeName" class="col-sm-2 col-form-label">Name</label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control"  v-model="attributeName" id="ipattributeName" placeholder="">
-                      </div>
+
+                    <div class="row g-3 align-items-center w-100">
+                        <div class="col-lg-3 col-md-3 text-left">
+                          <tool-tip infoMessage="Attribute Name"></tool-tip>
+                          <label for="attributeName" class="col-form-label">Name<span style="color: red">*</span>: </label>
+                        </div>
+                        <div class="col-lg-9 col-md-9 px-0">
+                            <input v-model="attributeName" type="text" id="attributeName" class="form-control w-100"
+                            placeholder="">
+                        </div>
                     </div>
-                    <div class="form-group row">
-                      <label for="type" class="col-sm-2 col-form-label">Type</label>
-                      <div class="col-sm-10">  
-                        <hf-select-drop-down
+
+                    <div class="row g-3 align-items-center w-100 mt-4">
+                        <div class="col-lg-3 col-md-3 text-left">
+                        <tool-tip infoMessage="Type of the attribute"></tool-tip>
+                        <label for="type" class="col-form-label">Type<span style="color: red">*</span>:</label>
+                        </div>
+                        <div class="col-lg-9 col-md-9 px-0">
+                      <hf-select-drop-down
                         :options="options"
                         @selected="e =>(attributeTypes=e)"
-                        ></hf-select-drop-down>
+                      ></hf-select-drop-down>
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label for="type" class="col-sm-2 col-form-label">Format</label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control"  v-model="attributeFormat" id="type" placeholder="Enter attribute Format (eg email)">
-                      </div>
+
+                     <div class="row g-3 align-items-center w-100 mt-4">
+                        <div class="col-lg-3 col-md-3 text-left">
+                          <tool-tip infoMessage="Format of the attribute"></tool-tip>
+                          <label for="format" class="col-form-label">Format: </label>
+                        </div>
+                        <div class="col-lg-9 col-md-9 px-0">
+                            <input v-model="attributeFormat" type="text"  placeholder="Enter attribute Format (eg email)" id="type" class="form-control w-100" >
+                        </div>
                     </div>
-                    <div class="form-group row">
-                      <label for="required" class="col-sm-2 col-form-label">Required?</label>
-                      <div class="col-sm-10" style="display:flex;">
-                        <input type="checkbox" v-model="attributeRequired" id="required" >
-                      </div>
+
+                     <div class="row g-3 align-items-center w-100 mt-4">
+                        <div class="col-lg-3 col-md-3 text-left">
+                        <tool-tip infoMessage="Required field"></tool-tip>
+                        <label for="required" class="col-form-label">Required: </label>
+                        </div>
+                        <div class="col-lg-9 col-md-9 px-0">
+                             <input type="checkbox" v-model="attributeRequired" id="required" >
+                        </div>
                     </div>
-                    <div class="form-group row">
+
+                    <div class="form-group row mt-4">
                       <div class="col-sm-10">                        
                         <hf-buttons 
                           name="Add +"        
@@ -161,6 +181,7 @@
                   </b-collapse>
                 </div>
                 <div class="form-group">
+                  <tool-tip infoMessage="Additional Properties"></tool-tip>
                   <label for="schDescription"><strong>Additional Properties?:</strong></label>
                   <input v-model="additionalProperties" type="checkbox" style="margin-left:5px;"/>
                 </div>
@@ -233,14 +254,14 @@ import QrcodeVue from "qrcode.vue";
 import Info from '@/components/Info.vue';
 import UtilsMixin from '../mixins/utils';
 import Loading from "vue-loading-overlay";
-import config from "../config";
 import StudioSideBar from "../components/element/StudioSideBar.vue";
 import HfButtons from "../components/element/HfButtons.vue"
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
+import ToolTip from "../components/element/ToolTip.vue"
 export default {
   name: "IssueCredential",
-  components: { QrcodeVue, Info, Loading, StudioSideBar, HfButtons, HfSelectDropDown },
+  components: { QrcodeVue, Info, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip },
   computed: {
     schemaList() {
       return this.$store.state.schemaList;
