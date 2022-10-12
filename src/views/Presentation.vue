@@ -216,7 +216,6 @@ export default {
         { text: "Create new schema", value: "create" },
         { text: "Select existing schema", value: "existing" },
       ],
-      selected: null,
       attributeValues: {},
       authToken: localStorage.getItem("authToken"),
    
@@ -291,7 +290,7 @@ export default {
         text: msg
       });
     },
-    fetchData(url, option) {
+    fetchData(url) {
       fetch(url)
         .then((res) => res.json())
         .then((j) => {

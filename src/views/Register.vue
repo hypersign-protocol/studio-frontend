@@ -76,11 +76,9 @@
 
 <script>
 import fetch from "node-fetch";
-const { sha256hashStr } = require("../utils/hash");
 import Loading from "vue-loading-overlay";
 export default {
   name: "Register",
-  components: {},
   components: {
     Loading,
   },
