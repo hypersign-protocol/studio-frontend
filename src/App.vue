@@ -256,11 +256,9 @@ export default {
   },
 
   mounted() {
-    console.log('===================mount')
     EventBus.$on('closeSideNav',()=>{
       this.isSidebarCollapsed = true
     })
-    console.log(localStorage.getItem('user'))
     if(localStorage.getItem('user')){
     const usrStr = localStorage.getItem('user')
     this.user = JSON.parse(usrStr);
