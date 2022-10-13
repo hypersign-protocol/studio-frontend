@@ -32,3 +32,11 @@ export function isDate(date) {
     }
     return new Date(date) !== "Invalid Date" && !isNaN(new Date(date));
 }
+export function ifSpaceExists(str) {
+  str= str.trim()
+  str = str.split(' ')
+  if (str.length > 1) {
+     return true
+  }
+  else return false 
+ }
