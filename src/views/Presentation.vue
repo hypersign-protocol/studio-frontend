@@ -168,6 +168,8 @@ import "vue-loading-overlay/dist/vue-loading.css";
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
+import message from '../mixins/messages'
+import { isEmpty, isValidURL } from '../mixins/fieldValidation'
 export default {
   name: "Presentation",
   components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading, HfSelectDropDown, ToolTip},
@@ -351,8 +353,16 @@ export default {
     async generatePresentation() {
       this.isLoading = true
       try {
-        
         const issuerDid = this.presentationTemplate.issuerDid.split(',')
+        if (isEmpty(this.presentationTemplate.schemaId)) {
+          return this.notifyErr(message.CREDENTIAL.SELECT_SCHEMA)
+        } else if (isEmpty(this.presentationTemplate.reason)) {
+          return this.notifyErr(message.PRESENTATION.REASON)
+        } else if (isEmpty(this.presentationTemplate.callbackUrl)) {
+          return this.notifyErr(message.PRESENTATION.CALLBACK_URL)
+        } else if (isValidURL(this.presentationTemplate.callbackUrl)) {
+          return this.notifyErr(message.PRESENTATION.INVALID_URL)
+        } 
         const headers = {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.authToken}`
@@ -368,6 +378,7 @@ export default {
           callbackUrl: this.presentationTemplate.callbackUrl,
           orgDid:this.$store.state.selectedOrgDid
         }
+
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.PRESENTATION_TEMPLATE_EP}`
         fetch(url, {
           body: JSON.stringify(body),
