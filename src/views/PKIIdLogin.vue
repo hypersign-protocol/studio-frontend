@@ -207,7 +207,6 @@ export default {
     document.title = `${config.app.name} - Login`;
     // take it in the env
     this.connection = new WebSocket(this.$config.websocketUrl);
-    console.log(this.$config.websocketUrl);
     this.connection.onopen = function () {
       console.log("Socket connection is open");
     };
