@@ -159,6 +159,8 @@ import HfButtons from "../components/element/HfButtons.vue"
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
+import { isEmpty, isValidDid } from '../mixins/fieldValidation'
+import message from '../mixins/messages'
 export default {
   name: "IssueCredential",
   components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip },
@@ -315,11 +317,11 @@ export default {
         const id = this.issueCredAttributes.length;
         const selectedSchema = this.$store.getters.findSchemaBySchemaID(event);
         const schemaMap =  selectedSchema.schemaDetails.schema.properties;
-        for (const e in schemaMap) {
+        for (const e of Object.entries(schemaMap)) {
           this.issueCredAttributes.push({
             id: id + event,
-            type: e.type,
-            name: e,
+            type: e[1].type,
+            name: e[0],
             required: e.required === true ? true : false,
             value: "",
           });
@@ -346,7 +348,13 @@ export default {
       let attributesMap = [];
       if (this.issueCredAttributes.length > 0) {
         this.issueCredAttributes.forEach((e) => {
+          console.log(e.type)
           attributesMap[e.name] = e.value;
+          if (isEmpty(e.value)) {
+            throw new Error(`Please enter value in ${e.name} field`)
+          }//else if(typeof(e.value)!== e.type){
+          //   throw new Error(`Type mismatch`)
+          // }
         });
       }
       return attributesMap;
@@ -354,9 +362,13 @@ export default {
     async issueCredential() {
       try {
         this.isLoading = true
-        if (this.holderDid == "") throw new Error("Please enter the holder did")
-        if (this.selected == null) throw new Error("Please select a schema")
-
+        if (isEmpty(this.holderDid)) {
+          return this.notifyErr(message.CREDENTIAL.EMPTY_HOLDER_DID)
+        } else if (!isValidDid(this.holderDid)) {
+          return this.notifyErr(message.CREDENTIAL.INVALID_DID)
+        } else if (isEmpty(this.selected)) {
+          return this.notifyErr(message.CREDENTIAL.SELECT_SCHEMA)
+        }
         // generateAttributeMap
         const attributeMap = await this.generateAttributeMap();
 

@@ -14,7 +14,14 @@ const SCHEMA = {
     EMPTY_ATTRIBUTE_TYPE: "Please select attribute type",
     INVALID_FORMAT: "Enter a valid format value"
 }
+
+const CREDENTIAL = {
+    EMPTY_HOLDER_DID: "Please enter Subject Did",
+    SELECT_SCHEMA: "Please select schema",
+    INVALID_DID: "Please enter a valid did"
+}
 module.exports = {
     ORGANIZATION,
-    SCHEMA
+    SCHEMA,
+    CREDENTIAL
 }
