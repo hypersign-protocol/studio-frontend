@@ -96,7 +96,7 @@
               <div class="container">
                 <div class="form-group">
                   <tool-tip infoMessage="Name of the schema"></tool-tip>
-                  <label for="schemaName"><strong>Schema Name:</strong></label>
+                  <label for="schemaName"><strong>Schema Name<span style="color: red">*</span>:</strong></label>
                   <input type="text" class="form-control" id="schemaName" v-model="credentialName" aria-describedby="schemaNameHelp">
                 </div>
                 <div class="form-group">
@@ -259,6 +259,8 @@ import HfButtons from "../components/element/HfButtons.vue"
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
+import { isValidURL, isEmpty, ifSpaceExists } from '../mixins/fieldValidation'
+import message from '../mixins/messages'
 export default {
   name: "IssueCredential",
   components: { QrcodeVue, Info, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip },
@@ -345,8 +347,17 @@ export default {
       
     },
     addBlankAttrBox() {
-      console.log(this.attributeName, this.attributeTypes);
-      if (this.attributeName !== "" && this.attributeTypes !== "") {
+      if (isEmpty(this.attributeName)) {
+        return this.notifyErr(message.SCHEMA.EMPTY_SCHEMA_ATTRIBUTE_NAME)
+      } else if (isValidURL(this.attributeName)) {
+        return this.notifyErr(message.SCHEMA.INVALID_ATTRIBUTE_NAME)
+      } else if (ifSpaceExists(this.attributeName)) {
+         return this.notifyErr('There should not be space in attribute name')
+      }else if (this.attributeTypes === ' ' || this.attributeTypes === null) {
+        return this.notifyErr(message.SCHEMA.EMPTY_ATTRIBUTE_TYPE)
+      } else if (isValidURL(this.attributeFormat)) {
+        return this.notifyErr(message.SCHEMA.INVALID_FORMAT)
+      }
         let obj = {
           name: this.attributeName,
           type: this.attributeTypes,
@@ -358,10 +369,7 @@ export default {
         this.attributeName = "";
         EventBus.$emit("resetOption",this.attributeTypes)
         this.attributeFormat = "";
-        this.attributeRequired = false;
-      } else {
-        this.notifyErr("Name or Type Cannot be blank")
-      }
+        this.attributeRequired = false;     
     },
     ssePopulateSchema(id, store) {
       const sse = new EventSource(`${this.$config.studioServer.SCHEMA_SSE}${id}`);
@@ -369,7 +377,6 @@ export default {
       
       sse.onmessage = function (e) {
         const data = JSON.parse(e.data)
-         console.log(data);
         if (data.status === "Registered" || data.status === "Failed") {
           sse.close();
           store.dispatch("insertAschema", data)
@@ -398,11 +405,13 @@ export default {
     createSchema() {
       try {
         this.isLoading = true
-        if (this.credentialName == "")
-          throw new Error("SchemaName can not be blank");
-        if (this.attributes.length == 0)
-          throw new Error("Atleast one attribute is required");
-
+        if (isEmpty(this.credentialName)) {
+          return this.notifyErr(message.SCHEMA.EMPTY_SCHEMA_NAME)
+        } else if (isValidURL(this.credentialName)) {
+          return this.notifyErr(message.SCHEMA.INVALID_SCHEMA_NAME)
+        } else if (this.attributes.length == 0) {
+          return this.notifyErr(message.SCHEMA.EMPTY_SCHEMA_ATTRIBUTE)
+        }
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.SAVE_SCHEMA_EP}`;
         const schemaData = {
           name: this.credentialName,

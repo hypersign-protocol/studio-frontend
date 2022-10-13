@@ -184,7 +184,7 @@ export default new Vuex.Store({
                     }
                     payload['schemaDetails'] = shcemaDetial;
                     commit('insertAschema', payload);
-                }).catch(e => console.log)
+                }).catch(e => console.log(e))
             } else {
                 commit('insertAschema', payload);
             }
