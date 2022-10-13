@@ -204,7 +204,7 @@ export default {
   },
   created() {             
     localStorage.clear();
-    document.title = `${config.appName} - Login`;
+    document.title = `${config.app.name} - Login`;
     // take it in the env
     this.connection = new WebSocket(this.$config.websocketUrl);
     console.log(this.$config.websocketUrl);
@@ -214,10 +214,7 @@ export default {
     this.isLoading = true;
     var _this = this;
     this.connection.onmessage = function ({ data }) {
-      // console.log("Websocket connection messag receieved ", data);
       let messageData = JSON.parse(data);
-      console.log(messageData);
-      // console.log(messageData);
       if (messageData.op == "init") {
         _this.isLoading = false;
         /// Sending provider from here........

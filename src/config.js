@@ -1,7 +1,6 @@
 import EnvProvider from 'jvjr-docker-env'
 
 const hsdk = require('lds-sdk')
-console.log(process.env);
 const config = {
     studioServer: {
         SCHEMA_SSE:`${process.env.VUE_APP_SSE}api/v1/schema/sse/`,

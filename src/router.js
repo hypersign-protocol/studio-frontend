@@ -39,7 +39,8 @@ const router =  new Router({
       name: 'dashboard',
       component: Dashboard,
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
+           title: `${config.app.name} - Dashboard`
       } 
     },
     {
@@ -68,8 +69,9 @@ const router =  new Router({
       name: 'schema',
       component: Schema,
       meta: {
-        requiresAuth: true
-           } 
+        requiresAuth: true,
+        title: `${config.app.name} - Schema`
+           }
     },
     // {
     //   path: '/studio/apps/:appId',
@@ -84,7 +86,8 @@ const router =  new Router({
       name: 'credential',
       component: Credential,
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
+        title: `${config.app.name} - Credential`
       } 
     },
     {
@@ -92,7 +95,8 @@ const router =  new Router({
       name: 'presentation',
       component: Presentation,
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
+         title: `${config.app.name} - Presentation`
       } 
     },
     // {
@@ -107,7 +111,8 @@ const router =  new Router({
 })
 
 router.beforeEach((to, from, next) => {
-  if(to.matched.some(record => record.meta.requiresAuth)){
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    document.title= to.meta.title
     const authToken = localStorage.getItem('authToken')
     if(authToken){
       const url = `${config.studioServer.BASE_URL}api/v2/protected`
