@@ -39,4 +39,17 @@ export function ifSpaceExists(str) {
      return true
   }
   else return false 
- }
+}
+ 
+export function isValidDid(str) {
+  str = str.split(':')
+  if (!str[0]=='did') {
+    return false
+  } else if(! (str.length==3 || str.length==4)) {
+    return false
+  }else if (!((str[str.length - 1]).length === 45)) {
+    return false
+  } else {
+    return true
+  }
+}
