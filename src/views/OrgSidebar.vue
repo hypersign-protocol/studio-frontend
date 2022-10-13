@@ -13,8 +13,10 @@
     </div>
     <StudioSideBar :title="edit? 'Edit Organization' : 'Add Organization'">
       <div class="container">
-        <div class="form-group" v-if="orgStore.orgDid">
-          <label for="orgName"><strong>Org DID:</strong></label>
+
+        <div class="form-group" v-if="edit === true">
+          <tool-tip infoMessage="Your Organization DID"></tool-tip>
+          <label for="orgDid"><strong>Org DID<span style="color: red">*</span>: </strong></label>
           <input type="text" class="form-control" id="orgDid" v-model="orgStore.orgDid" aria-describedby="orgNameHelp"
             disabled>
           <small id="orgNameHelp" class="form-text text-muted">
@@ -22,20 +24,17 @@
               target="_blank">Resolve DID</a>
           </small>
         </div>
-        <div class="form-group" v-else>
-          <label for="orgName"><strong>Org ID:</strong></label>
-          <input type="text" class="form-control" id="orgDid" v-model="orgStore._id" aria-describedby="orgNameHelp"
-            disabled>
-        </div>
 
         <div class="form-group">
-          <label for="orgName"><strong>Organization Name:</strong></label>
+          <tool-tip infoMessage="Your Organization Name"></tool-tip>
+          <label for="orgName"><strong>Organization Name<span style="color: red">*</span>:</strong></label>
           <input type="text" class="form-control" id="orgName" v-model="orgStore.name" aria-describedby="orgNameHelp"
             placeholder="Enter your org name">
           <!-- <small id="orgNameHelp" class="form-text text-muted">Some help text</small> -->
         </div>
         <div class="form-group">
-          <label for="domain"><strong>Domain:</strong></label>
+          <tool-tip infoMessage="Your Organization Domain Name"></tool-tip>
+          <label for="domain"><strong>Domain<span style="color: red">*</span>:</strong></label>
           <input type="text" class="form-control" id="domain" v-model="orgStore.domain" aria-describedby="domainHelp"
             placeholder="Enter your domain name">
         </div>
@@ -160,12 +159,13 @@ padding-left: 5px;
 import HfPopUp from "../components/element/hfPopup.vue";
 import StudioSideBar from "../components/element/StudioSideBar.vue";
 import UtilsMixin from '../mixins/utils';
+import {isEmpty, isValidURL, isDomain} from '../mixins/fieldValidation'
 import 'vue-loading-overlay/dist/vue-loading.css';
 import Loading from "vue-loading-overlay";
 import HfButtons from '../components/element/HfButtons.vue'
-
+import ToolTip from '../components/element/ToolTip.vue'
+import messages from '../mixins/messages'
 export default {
-  comments: { HfButtons },
   computed: {
     orgList() {
       return this.$store.state.orgList;
@@ -195,7 +195,7 @@ export default {
       }
     }
   },
-  components: { HfPopUp, Loading, StudioSideBar, HfButtons },
+  components: { HfPopUp, Loading, StudioSideBar, HfButtons, ToolTip },
   methods: {
     ssePopulateOrg(id, store) {
       const sse = new EventSource(`${this.$config.studioServer.ORG_SSE}${id}`);
@@ -271,7 +271,15 @@ export default {
       Object.assign(this.orgStore, { ...this.$store.getters.findOrgByOrgID(orgDid) })
     },
     createAnOrg() {
-
+      if(isEmpty(this.orgStore.name)) {
+       return this.notifyErr(messages.ORGANIZATION.ORGANIZATION_NAME_EMPTY)
+      } else if(isValidURL(this.orgStore.name)){
+        return this.notifyErr(messages.ORGANIZATION.INVALID_ORG_NAME)
+      } else if(isEmpty(this.orgStore.domain)) {
+        return this.notifyErr(messages.ORGANIZATION.DOMAIN_NAME_EMPTY)
+      } else if(!isDomain(this.orgStore.domain)){
+        return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
+      }
       let url
       let method
       if (this.edit) {
