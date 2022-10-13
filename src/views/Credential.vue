@@ -49,12 +49,14 @@
                   <div class="col-md-12">
                     <form style="max-height:300px; overflow:auto; padding: 5px">
                     <div class="form-group">
-                      <label for="fordid"><strong>Subject Did</strong></label>
+                      <tool-tip infoMessage="Enter DID to whome you are issuing credential"></tool-tip>
+                      <label for="fordid"><strong>Subject DID<span style="color: red">*</span>:</strong></label>
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
                     <div class="form-group">
-                      <label for="forselectschema"><strong>Select Schema</strong></label>
+                      <tool-tip infoMessage="Select Schema to issue credential"></tool-tip>
+                      <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>
                       <!-- <b-form-select v-model="selected" :options="selectOptions"
                         @change="OnSchemaSelectDropDownChange($event)" size="md" class="mt-3">
                       </b-form-select> -->
@@ -63,6 +65,7 @@
                        @selected="e =>{OnSchemaSelectDropDownChange(e)}"
                       ></hf-select-drop-down>
                     </div>
+                    <tool-tip v-if="selectOptions.length === 1" infoMessage="Create Schema to issue credential"></tool-tip>
                     <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>              
                     <div class="form-group" v-for="attr in issueCredAttributes" :key="attr.name">
                       <label for="schDescription"><strong>{{ attr.name }}</strong></label>
@@ -155,9 +158,10 @@ import StudioSideBar from "../components/element/StudioSideBar.vue";
 import HfButtons from "../components/element/HfButtons.vue"
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
+import ToolTip from "../components/element/ToolTip.vue"
 export default {
   name: "IssueCredential",
-  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown },
+  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip },
   computed: {
     vcList(){
       return this.$store.state.vcList;

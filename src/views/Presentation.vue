@@ -47,19 +47,21 @@
                   <form>
                     <div class="form-group">
                       <label class="floatLeft"><strong> Domain :</strong></label>
-                      <input class="form-control" type="url" v-model="presentationTemplate.domain" />
+                      <input class="form-control" type="url" v-model="presentationTemplate.domain" disabled/>
 
 
                     </div>
                     <div class="form-group">
-                      <label class="floatLeft"><strong>Name (optional) :</strong></label>
+                      <tool-tip  infoMessage="Name for the Presentation template"></tool-tip>
+                      <label ><strong>Name (optional) :</strong></label>
+                      
                       <input class="form-control" type="text" v-model="presentationTemplate.name" />
 
 
                     </div>
                     <div class="form-group">
-                      <label class="floatLeft"><strong> IssuerDid :</strong></label>
-                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid" />
+                      <label><strong> IssuerDid :</strong></label>
+                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid" disabled/>
 
 
                     </div>
@@ -70,31 +72,35 @@
 
                     </div> -->
                     <div class="form-group">
-                      <label for="forselectschema"><strong>Select Schema</strong></label>
-                      <!-- <b-form-select v-model="selected" :options="selectOptions"
-                        @change="OnSchemaSelectDropDownChange($event)" size="md" class="mt-3">
-                      </b-form-select> -->
+                      <tool-tip  infoMessage="Select Schema to create template"></tool-tip>
+                      <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>
                       <hf-select-drop-down
                       :options="selectOptions"
                        @selected="e =>{OnSchemaSelectDropDownChange(e)}"
                       ></hf-select-drop-down>
-                      <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>              
+                      <div v-if="selectOptions.length === 1" class="mt-2">
+                      <tool-tip  infoMessage="To create Presentation template you need to have atleast one schema"></tool-tip>
+                      <span class="goschema" @click="goToSchema()">Create Schema</span>
+                      </div>
                     </div>              
                     <div class="form-group">
-                      <label class="floatLeft"><strong>Reason :</strong></label>
+                      <tool-tip  infoMessage="Reason for the template"></tool-tip>
+                      <label><strong>Reason<span style="color: red">*</span>:</strong></label>
                       <input class="form-control" type="text" v-model="presentationTemplate.reason" />
 
 
                     </div>
                     <div class="form-group">
-                      <label class="floatLeft"><strong>Callback URI</strong></label>
+                      <tool-tip  infoMessage="Callback URI"></tool-tip>
+                      <label><strong>Callback URI<span style="color: red">*</span>:</strong></label>
                       <input class="form-control" type="url" v-model="presentationTemplate.callbackUrl" />
 
 
                     </div>
                     <div class="form-group">
-                      <label class="floatLeft "><strong>Required :</strong></label>
-                      <input type="checkbox" v-model="presentationTemplate.required" />
+                      <tool-tip  infoMessage="Required"></tool-tip>              
+                      <label><strong>Required :</strong></label>
+                      <input type="checkbox" class="ml-2" v-model="presentationTemplate.required" />
                     </div>
 
                   </form>
@@ -161,9 +167,10 @@ import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
+import ToolTip from "../components/element/ToolTip.vue"
 export default {
   name: "Presentation",
-  components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading, HfSelectDropDown},
+  components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading, HfSelectDropDown, ToolTip},
   computed:{
     templateList(){
       return this.$store.state.templateList;
