@@ -20,8 +20,15 @@ const CREDENTIAL = {
     SELECT_SCHEMA: "Please select schema",
     INVALID_DID: "Please enter a valid did"
 }
+
+const PRESENTATION = {
+    REASON: "Please enter reason for creating template",
+    CALLBACK_URL: "Please enter callback url",
+    INVALID_URL: "Please enter a valid url"
+}
 module.exports = {
     ORGANIZATION,
     SCHEMA,
-    CREDENTIAL
+    CREDENTIAL,
+    PRESENTATION
 }
