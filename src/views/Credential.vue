@@ -397,19 +397,23 @@ export default {
           body: JSON.stringify({ QR_DATA: this.QrData }),
         }).then((res) => res.json())
           .then(json => {
-            const { QR_DATA,creadRecord } = json.data
-            
+            const { QR_DATA, creadRecord } = json.data
+            if (json.message === 'success') {
+              this.notifySuccess("Credential creation initiated. Please approve the trancation from your wallet")
+              this.$store.dispatch("insertAcredential", creadRecord)
+              const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
+              this.openWallet(URL)
 
-            this.$store.dispatch("insertAcredential", creadRecord)
-
-
-           const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
-            this.openWallet(URL)
-
-             this.ssePopulateCredStatus(creadRecord._id,this.$store)
-             this.openSlider();
+              this.ssePopulateCredStatus(creadRecord._id, this.$store)
+              this.openSlider();
+             
+           } else {
+             console.log(json)
+             throw new Error(`${json.message}`)
+            }       
           })
       } catch (e) {
+        console.log(e)
         this.isLoading = false
         this.notifyErr(`Error: ${e.message}`)
       } finally {
