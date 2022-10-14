@@ -360,7 +360,7 @@ export default {
           return this.notifyErr(message.PRESENTATION.REASON)
         } else if (isEmpty(this.presentationTemplate.callbackUrl)) {
           return this.notifyErr(message.PRESENTATION.CALLBACK_URL)
-        } else if (isValidURL(this.presentationTemplate.callbackUrl)) {
+        } else if (!isValidURL(this.presentationTemplate.callbackUrl)) {
           return this.notifyErr(message.PRESENTATION.INVALID_URL)
         } 
         const headers = {
@@ -378,7 +378,6 @@ export default {
           callbackUrl: this.presentationTemplate.callbackUrl,
           orgDid:this.$store.state.selectedOrgDid
         }
-
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.PRESENTATION_TEMPLATE_EP}`
         fetch(url, {
           body: JSON.stringify(body),
