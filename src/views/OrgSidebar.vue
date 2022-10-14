@@ -277,9 +277,9 @@ export default {
         return this.notifyErr(messages.ORGANIZATION.INVALID_ORG_NAME)
       } else if(isEmpty(this.orgStore.domain)) {
         return this.notifyErr(messages.ORGANIZATION.DOMAIN_NAME_EMPTY)
-      } else if (!isValidURL(this.orgStore.domain)){
-        return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
-      }
+       } //else if (!isValidURL(this.orgStore.domain)){
+      //   return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
+      // }
       let url
       let method
       if (this.edit) {
