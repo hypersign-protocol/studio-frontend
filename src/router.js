@@ -99,6 +99,16 @@ const router =  new Router({
          title: `${config.app.name} - Presentation`
       } 
     },
+      {
+        path: "/404",
+        name: "PageNotFound",
+
+        component: () =>
+          import ('./views/404.vue'),
+        meta: {
+          title: `${config.app.name} - 404`
+        }
+      },
     // {
     //   path: '/studio/apps/:appId/issue',
     //   name: 'issueCredential',
@@ -111,6 +121,11 @@ const router =  new Router({
 })
 
 router.beforeEach((to, from, next) => {
+  if (to.matched.length < 1) {
+    document.title = to.meta.title;
+    next(false)
+    return router.push('/404')
+  }
   if (to.matched.some(record => record.meta.requiresAuth)) {
     document.title= to.meta.title
     const authToken = localStorage.getItem('authToken')
