@@ -159,7 +159,7 @@ padding-left: 5px;
 import HfPopUp from "../components/element/hfPopup.vue";
 import StudioSideBar from "../components/element/StudioSideBar.vue";
 import UtilsMixin from '../mixins/utils';
-import {isEmpty, isValidURL, isDomain} from '../mixins/fieldValidation'
+import {isEmpty, isValidURL} from '../mixins/fieldValidation'
 import 'vue-loading-overlay/dist/vue-loading.css';
 import Loading from "vue-loading-overlay";
 import HfButtons from '../components/element/HfButtons.vue'
@@ -277,7 +277,7 @@ export default {
         return this.notifyErr(messages.ORGANIZATION.INVALID_ORG_NAME)
       } else if(isEmpty(this.orgStore.domain)) {
         return this.notifyErr(messages.ORGANIZATION.DOMAIN_NAME_EMPTY)
-      } else if(!isDomain(this.orgStore.domain)){
+      } else if (!isValidURL(this.orgStore.domain)){
         return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
       }
       let url
