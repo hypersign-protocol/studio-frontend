@@ -25,6 +25,13 @@
   padding-top: 10px;
   cursor: pointer;
 }
+.datetime-picker{
+   background-color: #fff;
+    background-clip: content-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+}
 </style>
 <template>
   <div class="home">
@@ -37,7 +44,7 @@
            <h3 v-if="vcList.length > 0" class="mt-4" style="text-align: left;">Credentials</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Issue your first credential!</h3>
             <hf-buttons 
-              name="+ Credential"
+              name="+ Create"
               style="text-align: right;"
               class="btn btn-primary ml-auto mt-4"
               @executeAction="openSlider()"
@@ -47,29 +54,49 @@
               <div class="container">
                 <div class="form-group row">
                   <div class="col-md-12">
-                    <form style="max-height:300px; overflow:auto; padding: 5px">
-                    <div class="form-group">
-                      <tool-tip infoMessage="Enter DID to whome you are issuing credential"></tool-tip>
+                    <form style="padding: 5px">
+                    <div class="form-group">                      
                       <label for="fordid"><strong>Subject DID<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Enter DID to whome you are issuing credential"></tool-tip>
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
-                    <div class="form-group">
-                      <tool-tip infoMessage="Select Schema to issue credential"></tool-tip>
+                    <div class="form-group">                  
                       <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Select Schema to issue credential"></tool-tip>
                       <!-- <b-form-select v-model="selected" :options="selectOptions"
                         @change="OnSchemaSelectDropDownChange($event)" size="md" class="mt-3">
                       </b-form-select> -->
                       <hf-select-drop-down
                       :options="selectOptions"
                        @selected="e =>{OnSchemaSelectDropDownChange(e)}"
-                      ></hf-select-drop-down>
+                      ></hf-select-drop-down>                      
                     </div>
                     <tool-tip v-if="selectOptions.length === 1" infoMessage="Create Schema to issue credential"></tool-tip>
                     <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>              
                     <div class="form-group" v-for="attr in issueCredAttributes" :key="attr.name">
-                      <label for="schDescription"><strong>{{ attr.name }}</strong></label>
-                      <input type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                      <label for="schDescription"><strong>{{ attr.name }}</strong></label>                      
+                      <Datepicker v-if="attr.type === 'DATE'"
+                          class="datepicker"
+                          name="toDate"
+                          format="YYYY-MM-DD" 
+                          v-model="attr.value"
+                          />
+                          <input v-else type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                    </div>
+                    <div class="form-group" v-if="showDatePicker">                  
+                      <label for="fordid"><strong>Expiry Date<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Enter expiry time for the credential"></tool-tip>
+                      <!-- <input type="date" class="form-control"
+                         /> -->
+                      <!-- <div class="form-control"> -->
+                          <Datepicker 
+                          class="datepicker"
+                          name="toDate"
+                          format="YYYY-MM-DD h:i:s" 
+                          v-model="expiryDateTime"
+                          />
+                      <!-- </div>   -->
                     </div>
                   </form>
                   </div>
@@ -78,7 +105,7 @@
                   <div class="col-md-12">
                     <hr />    
                     <hf-buttons 
-                      name="Issue"
+                      name="Save"
                       style="text-align: right;"
                       class="btn btn-primary ml-auto mt-4"
                       @executeAction="issueCredential()"
@@ -114,7 +141,7 @@
               <td>
                 <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.SCHEMA_GET_REST}${row.schemaId}:`" target="_blank">{{ shorten(row.schemaId) }}</a>
               </td>
-              <td>{{ row.subjectDid }}</td>
+              <td>{{ shorten(row.subjectDid) }}</td>
               <td>{{ row.credStatus ? row.credStatus.issuanceDate: "-"}}</td>
               <td>{{ row.credStatus ? row.credStatus.expirationDate : "-"}}</td>
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
@@ -161,9 +188,10 @@ import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
 import { isEmpty, isValidDid } from '../mixins/fieldValidation'
 import message from '../mixins/messages'
+import Datepicker from 'vuejs-datetimepicker'
 export default {
-  name: "IssueCredential",
-  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip },
+  name: "Credential",
+  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip, Datepicker },
   computed: {
     vcList(){
       return this.$store.state.vcList;
@@ -177,6 +205,7 @@ export default {
   },
   data() {
     return {
+      showDatePicker:false,
       authToken: localStorage.getItem('authToken'),
       description: "An issuer can issue a credential to a subject (or holder) which can be verfied by the verifier independently, without having him to connect with the issuer. They are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries.  For example: an airline company can issue a flight ticket (\"verfiable credential\") using schema (issued by DGCA) to the passenger.",
       active: 0,
@@ -203,6 +232,7 @@ export default {
       fullPage: true,
       isLoading: false,
       holderDid: "",
+      expiryDateTime:null,
       schema_page: 1,
       credUrl:"",
       QrData: {
@@ -311,9 +341,11 @@ export default {
       }
     },
     OnSchemaSelectDropDownChange(event) {
+      this.showDatePicker = false
+      this.selected = event;
       if (event) {
         this.issueCredAttributes = [];
-        this.selected = event;
+        this.showDatePicker = true
         const id = this.issueCredAttributes.length;
         const selectedSchema = this.$store.getters.findSchemaBySchemaID(event);
         const schemaMap =  selectedSchema.schemaDetails.schema.properties;
@@ -351,7 +383,9 @@ export default {
           console.log(e.type)
           attributesMap[e.name] = e.value;
           if (isEmpty(e.value)) {
+            console.log(e.type)
             throw new Error(`Please enter value in ${e.name} field`)
+            // return this.notifyErr(`Please enter value in ${e.name} field`)
           }//else if(typeof(e.value)!== e.type){
           //   throw new Error(`Type mismatch`)
           // }
@@ -362,6 +396,7 @@ export default {
     async issueCredential() {
       try {
         this.isLoading = true
+        const ToDate = new Date();
         if (isEmpty(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.EMPTY_HOLDER_DID)
         } else if (!isValidDid(this.holderDid)) {
@@ -371,6 +406,11 @@ export default {
         }
         // generateAttributeMap
         const attributeMap = await this.generateAttributeMap();
+        if(this.showDatePicker) {
+          if (new Date(this.expiryDateTime).getTime() <= ToDate.getTime()) {          
+          return this.notifyErr("Expiry time should be gretter than current data & time");
+        }
+        }
 
         const fields = Object.assign({}, attributeMap)
         const schemaId = this.selected
@@ -420,8 +460,10 @@ export default {
         this.isLoading = false;
       }
     },
-    clearAll() {
+    clearAll() {    
+      this.showDatePicker = false
       this.holderDid = "";
+      this.expiryDateTime = null
       this.issueCredAttributes = []
       EventBus.$emit("resetOption",this.selected)
     }

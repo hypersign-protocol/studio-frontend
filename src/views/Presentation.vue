@@ -31,10 +31,10 @@
         <Info :message="description" />
         
           <div class="form-group" style="display:flex">
-           <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">Presentation</h3>
+           <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">Presentation Template</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first presentation template!</h3>            
             <hf-buttons 
-              name="+ Presentation Template"
+              name="+ Create"
               style="text-align: right;"
               class="btn btn-primary ml-auto mt-4"
               @executeAction="openSlider()"
@@ -45,12 +45,12 @@
               <div class="form-group row container">
                 <div class="col-md-12">
                   <form>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                       <label class="floatLeft"><strong> Domain :</strong></label>
                       <input class="form-control" type="url" v-model="presentationTemplate.domain" disabled/>
 
 
-                    </div>
+                    </div> -->
                     <div class="form-group">
                       <tool-tip  infoMessage="Name for the Presentation template"></tool-tip>
                       <label ><strong>Name (optional) :</strong></label>
@@ -61,7 +61,7 @@
                     </div>
                     <div class="form-group">
                       <label><strong> IssuerDid :</strong></label>
-                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid" disabled/>
+                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid"/>
 
 
                     </div>
@@ -124,7 +124,7 @@
               <th>Template Id </th>
               <th>Domain</th>
               <th>Name</th>
-              <th>Issuer DID</th>
+              <!-- <th>Issuer DID</th> -->
               <th>Schema Id</th>
               <th>Reason</th>
               <th>CallbackUrl</th>
@@ -137,7 +137,7 @@
               <td>{{row._id}}</td>
               <td>{{row.domain}}</td>
               <td>{{row.name}}</td>
-              <td>{{row.issuerDid.toString()}}</td>
+              <!-- <td>{{row.issuerDid.toString()}}</td> -->
               <td>{{ shorten(row.schemaId)}}</td>
               <td>{{row.reason}}</td>
               <td>{{row.callbackUrl}}</td>
@@ -275,7 +275,7 @@ export default {
     },
     openSlider() {
       this.clearAll()
-      this.presentationTemplate.issuerDid = JSON.parse(localStorage.getItem("user")).id
+      // this.presentationTemplate.issuerDid = JSON.parse(localStorage.getItem("user")).id
       this.presentationTemplate.domain = this.selectedOrg.domain;
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
     },
