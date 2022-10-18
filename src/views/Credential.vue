@@ -32,6 +32,22 @@
     border-radius: 0.25rem;
     padding: 0.375rem 0.75rem;
 }
+.linkdiv{
+  background-clip: content-box;
+  background-color: rgba(173,232,255,.5607843137254902);
+  border-radius: 0.25rem;
+}
+h5 {
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid #80808045;
+  line-height: 0.1em;
+  margin: 10px 0 20px;
+}
+h5 span {
+  background: #fff;
+  padding: 0 10px;
+}
 </style>
 <template>
   <div class="home">
@@ -75,7 +91,7 @@
                     <tool-tip v-if="selectOptions.length === 1" infoMessage="Create Schema to issue credential"></tool-tip>
                     <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>              
                     <div class="form-group" v-for="attr in issueCredAttributes" :key="attr.name">
-                      <label for="schDescription"><strong>{{ attr.name }}</strong></label>                      
+                      <label for="schDescription"><strong>{{ CapitaliseString(attr.name) }}<span v-if="attr.required===true" style="color: red">*</span>:</strong></label>                      
                       <Datepicker v-if="attr.type === 'DATE'"
                           class="datepicker"
                           name="toDate"
@@ -84,7 +100,7 @@
                           />
                           <input v-else type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
                     </div>
-                    <div class="form-group" v-if="showDatePicker">                  
+                    <div class="form-group">                  
                       <label for="fordid"><strong>Expiry Date<span style="color: red">*</span>:</strong></label>
                       <tool-tip class="pl-2" infoMessage="Enter expiry time for the credential"></tool-tip>
                       <!-- <input type="date" class="form-control"
@@ -161,14 +177,20 @@
           </tbody>
         </table>
         <hf-pop-up Header="Accept Credential URL"> 
-            <Info message="Copy and send this URL to the credential owner so that they can accept in their wallet" />
+            <Info message="Scan QR code or Copy the link and send it to the credential owner so that they can accept in their wallet" />
+            <div class="d-flex justify-content-center"><vue-qr margin="1" :text="credUrl" :size="200"
+              logoBackgroundColor="white" logoCornerRadius="2"></vue-qr>
+            </div>        
+            <h5 class="pt-2"><span>OR</span></h5>
             <i
             style="float:right"
-            class="far fa-copy"
+            class="far fa-copy pr-2"
             title="copy url"
-            @click="copyToClip(credUrl,'Url')"
+            @click="copyToClip(credUrl,'URL')"
             ></i>
-            <p style="max-width: 500px; word-wrap: break-word; padding:10px;">{{ credUrl}}</p>
+            <div class="linkdiv">
+            <p style="max-width: 500px; word-wrap: break-word; padding:10px;">{{ truncate(credUrl,70)}}</p>
+            </div>
         </hf-pop-up>
       </div>
     </div>
@@ -189,9 +211,10 @@ import ToolTip from "../components/element/ToolTip.vue"
 import { isEmpty, isValidDid } from '../mixins/fieldValidation'
 import message from '../mixins/messages'
 import Datepicker from 'vuejs-datetimepicker'
+import VueQr from "vue-qr"
 export default {
   name: "Credential",
-  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip, Datepicker },
+  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip, Datepicker, VueQr },
   computed: {
     vcList(){
       return this.$store.state.vcList;
@@ -205,7 +228,6 @@ export default {
   },
   data() {
     return {
-      showDatePicker:false,
       authToken: localStorage.getItem('authToken'),
       description: "An issuer can issue a credential to a subject (or holder) which can be verfied by the verifier independently, without having him to connect with the issuer. They are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries.  For example: an airline company can issue a flight ticket (\"verfiable credential\") using schema (issued by DGCA) to the passenger.",
       active: 0,
@@ -258,6 +280,10 @@ export default {
     });
   },
   methods: {
+    CapitaliseString(string) {
+    const spaced = string.replace(/([a-z])([A-Z])/g, '$1 $2');
+    return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+    },
     removeUrl(url) {
       const chars = url.split('credential/');
       return this.shorten(chars[1])      
@@ -313,7 +339,7 @@ export default {
       
     
     async  generateCred(id) {
-
+      this.credUrl = ''
       const body = {
         id,
       }
@@ -340,24 +366,32 @@ export default {
         );
       }
     },
-    OnSchemaSelectDropDownChange(event) {
-      this.showDatePicker = false
+    OnSchemaSelectDropDownChange(event) {  
       this.selected = event;
       if (event) {
-        this.issueCredAttributes = [];
-        this.showDatePicker = true
+        this.issueCredAttributes = [];        
         const id = this.issueCredAttributes.length;
         const selectedSchema = this.$store.getters.findSchemaBySchemaID(event);
         const schemaMap =  selectedSchema.schemaDetails.schema.properties;
+        const requiredFields = selectedSchema.schemaDetails.schema.required  
         for (const e of Object.entries(schemaMap)) {
           this.issueCredAttributes.push({
             id: id + event,
             type: e[1].type,
             name: e[0],
-            required: e.required === true ? true : false,
             value: "",
           });
         }
+        this.issueCredAttributes.map((x)=>{
+          requiredFields.filter((y)=>{
+           if(x.name === y){
+            x['required'] = true
+           }
+           else {
+            x['required'] = false
+           }
+          })
+        })
       } else {
         this.issueCredAttributes = [];
       }
@@ -380,12 +414,13 @@ export default {
       let attributesMap = [];
       if (this.issueCredAttributes.length > 0) {
         this.issueCredAttributes.forEach((e) => {
-          console.log(e.type)
           attributesMap[e.name] = e.value;
+          if(e.required === true){
           if (isEmpty(e.value)) {
             console.log(e.type)
-            throw new Error(`Please enter value in ${e.name} field`)
+            throw new Error(`Please enter value in ${this.CapitaliseString(e.name)} field`)
             // return this.notifyErr(`Please enter value in ${e.name} field`)
+          }
           }//else if(typeof(e.value)!== e.type){
           //   throw new Error(`Type mismatch`)
           // }
@@ -395,7 +430,6 @@ export default {
     },
     async issueCredential() {
       try {
-        this.isLoading = true
         const ToDate = new Date();
         if (isEmpty(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.EMPTY_HOLDER_DID)
@@ -406,15 +440,14 @@ export default {
         }
         // generateAttributeMap
         const attributeMap = await this.generateAttributeMap();
-        if(this.showDatePicker) {
+        
           if(!this.expiryDateTime){
-            return this.notifyErr('Enter expiry date')
+            return this.notifyErr('Enter Expiry Date for credential')
           }
           if (new Date(this.expiryDateTime).getTime() <= ToDate.getTime()) {          
-          return this.notifyErr("Expiry time should be gretter than current data & time");
+          return this.notifyErr("Expiry time should be gretter than current date & time");
         }
-        }
-
+        this.isLoading = true
         const fields = Object.assign({}, attributeMap)
         const schemaId = this.selected
         const issuerDid = this.user.id
@@ -466,7 +499,6 @@ export default {
       }
     },
     clearAll() {    
-      this.showDatePicker = false
       this.holderDid = "";
       this.expiryDateTime = null
       this.issueCredAttributes = []
