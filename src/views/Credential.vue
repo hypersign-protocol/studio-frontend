@@ -407,6 +407,9 @@ export default {
         // generateAttributeMap
         const attributeMap = await this.generateAttributeMap();
         if(this.showDatePicker) {
+          if(!this.expiryDateTime){
+            return this.notifyErr('Enter expiry date')
+          }
           if (new Date(this.expiryDateTime).getTime() <= ToDate.getTime()) {          
           return this.notifyErr("Expiry time should be gretter than current data & time");
         }
@@ -416,6 +419,7 @@ export default {
         const schemaId = this.selected
         const issuerDid = this.user.id
         const subjectDid = this.holderDid
+        const expiryDate = this.expiryDateTime
 
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
 
@@ -428,6 +432,7 @@ export default {
           schemaId,
           issuerDid,
           subjectDid,
+          expiryDate,
           orgDid:this.$store.state.selectedOrgDid
         };
         this.QrData.data = creadData
