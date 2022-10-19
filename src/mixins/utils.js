@@ -31,7 +31,7 @@ export default {
             const lastPart = str.slice(-eachLen);
             return firstPart + " ... " + lastPart;
         },
-        fetchData(url, option) {
+        fetchData(url) {
             fetch(url)
               .then((res) => res.json())
               .then((j) => {

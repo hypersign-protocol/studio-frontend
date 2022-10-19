@@ -195,13 +195,13 @@ export default new Vuex.Store({
                 fetch(vc_id + ':').then(response => response.json()).then(json => {
                     Object.assign(payload, { ...json });
                     commit('insertAcredential', payload);
-                }).catch(e => console.log)
+                }).catch(e => console.log(e))
             } else {
                 commit('insertAcredential', payload);
             }
         },
 
-        fetchAllOrgDataOnOrgSelect({ commit }, payload) {
+        fetchAllOrgDataOnOrgSelect() {
             this.authToken = localStorage.getItem('authToken');
             // fetch all templete   
             {

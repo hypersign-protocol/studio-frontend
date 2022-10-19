@@ -163,12 +163,9 @@ h5 span {
 <script>
 import QrcodeVue from "qrcode.vue";
 import VueQr from "vue-qr";
-import conf from '../config';
-const { hypersignSDK } = conf;
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import config from "../config";
-const { sha256hashStr } = require("../utils/hash");
 import EventBus from "../eventbus";
 export default {
   name: "Login",
@@ -202,7 +199,8 @@ export default {
 
     };
   },
-  created() {             
+  created() {
+    EventBus.$emit("clearAppData");       
     localStorage.clear();
     document.title = `${config.app.name} - Login`;
     // take it in the env

@@ -87,9 +87,9 @@ h5 span {
                       :options="selectOptions"
                        @selected="e =>{OnSchemaSelectDropDownChange(e)}"
                       ></hf-select-drop-down>                      
-                    </div>
-                    <tool-tip v-if="selectOptions.length === 1" infoMessage="Create Schema to issue credential"></tool-tip>
-                    <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>              
+                    </div>                  
+                    <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>
+                    <tool-tip class="pl-2" v-if="selectOptions.length === 1" infoMessage="Create Schema to issue credential"></tool-tip>
                     <div class="form-group" v-for="attr in issueCredAttributes" :key="attr.name">
                       <label for="schDescription"><strong>{{ CapitaliseString(attr.name) }}<span v-if="attr.required===true" style="color: red">*</span>:</strong></label>                      
                       <Datepicker v-if="attr.type === 'DATE'"
@@ -100,7 +100,7 @@ h5 span {
                           />
                           <input v-else type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
                     </div>
-                    <div class="form-group">                  
+                    <div class="form-group pt-2">                  
                       <label for="fordid"><strong>Expiry Date<span style="color: red">*</span>:</strong></label>
                       <tool-tip class="pl-2" infoMessage="Enter expiry time for the credential"></tool-tip>
                       <!-- <input type="date" class="form-control"
@@ -382,15 +382,22 @@ export default {
             value: "",
           });
         }
+        // this.issueCredAttributes.map((x)=>{
+        //   requiredFields.filter((y)=>{
+        //    if(x.name === y){
+        //     x['required'] = true
+        //    }
+        //    else {
+        //     x['required'] = false
+        //    }
+        //   })
+        // })
         this.issueCredAttributes.map((x)=>{
-          requiredFields.filter((y)=>{
-           if(x.name === y){
+          if(requiredFields.includes(x.name)){
             x['required'] = true
-           }
-           else {
+          } else {
             x['required'] = false
-           }
-          })
+          }
         })
       } else {
         this.issueCredAttributes = [];

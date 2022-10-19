@@ -261,7 +261,7 @@ export default {
       this.$store.commit('updateSideNavStatus',true)
       this.$store.commit('selectAnOrg', orgDid)
       this.$router.push('/studio/credential')
-      this.$store.dispatch('fetchAllOrgDataOnOrgSelect', orgDid)
+      this.$store.dispatch('fetchAllOrgDataOnOrgSelect')
       
     },
     openSlider() {

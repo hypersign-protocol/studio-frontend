@@ -117,7 +117,7 @@ export default {
     },
     switchOrg(orgDid) {
       this.$store.commit('selectAnOrg', orgDid)
-      this.$store.dispatch('fetchAllOrgDataOnOrgSelect', orgDid)
+      this.$store.dispatch('fetchAllOrgDataOnOrgSelect')
     },
     openSlider() {
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
