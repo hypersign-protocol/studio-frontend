@@ -68,6 +68,7 @@ const router =  new Router({
       path: '/studio/schema',
       name: 'schema',
       component: Schema,
+      beforeEnter:guardRouteIfOrgNotSelected,
       meta: {
         requiresAuth: true,
         title: `${config.app.name} - Schema`
@@ -85,6 +86,7 @@ const router =  new Router({
       path: '/studio/credential',
       name: 'credential',
       component: Credential,
+      beforeEnter:guardRouteIfOrgNotSelected,
       meta: {
         requiresAuth: true,
         title: `${config.app.name} - Credential`
@@ -94,6 +96,7 @@ const router =  new Router({
       path: '/studio/presentation',
       name: 'presentation',
       component: Presentation,
+      beforeEnter:guardRouteIfOrgNotSelected,
       meta: {
         requiresAuth: true,
          title: `${config.app.name} - Presentation`
@@ -119,6 +122,21 @@ const router =  new Router({
     // }
   ]
 })
+function guardRouteIfOrgNotSelected(to, from, next)
+{
+ let isOrgSelected= false;
+if(localStorage.getItem('selectedOrg'))
+  isOrgSelected = true;
+ else
+  isOrgSelected= false; if(isOrgSelected) 
+ {
+  next();
+ } 
+ else
+ {
+  next({name:'dashboard'});
+ }
+}
 
 router.beforeEach((to, from, next) => {
   if (to.matched.length < 1) {
