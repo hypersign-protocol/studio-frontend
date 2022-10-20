@@ -256,6 +256,9 @@ export default {
   },
 
   mounted() {
+    EventBus.$on('clearAppData',()=>{
+      this.authToken = null
+      this.showIcon = false})
     EventBus.$on('closeSideNav',()=>{
       this.isSidebarCollapsed = true
     })
@@ -479,6 +482,7 @@ export default {
     // },
 
     logout() {
+      this.authToken = null
       localStorage.removeItem('authToken')
       localStorage.removeItem('user')
       localStorage.removeItem("credentials")

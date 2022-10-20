@@ -25,6 +25,29 @@
   padding-top: 10px;
   cursor: pointer;
 }
+.datetime-picker{
+   background-color: #fff;
+    background-clip: content-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+}
+.linkdiv{
+  background-clip: content-box;
+  background-color: rgba(173,232,255,.5607843137254902);
+  border-radius: 0.25rem;
+}
+h5 {
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid #80808045;
+  line-height: 0.1em;
+  margin: 10px 0 20px;
+}
+h5 span {
+  background: #fff;
+  padding: 0 10px;
+}
 </style>
 <template>
   <div class="home">
@@ -37,7 +60,7 @@
            <h3 v-if="vcList.length > 0" class="mt-4" style="text-align: left;">Credentials</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Issue your first credential!</h3>
             <hf-buttons 
-              name="+ Credential"
+              name="+ Create"
               style="text-align: right;"
               class="btn btn-primary ml-auto mt-4"
               @executeAction="openSlider()"
@@ -47,29 +70,49 @@
               <div class="container">
                 <div class="form-group row">
                   <div class="col-md-12">
-                    <form style="max-height:300px; overflow:auto; padding: 5px">
-                    <div class="form-group">
-                      <tool-tip infoMessage="Enter DID to whome you are issuing credential"></tool-tip>
+                    <form style="padding: 5px">
+                    <div class="form-group">                      
                       <label for="fordid"><strong>Subject DID<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Enter DID to whome you are issuing credential"></tool-tip>
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
-                    <div class="form-group">
-                      <tool-tip infoMessage="Select Schema to issue credential"></tool-tip>
+                    <div class="form-group">                  
                       <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Select Schema to issue credential"></tool-tip>
                       <!-- <b-form-select v-model="selected" :options="selectOptions"
                         @change="OnSchemaSelectDropDownChange($event)" size="md" class="mt-3">
                       </b-form-select> -->
                       <hf-select-drop-down
                       :options="selectOptions"
                        @selected="e =>{OnSchemaSelectDropDownChange(e)}"
-                      ></hf-select-drop-down>
-                    </div>
-                    <tool-tip v-if="selectOptions.length === 1" infoMessage="Create Schema to issue credential"></tool-tip>
-                    <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>              
+                      ></hf-select-drop-down>                      
+                    </div>                  
+                    <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>
+                    <tool-tip class="pl-2" v-if="selectOptions.length === 1" infoMessage="Create Schema to issue credential"></tool-tip>
                     <div class="form-group" v-for="attr in issueCredAttributes" :key="attr.name">
-                      <label for="schDescription"><strong>{{ attr.name }}</strong></label>
-                      <input type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                      <label for="schDescription"><strong>{{ CapitaliseString(attr.name) }}<span v-if="attr.required===true" style="color: red">*</span>:</strong></label>                      
+                      <Datepicker v-if="attr.type === 'DATE'"
+                          class="datepicker"
+                          name="toDate"
+                          format="YYYY-MM-DD" 
+                          v-model="attr.value"
+                          />
+                          <input v-else type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                    </div>
+                    <div class="form-group pt-2">                  
+                      <label for="fordid"><strong>Expiry Date<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Enter expiry time for the credential"></tool-tip>
+                      <!-- <input type="date" class="form-control"
+                         /> -->
+                      <!-- <div class="form-control"> -->
+                          <Datepicker 
+                          class="datepicker"
+                          name="toDate"
+                          format="YYYY-MM-DD h:i:s" 
+                          v-model="expiryDateTime"
+                          />
+                      <!-- </div>   -->
                     </div>
                   </form>
                   </div>
@@ -78,7 +121,7 @@
                   <div class="col-md-12">
                     <hr />    
                     <hf-buttons 
-                      name="Issue"
+                      name="Save"
                       style="text-align: right;"
                       class="btn btn-primary ml-auto mt-4"
                       @executeAction="issueCredential()"
@@ -114,7 +157,7 @@
               <td>
                 <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.SCHEMA_GET_REST}${row.schemaId}:`" target="_blank">{{ shorten(row.schemaId) }}</a>
               </td>
-              <td>{{ row.subjectDid }}</td>
+              <td>{{ shorten(row.subjectDid) }}</td>
               <td>{{ row.credStatus ? row.credStatus.issuanceDate: "-"}}</td>
               <td>{{ row.credStatus ? row.credStatus.expirationDate : "-"}}</td>
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
@@ -134,14 +177,20 @@
           </tbody>
         </table>
         <hf-pop-up Header="Accept Credential URL"> 
-            <Info message="Copy and send this URL to the credential owner so that they can accept in their wallet" />
+            <Info message="Scan QR code or Copy the link and send it to the credential owner so that they can accept in their wallet" />
+            <div class="d-flex justify-content-center"><vue-qr margin="1" :text="credUrl" :size="200"
+              logoBackgroundColor="white" logoCornerRadius="2"></vue-qr>
+            </div>        
+            <h5 class="pt-2"><span>OR</span></h5>
             <i
             style="float:right"
-            class="far fa-copy"
+            class="far fa-copy pr-2"
             title="copy url"
-            @click="copyToClip(credUrl,'Url')"
+            @click="copyToClip(credUrl,'URL')"
             ></i>
-            <p style="max-width: 500px; word-wrap: break-word; padding:10px;">{{ credUrl}}</p>
+            <div class="linkdiv">
+            <p style="max-width: 500px; word-wrap: break-word; padding:10px;">{{ truncate(credUrl,70)}}</p>
+            </div>
         </hf-pop-up>
       </div>
     </div>
@@ -161,9 +210,11 @@ import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
 import { isEmpty, isValidDid } from '../mixins/fieldValidation'
 import message from '../mixins/messages'
+import Datepicker from 'vuejs-datetimepicker'
+import VueQr from "vue-qr"
 export default {
-  name: "IssueCredential",
-  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip },
+  name: "Credential",
+  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip, Datepicker, VueQr },
   computed: {
     vcList(){
       return this.$store.state.vcList;
@@ -203,6 +254,7 @@ export default {
       fullPage: true,
       isLoading: false,
       holderDid: "",
+      expiryDateTime:null,
       schema_page: 1,
       credUrl:"",
       QrData: {
@@ -228,6 +280,10 @@ export default {
     });
   },
   methods: {
+    CapitaliseString(string) {
+    const spaced = string.replace(/([a-z])([A-Z])/g, '$1 $2');
+    return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+    },
     removeUrl(url) {
       const chars = url.split('credential/');
       return this.shorten(chars[1])      
@@ -283,7 +339,7 @@ export default {
       
     
     async  generateCred(id) {
-
+      this.credUrl = ''
       const body = {
         id,
       }
@@ -310,22 +366,39 @@ export default {
         );
       }
     },
-    OnSchemaSelectDropDownChange(event) {
+    OnSchemaSelectDropDownChange(event) {  
+      this.selected = event;
       if (event) {
-        this.issueCredAttributes = [];
-        this.selected = event;
+        this.issueCredAttributes = [];        
         const id = this.issueCredAttributes.length;
         const selectedSchema = this.$store.getters.findSchemaBySchemaID(event);
         const schemaMap =  selectedSchema.schemaDetails.schema.properties;
+        const requiredFields = selectedSchema.schemaDetails.schema.required  
         for (const e of Object.entries(schemaMap)) {
           this.issueCredAttributes.push({
             id: id + event,
             type: e[1].type,
             name: e[0],
-            required: e.required === true ? true : false,
             value: "",
           });
         }
+        // this.issueCredAttributes.map((x)=>{
+        //   requiredFields.filter((y)=>{
+        //    if(x.name === y){
+        //     x['required'] = true
+        //    }
+        //    else {
+        //     x['required'] = false
+        //    }
+        //   })
+        // })
+        this.issueCredAttributes.map((x)=>{
+          if(requiredFields.includes(x.name)){
+            x['required'] = true
+          } else {
+            x['required'] = false
+          }
+        })
       } else {
         this.issueCredAttributes = [];
       }
@@ -348,10 +421,13 @@ export default {
       let attributesMap = [];
       if (this.issueCredAttributes.length > 0) {
         this.issueCredAttributes.forEach((e) => {
-          console.log(e.type)
           attributesMap[e.name] = e.value;
+          if(e.required === true){
           if (isEmpty(e.value)) {
-            throw new Error(`Please enter value in ${e.name} field`)
+            console.log(e.type)
+            throw new Error(`Please enter value in ${this.CapitaliseString(e.name)} field`)
+            // return this.notifyErr(`Please enter value in ${e.name} field`)
+          }
           }//else if(typeof(e.value)!== e.type){
           //   throw new Error(`Type mismatch`)
           // }
@@ -361,7 +437,7 @@ export default {
     },
     async issueCredential() {
       try {
-        this.isLoading = true
+        const ToDate = new Date();
         if (isEmpty(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.EMPTY_HOLDER_DID)
         } else if (!isValidDid(this.holderDid)) {
@@ -371,11 +447,19 @@ export default {
         }
         // generateAttributeMap
         const attributeMap = await this.generateAttributeMap();
-
+        
+          if(!this.expiryDateTime){
+            return this.notifyErr('Enter Expiry Date for credential')
+          }
+          if (new Date(this.expiryDateTime).getTime() <= ToDate.getTime()) {          
+          return this.notifyErr("Expiry time should be gretter than current date & time");
+        }
+        this.isLoading = true
         const fields = Object.assign({}, attributeMap)
         const schemaId = this.selected
         const issuerDid = this.user.id
         const subjectDid = this.holderDid
+        const expiryDate = this.expiryDateTime
 
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
 
@@ -388,6 +472,7 @@ export default {
           schemaId,
           issuerDid,
           subjectDid,
+          expiryDate,
           orgDid:this.$store.state.selectedOrgDid
         };
         this.QrData.data = creadData
@@ -420,8 +505,9 @@ export default {
         this.isLoading = false;
       }
     },
-    clearAll() {
+    clearAll() {    
       this.holderDid = "";
+      this.expiryDateTime = null
       this.issueCredAttributes = []
       EventBus.$emit("resetOption",this.selected)
     }

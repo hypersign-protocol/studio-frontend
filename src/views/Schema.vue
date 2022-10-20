@@ -5,6 +5,21 @@
   width: 1500px;
 }
 
+.flash {
+  cursor: pointer;
+  background-color: #1faa596b;
+  border: 0;
+  box-shadow: 2px 0 10px rgb(0 0 0 / 10%);
+  animation: flash 0.4s cubic-bezier(1, 0, 0, 1);
+}
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 .addmargin {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -74,6 +89,15 @@
     max-height:150px;
     overflow: auto
   }
+  .selected-media-wrapper {
+  border: 1px dashed;
+  max-height: 100px;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+}
+.rounded {
+  cursor: pointer;
+}
 </style>
 <template>
   <div class="home">
@@ -86,7 +110,7 @@
            <h3 v-if="schemaList.length > 0" class="mt-4" style="text-align: left;">Schema</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first schema!</h3>      
             <hf-buttons 
-              name="+ Schema"
+              name="+ Create"
               style="text-align: right;"
               class="btn btn-primary ml-auto mt-4"
               @executeAction="openSlider()"
@@ -95,13 +119,14 @@
           <StudioSideBar title="Create Schema">
               <div class="container">
                 <div class="form-group">
-                  <tool-tip infoMessage="Name of the schema"></tool-tip>
                   <label for="schemaName"><strong>Schema Name<span style="color: red">*</span>:</strong></label>
+                  <tool-tip class="pl-2" infoMessage="Name of the schema"></tool-tip>
                   <input type="text" class="form-control" id="schemaName" v-model="credentialName" aria-describedby="schemaNameHelp">
                 </div>
                 <div class="form-group">
-                  <tool-tip infoMessage="Description for the schema"></tool-tip>
                   <label for="schDescription"><strong>Description:</strong></label>
+                  <tool-tip class="pl-2" infoMessage="Description for the schema"></tool-tip>
+
                   <textarea type="text" class="form-control" id="schDescription" v-model="credentialDescription"  rows="5" cols="20" aria-describedby="orgNameHelp"></textarea>
                 </div>
                 <div class="form-group card">
@@ -116,60 +141,70 @@
                     </b-button>
                   </div>
                   <b-collapse id="collapse-1" class="mt-2" v-model="visible" style="padding:10px">
-                    <div class="form-group tile" v-if="attributes.length > 0">
-                      <div v-for="attr in attributes" :key="attr.type">
-                        <div class="sm-tiles">
-                          {{ attr.name }}
-                          <span>x</span>
+                    <div class="selected-media-wrapper d-flex p-2 mb-4"  style="overflow-y: auto" v-if="attributes.length > 0">
+                      <div v-for="(attr,id) in attributes" v-bind:key="attr.id">
+                        <div :class="
+                            flash == attr.id
+                            ? 'flash card rounded m-1 p-1 d-flex flex-row align-items-center'
+                            : 'card rounded m-1 p-1 d-flex flex-row align-items-center pointer'"
+                            @click="handleClick(attr.id)"
+                            style="min-width:90px;"
+                            :title="attr.name"
+                          >
+                          {{ truncate(attr.name,7) }}
+                           <span style="color: gray; padding-left: 5px">
+                            <i style="" class="fas fa-minus-circle"></i>
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     <div class="row g-3 align-items-center w-100">
                         <div class="col-lg-3 col-md-3 text-left">
-                          <tool-tip infoMessage="Attribute Name"></tool-tip>
                           <label for="attributeName" class="col-form-label">Name<span style="color: red">*</span>: </label>
+                          <tool-tip class= "pl-2" infoMessage="Attribute Name"></tool-tip>
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
-                            <input v-model="attributeName" type="text" id="attributeName" class="form-control w-100"
+                            <input v-model="selected.attributeName" type="text" id="attributeName" class="form-control w-100"
                             placeholder="">
                         </div>
                     </div>
 
                     <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
-                        <tool-tip infoMessage="Type of the attribute"></tool-tip>
                         <label for="type" class="col-form-label">Type<span style="color: red">*</span>:</label>
+                        <tool-tip class="pl-2" infoMessage="Type of the attribute"></tool-tip>
+
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                       <hf-select-drop-down
                         :options="options"
-                        @selected="e =>(attributeTypes=e)"
+                        @selected="e =>(selected.attributeTypes=e)"
                       ></hf-select-drop-down>
                       </div>
                     </div>
 
                      <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
-                          <tool-tip infoMessage="Format of the attribute"></tool-tip>
                           <label for="format" class="col-form-label">Format: </label>
+                          <tool-tip class= "pl-2" infoMessage="Format of the attribute"></tool-tip>
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
-                            <input v-model="attributeFormat" type="text"  placeholder="Enter attribute Format (eg email)" id="type" class="form-control w-100" >
+                            <input v-model="selected.attributeFormat" type="text"  placeholder="Enter attribute Format (eg email)" id="type" class="form-control w-100" >
                         </div>
                     </div>
 
                      <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
-                        <tool-tip infoMessage="Required field"></tool-tip>
                         <label for="required" class="col-form-label">Required: </label>
+                        <tool-tip class="pl-2" infoMessage="Required field"></tool-tip>
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
-                             <input type="checkbox" v-model="attributeRequired" id="required" >
+                             <input type="checkbox" v-model="selected.attributeRequired" id="required" >
                         </div>
                     </div>
 
-                    <div class="form-group row mt-4">
+                    <div class="form-group row mt-4" v-if="isAdd">
                       <div class="col-sm-10">                        
                         <hf-buttons 
                           name="Add +"        
@@ -178,12 +213,27 @@
                         ></hf-buttons>
                       </div>
                     </div>
+                    <div class="form-group row mt-4" v-else>
+                      <div class="col-sm-10">                        
+                        <hf-buttons 
+                          name="Update"        
+                          class="btn btn-primary"
+                          @executeAction="updateSchemaAttribute()"
+                        ></hf-buttons>
+                        <hf-buttons 
+                          name="Delete"        
+                          class="btn btn-danger ml-2"
+                          @executeAction="deleteAttribute()"
+                        ></hf-buttons>
+                      </div>
+                    </div>
                   </b-collapse>
                 </div>
                 <div class="form-group">
-                  <tool-tip infoMessage="Additional Properties"></tool-tip>
-                  <label for="schDescription"><strong>Additional Properties?:</strong></label>
-                  <input v-model="additionalProperties" type="checkbox" style="margin-left:5px;"/>
+                  <input v-model="additionalProperties" type="checkbox" style="margin-left:5px;" />
+                  <label for="schDescription"><strong class="pl-2">Additional Properties</strong></label>
+                  <tool-tip class="pl-2" infoMessage="Additional Properties"></tool-tip>
+
                 </div>
                 <div class="form-group row">
                   <div class="col-md-12">
@@ -262,7 +312,7 @@ import ToolTip from "../components/element/ToolTip.vue"
 import { isValidURL, isEmpty, ifSpaceExists } from '../mixins/fieldValidation'
 import message from '../mixins/messages'
 export default {
-  name: "IssueCredential",
+  name: "Schema",
   components: { QrcodeVue, Info, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip },
   computed: {
     schemaList() {
@@ -274,6 +324,9 @@ export default {
   },
   data() {
     return {
+      counter:0,
+      flash:null,
+      isAdd:true,
       description: "Credential Schema defines what information will go inside a verifiable credential. For example: Directorate General of Civil Aviation (DGCA) can define a schema (or format) for flights tickets, being issued by all airline companies in India.",
       active: 0,
       host: location.hostname,
@@ -288,10 +341,13 @@ export default {
       page: 1,
       visible:false,
       prevRoute: null,
+      selectedId:null,
+      selected:{
       attributeName: "",
       attributeTypes: null,
       attributeFormat: "",
       attributeRequired: false,
+      },
       attributes: [],
       issueCredAttributes: [],
       additionalProperties: false,
@@ -327,7 +383,57 @@ export default {
     });
   },
   methods: {
+    handleClick(id) {
+      this.flash = id
+      const found = this.attributes.find((x)=>x.id === id)
+      let updateData = found
+      this.selectedId = id
+      this.selected.attributeName = updateData.name
+      this.selected.attributeFormat = updateData.format
+      this.selected.attributeRequired = updateData.isRequired
+      EventBus.$emit("setOption",updateData.type);
+      this.isAdd = false
+    },
+    updateSchemaAttribute() {
+      let obj = {
+          name: this.selected.attributeName,
+          type: this.selected.attributeTypes,
+          format: this.selected.attributeFormat,
+          isRequired: this.selected.attributeRequired,
+          id: this.selectedId
+        }
+      const indexToUpdate = this.attributes.findIndex((x)=>x.id === this.selectedId)
+      if(indexToUpdate > -1){
+      this.attributes[indexToUpdate] = obj
+      EventBus.$emit("resetOption",this.selected.attributeTypes);
+      this.clearSelected()
+      this.isAdd = true
+      }
+      
+    },
+    deleteAttribute() {
+      let id = this.selectedId
+      const actionIndex =  this.attributes.findIndex((x)=> x.id === id)
+      if(actionIndex > -1 ) {
+        this.attributes.splice(actionIndex, 1);
+      }
+      
+      EventBus.$emit("resetOption",this.selected.attributeTypes);
+      this.clearSelected()
+      this.isAdd = true
+    },
+    clearSelected() {
+      this.flash = null
+      this.selectedId = null
+      this.selected = {
+        attributeName : "",
+        attributeTypes : null,
+        attributeRequired : false,
+        attributeFormat : ""
+      }
+    },
     openSlider() {
+      this.counter = 0
       this.clearAll();
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
     },
@@ -338,38 +444,40 @@ export default {
       this.visible=false
       this.credentialName = ''
       this.credentialDescription = ''
-      this.attributeName = ''
-      this.attributeTypes = null
-      this.attributeFormat = ''
-      this.attributeRequired = false
+      this.selected.attributeName = ''
+      this.selected.attributeTypes = null
+      this.selected.attributeFormat = ''
+      this.selected.attributeRequired = false
       this.additionalProperties = false
       this.attributes = []
       
     },
     addBlankAttrBox() {
-      if (isEmpty(this.attributeName)) {
+      if (isEmpty(this.selected.attributeName)) {
         return this.notifyErr(message.SCHEMA.EMPTY_SCHEMA_ATTRIBUTE_NAME)
-      } else if (isValidURL(this.attributeName)) {
+      } else if (isValidURL(this.selected.attributeName)) {
         return this.notifyErr(message.SCHEMA.INVALID_ATTRIBUTE_NAME)
-      } else if (ifSpaceExists(this.attributeName)) {
+      } else if (ifSpaceExists(this.selected.attributeName)) {
          return this.notifyErr('There should not be space in attribute name')
-      }else if (this.attributeTypes === ' ' || this.attributeTypes === null) {
+      }else if (this.selected.attributeTypes === ' ' || this.selected.attributeTypes === null) {
         return this.notifyErr(message.SCHEMA.EMPTY_ATTRIBUTE_TYPE)
-      } else if (isValidURL(this.attributeFormat)) {
+      } else if (isValidURL(this.selected.attributeFormat)) {
         return this.notifyErr(message.SCHEMA.INVALID_FORMAT)
       }
+      
         let obj = {
-          name: this.attributeName,
-          type: this.attributeTypes,
-          format: this.attributeFormat,
-          isRequired: this.attributeRequired
-
+          name: this.selected.attributeName,
+          type: this.selected.attributeTypes,
+          format: this.selected.attributeFormat,
+          isRequired: this.selected.attributeRequired,
         }
+        this.counter +=1
+        obj['id'] = this.counter
         this.attributes.push(obj)
-        this.attributeName = "";
-        EventBus.$emit("resetOption",this.attributeTypes)
-        this.attributeFormat = "";
-        this.attributeRequired = false;     
+        this.selected.attributeName = "";
+        EventBus.$emit("resetOption",this.selected.attributeTypes)
+        this.selected.attributeFormat = "";
+        this.selected.attributeRequired = false;     
     },
     ssePopulateSchema(id, store) {
       const sse = new EventSource(`${this.$config.studioServer.SCHEMA_SSE}${id}`);

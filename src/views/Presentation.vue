@@ -31,10 +31,10 @@
         <Info :message="description" />
         
           <div class="form-group" style="display:flex">
-           <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">Presentation</h3>
+           <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">Presentation Template</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first presentation template!</h3>            
             <hf-buttons 
-              name="+ Presentation Template"
+              name="+ Create"
               style="text-align: right;"
               class="btn btn-primary ml-auto mt-4"
               @executeAction="openSlider()"
@@ -45,23 +45,24 @@
               <div class="form-group row container">
                 <div class="col-md-12">
                   <form>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                       <label class="floatLeft"><strong> Domain :</strong></label>
                       <input class="form-control" type="url" v-model="presentationTemplate.domain" disabled/>
 
 
-                    </div>
+                    </div> -->
                     <div class="form-group">
-                      <tool-tip  infoMessage="Name for the Presentation template"></tool-tip>
                       <label ><strong>Name (optional) :</strong></label>
-                      
+                      <tool-tip class="pl-2" infoMessage="Name for the Presentation template"></tool-tip>
                       <input class="form-control" type="text" v-model="presentationTemplate.name" />
 
 
                     </div>
                     <div class="form-group">
-                      <label><strong> IssuerDid :</strong></label>
-                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid" disabled/>
+                      <label><strong> IssuerDid<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Did of the issuer"></tool-tip>
+
+                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid"/>
 
 
                     </div>
@@ -72,35 +73,36 @@
 
                     </div> -->
                     <div class="form-group">
-                      <tool-tip  infoMessage="Select Schema to create template"></tool-tip>
                       <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Select Schema to create template"></tool-tip>
                       <hf-select-drop-down
                       :options="selectOptions"
                        @selected="e =>{OnSchemaSelectDropDownChange(e)}"
                       ></hf-select-drop-down>
                       <div v-if="selectOptions.length === 1" class="mt-2">
-                      <tool-tip  infoMessage="To create Presentation template you need to have atleast one schema"></tool-tip>
                       <span class="goschema" @click="goToSchema()">Create Schema</span>
+                      <tool-tip class="pl-2" infoMessage="To create Presentation template you need to have atleast one schema"></tool-tip>
                       </div>
                     </div>              
                     <div class="form-group">
-                      <tool-tip  infoMessage="Reason for the template"></tool-tip>
                       <label><strong>Reason<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Reason for the template"></tool-tip>
                       <input class="form-control" type="text" v-model="presentationTemplate.reason" />
 
 
                     </div>
                     <div class="form-group">
-                      <tool-tip  infoMessage="Callback URI"></tool-tip>
                       <label><strong>Callback URI<span style="color: red">*</span>:</strong></label>
+                      <tool-tip class="pl-2" infoMessage="Callback URI"></tool-tip>
+
                       <input class="form-control" type="url" v-model="presentationTemplate.callbackUrl" />
 
 
                     </div>
                     <div class="form-group">
-                      <tool-tip  infoMessage="Required"></tool-tip>              
-                      <label><strong>Required :</strong></label>
                       <input type="checkbox" class="ml-2" v-model="presentationTemplate.required" />
+                      <label><strong class="pl-2" >Required </strong></label>
+                      <tool-tip class="pl-2" infoMessage="Required"></tool-tip>
                     </div>
 
                   </form>
@@ -124,7 +126,7 @@
               <th>Template Id </th>
               <th>Domain</th>
               <th>Name</th>
-              <th>Issuer DID</th>
+              <!-- <th>Issuer DID</th> -->
               <th>Schema Id</th>
               <th>Reason</th>
               <th>CallbackUrl</th>
@@ -137,7 +139,7 @@
               <td>{{row._id}}</td>
               <td>{{row.domain}}</td>
               <td>{{row.name}}</td>
-              <td>{{row.issuerDid.toString()}}</td>
+              <!-- <td>{{row.issuerDid.toString()}}</td> -->
               <td>{{ shorten(row.schemaId)}}</td>
               <td>{{row.reason}}</td>
               <td>{{row.callbackUrl}}</td>
@@ -275,7 +277,7 @@ export default {
     },
     openSlider() {
       this.clearAll()
-      this.presentationTemplate.issuerDid = JSON.parse(localStorage.getItem("user")).id
+      // this.presentationTemplate.issuerDid = JSON.parse(localStorage.getItem("user")).id
       this.presentationTemplate.domain = this.selectedOrg.domain;
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
     },

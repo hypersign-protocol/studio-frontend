@@ -26,15 +26,15 @@
         </div>
 
         <div class="form-group">
-          <tool-tip infoMessage="Your Organization Name"></tool-tip>
           <label for="orgName"><strong>Organization Name<span style="color: red">*</span>:</strong></label>
+          <tool-tip class="pl-2" infoMessage="Your Organization Name"></tool-tip>
           <input type="text" class="form-control" id="orgName" v-model="orgStore.name" aria-describedby="orgNameHelp"
             placeholder="Enter your org name">
           <!-- <small id="orgNameHelp" class="form-text text-muted">Some help text</small> -->
         </div>
         <div class="form-group">
-          <tool-tip infoMessage="Your Organization Domain Name"></tool-tip>
           <label for="domain"><strong>Domain<span style="color: red">*</span>:</strong></label>
+          <tool-tip class="pl-2" infoMessage="Your Organization Domain Name"></tool-tip>
           <input type="text" class="form-control" id="domain" v-model="orgStore.domain" aria-describedby="domainHelp"
             placeholder="Enter your domain name">
         </div>
@@ -65,7 +65,8 @@
 
         <b-card :title="truncate(eachOrg.name,20)" tag="article" style="max-width: 30rem; margin-top: 10px; max-height:25rem"
           class="mb-2 eventCard" img-top>
-          <ul style="list-style-type: none;padding-left: 0px;min-height: 80px;">
+          <ul style="list-style-type: none;padding-left: 0px;min-height: 80px;">            
+            <img style="float:right;" :src="`${getProfileIcon(eachOrg.name)}`" class="mr-2" alt="center" width="70px"/>            
             <li>
               <span class="card-title"><a target="_blank" :href="`${$config.explorer.BASE_URL}identity/${eachOrg.orgDid}`">{{ truncate(eachOrg.orgDid,45) }}</a></span>
               <span v-if="eachOrg.status === 'Registered'" @click="copyToClip(eachOrg.orgDid,'Org DID')"
@@ -197,6 +198,9 @@ export default {
   },
   components: { HfPopUp, Loading, StudioSideBar, HfButtons, ToolTip },
   methods: {
+    getProfileIcon(name) {
+      return "https://avatars.dicebear.com/api/identicon/"+name+".svg"
+    },
     ssePopulateOrg(id, store) {
       const sse = new EventSource(`${this.$config.studioServer.ORG_SSE}${id}`);
       sse.onmessage = (event) => {
@@ -257,7 +261,7 @@ export default {
       this.$store.commit('updateSideNavStatus',true)
       this.$store.commit('selectAnOrg', orgDid)
       this.$router.push('/studio/credential')
-      this.$store.dispatch('fetchAllOrgDataOnOrgSelect', orgDid)
+      this.$store.dispatch('fetchAllOrgDataOnOrgSelect')
       
     },
     openSlider() {
