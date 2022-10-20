@@ -26,15 +26,15 @@
         </div>
 
         <div class="form-group">
-          <tool-tip infoMessage="Your Organization Name"></tool-tip>
           <label for="orgName"><strong>Organization Name<span style="color: red">*</span>:</strong></label>
+          <tool-tip class="pl-2" infoMessage="Your Organization Name"></tool-tip>
           <input type="text" class="form-control" id="orgName" v-model="orgStore.name" aria-describedby="orgNameHelp"
             placeholder="Enter your org name">
           <!-- <small id="orgNameHelp" class="form-text text-muted">Some help text</small> -->
         </div>
         <div class="form-group">
-          <tool-tip infoMessage="Your Organization Domain Name"></tool-tip>
           <label for="domain"><strong>Domain<span style="color: red">*</span>:</strong></label>
+          <tool-tip class="pl-2" infoMessage="Your Organization Domain Name"></tool-tip>
           <input type="text" class="form-control" id="domain" v-model="orgStore.domain" aria-describedby="domainHelp"
             placeholder="Enter your domain name">
         </div>

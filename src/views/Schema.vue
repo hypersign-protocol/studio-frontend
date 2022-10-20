@@ -119,13 +119,14 @@
           <StudioSideBar title="Create Schema">
               <div class="container">
                 <div class="form-group">
-                  <tool-tip infoMessage="Name of the schema"></tool-tip>
                   <label for="schemaName"><strong>Schema Name<span style="color: red">*</span>:</strong></label>
+                  <tool-tip class="pl-2" infoMessage="Name of the schema"></tool-tip>
                   <input type="text" class="form-control" id="schemaName" v-model="credentialName" aria-describedby="schemaNameHelp">
                 </div>
                 <div class="form-group">
-                  <tool-tip infoMessage="Description for the schema"></tool-tip>
                   <label for="schDescription"><strong>Description:</strong></label>
+                  <tool-tip class="pl-2" infoMessage="Description for the schema"></tool-tip>
+
                   <textarea type="text" class="form-control" id="schDescription" v-model="credentialDescription"  rows="5" cols="20" aria-describedby="orgNameHelp"></textarea>
                 </div>
                 <div class="form-group card">
@@ -160,8 +161,8 @@
 
                     <div class="row g-3 align-items-center w-100">
                         <div class="col-lg-3 col-md-3 text-left">
-                          <tool-tip infoMessage="Attribute Name"></tool-tip>
                           <label for="attributeName" class="col-form-label">Name<span style="color: red">*</span>: </label>
+                          <tool-tip class= "pl-2" infoMessage="Attribute Name"></tool-tip>
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                             <input v-model="selected.attributeName" type="text" id="attributeName" class="form-control w-100"
@@ -171,8 +172,9 @@
 
                     <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
-                        <tool-tip infoMessage="Type of the attribute"></tool-tip>
                         <label for="type" class="col-form-label">Type<span style="color: red">*</span>:</label>
+                        <tool-tip class="pl-2" infoMessage="Type of the attribute"></tool-tip>
+
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                       <hf-select-drop-down
@@ -184,8 +186,8 @@
 
                      <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
-                          <tool-tip infoMessage="Format of the attribute"></tool-tip>
                           <label for="format" class="col-form-label">Format: </label>
+                          <tool-tip class= "pl-2" infoMessage="Format of the attribute"></tool-tip>
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                             <input v-model="selected.attributeFormat" type="text"  placeholder="Enter attribute Format (eg email)" id="type" class="form-control w-100" >
@@ -194,8 +196,8 @@
 
                      <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
-                        <tool-tip infoMessage="Required field"></tool-tip>
                         <label for="required" class="col-form-label">Required: </label>
+                        <tool-tip class="pl-2" infoMessage="Required field"></tool-tip>
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                              <input type="checkbox" v-model="selected.attributeRequired" id="required" >
@@ -228,9 +230,10 @@
                   </b-collapse>
                 </div>
                 <div class="form-group">
-                  <tool-tip infoMessage="Additional Properties"></tool-tip>
-                  <label for="schDescription"><strong>Additional Properties?:</strong></label>
-                  <input v-model="additionalProperties" type="checkbox" style="margin-left:5px;"/>
+                  <input v-model="additionalProperties" type="checkbox" style="margin-left:5px;" />
+                  <label for="schDescription"><strong class="pl-2">Additional Properties</strong></label>
+                  <tool-tip class="pl-2" infoMessage="Additional Properties"></tool-tip>
+
                 </div>
                 <div class="form-group row">
                   <div class="col-md-12">
