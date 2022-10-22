@@ -71,38 +71,40 @@ h5 span {
                 <div class="form-group row">
                   <div class="col-md-12">
                     <form style="padding: 5px">
-                    <div class="form-group">                      
-                      <label for="fordid"><strong>Subject DID<span style="color: red">*</span>:</strong></label>
-                      <tool-tip class="pl-2" infoMessage="Enter DID to whome you are issuing credential"></tool-tip>
+                    <div class="form-group">
+                      <tool-tip infoMessage="Enter DID to whome you are issuing credential"></tool-tip>
+                      <label for="fordid"><strong>Subject DID<span style="color: red">*</span>:</strong></label>                      
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
-                    <div class="form-group">                  
-                      <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>
-                      <tool-tip class="pl-2" infoMessage="Select Schema to issue credential"></tool-tip>
+                    <div class="form-group">
+                      <tool-tip infoMessage="Select Schema to issue credential"></tool-tip>
+                      <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>                      
                       <!-- <b-form-select v-model="selected" :options="selectOptions"
                         @change="OnSchemaSelectDropDownChange($event)" size="md" class="mt-3">
                       </b-form-select> -->
                       <hf-select-drop-down
                       :options="selectOptions"
                        @selected="e =>{OnSchemaSelectDropDownChange(e)}"
-                      ></hf-select-drop-down>                      
-                    </div>                  
-                    <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>
-                    <tool-tip class="pl-2" v-if="selectOptions.length === 1" infoMessage="Create Schema to issue credential"></tool-tip>
+                      ></hf-select-drop-down>                
+                      <span class="goschema" v-if="selectOptions.length === 1" @click="goToSchema()">Create Schema</span>                
+                    </div>
                     <div class="form-group" v-for="attr in issueCredAttributes" :key="attr.name">
                       <label for="schDescription"><strong>{{ CapitaliseString(attr.name) }}<span v-if="attr.required===true" style="color: red">*</span>:</strong></label>                      
-                      <Datepicker v-if="attr.type === 'DATE'"
+                      <Datepicker v-if="attr.type === 'date'"
                           class="datepicker"
                           name="toDate"
                           format="YYYY-MM-DD" 
                           v-model="attr.value"
                           />
-                          <input v-else type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                          <input class="ml-2" v-if="attr.type === 'boolean'" type="checkbox" v-model="attr.value" id="required" >
+                          <input v-if="attr.type === 'integer' " type="number" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                          <input v-if="attr.type == 'number'" type="number" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                          <input v-if="attr.type == 'string'" type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
                     </div>
-                    <div class="form-group pt-2">                  
-                      <label for="fordid"><strong>Expiry Date<span style="color: red">*</span>:</strong></label>
-                      <tool-tip class="pl-2" infoMessage="Enter expiry time for the credential"></tool-tip>
+                    <div class="form-group pt-2">
+                      <tool-tip infoMessage="Enter expiry time for the credential"></tool-tip>
+                      <label for="fordid"><strong>Expiry Date<span style="color: red">*</span>:</strong></label>                      
                       <!-- <input type="date" class="form-control"
                          /> -->
                       <!-- <div class="form-control"> -->
@@ -176,7 +178,7 @@ h5 span {
             </tr>
           </tbody>
         </table>
-        <hf-pop-up Header="Accept Credential URL"> 
+        <hf-pop-up Header="Scan QR Or Copy URL"> 
             <Info message="Scan QR code or Copy the link and send it to the credential owner so that they can accept in their wallet" />
             <div class="d-flex justify-content-center"><vue-qr margin="1" :text="credUrl" :size="200"
               logoBackgroundColor="white" logoCornerRadius="2"></vue-qr>
@@ -280,6 +282,14 @@ export default {
     });
   },
   methods: {
+    showInputField(type) {
+      console.log(type)
+      if(type !=='date' || type !=='boolean'){
+        return true
+      } else {
+        return false
+      }
+    },
     CapitaliseString(string) {
     const spaced = string.replace(/([a-z])([A-Z])/g, '$1 $2');
     return spaced.charAt(0).toUpperCase() + spaced.slice(1);
@@ -375,12 +385,36 @@ export default {
         const schemaMap =  selectedSchema.schemaDetails.schema.properties;
         const requiredFields = selectedSchema.schemaDetails.schema.required  
         for (const e of Object.entries(schemaMap)) {
-          this.issueCredAttributes.push({
+          let dataToPush = {
             id: id + event,
             type: e[1].type,
             name: e[0],
-            value: "",
-          });
+          }
+          switch(e[1].type){
+            case 'boolean':
+               dataToPush['value'] = false
+               break;
+            case 'string':
+              dataToPush['value'] = ""
+              break;
+            case 'number':
+              dataToPush['value'] = ""
+              break;
+            case 'integer':
+              dataToPush['value'] = ""
+              break;
+            case 'date':
+              dataToPush['value'] = ""
+              break;
+            default:
+              this.notifyErr('invalid type')
+          }
+          // if(e[1].type === 'boolean') {
+          //   dataToPush['value'] = false
+          // } else {
+          //   dataToPush['value'] = ""
+          // }
+          this.issueCredAttributes.push(dataToPush);
         }
         // this.issueCredAttributes.map((x)=>{
         //   requiredFields.filter((y)=>{
@@ -422,15 +456,11 @@ export default {
       if (this.issueCredAttributes.length > 0) {
         this.issueCredAttributes.forEach((e) => {
           attributesMap[e.name] = e.value;
-          if(e.required === true){
+          if(e.type !== 'boolean' && e.required === true){
           if (isEmpty(e.value)) {
-            console.log(e.type)
             throw new Error(`Please enter value in ${this.CapitaliseString(e.name)} field`)
-            // return this.notifyErr(`Please enter value in ${e.name} field`)
           }
-          }//else if(typeof(e.value)!== e.type){
-          //   throw new Error(`Type mismatch`)
-          // }
+          }
         });
       }
       return attributesMap;
