@@ -52,15 +52,15 @@
 
                     </div> -->
                     <div class="form-group">
-                      <label ><strong>Name (optional) :</strong></label>
-                      <tool-tip class="pl-2" infoMessage="Name for the Presentation template"></tool-tip>
+                      <tool-tip infoMessage="Name for the Presentation template"></tool-tip>
+                      <label ><strong>Name (optional) :</strong></label>                      
                       <input class="form-control" type="text" v-model="presentationTemplate.name" />
 
 
                     </div>
                     <div class="form-group">
-                      <label><strong> IssuerDid<span style="color: red">*</span>:</strong></label>
-                      <tool-tip class="pl-2" infoMessage="Did of the issuer"></tool-tip>
+                      <tool-tip infoMessage="Did of the issuer"></tool-tip>
+                      <label><strong> IssuerDid<span style="color: red">*</span>:</strong></label>                      
 
                       <input class="form-control" type="text" v-model="presentationTemplate.issuerDid"/>
 
@@ -73,36 +73,35 @@
 
                     </div> -->
                     <div class="form-group">
-                      <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>
-                      <tool-tip class="pl-2" infoMessage="Select Schema to create template"></tool-tip>
+                      <tool-tip infoMessage="Select Schema to create template"></tool-tip>
+                      <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>                      
                       <hf-select-drop-down
                       :options="selectOptions"
                        @selected="e =>{OnSchemaSelectDropDownChange(e)}"
                       ></hf-select-drop-down>
-                      <div v-if="selectOptions.length === 1" class="mt-2">
-                      <span class="goschema" @click="goToSchema()">Create Schema</span>
-                      <tool-tip class="pl-2" infoMessage="To create Presentation template you need to have atleast one schema"></tool-tip>
+                      <div v-if="selectOptions.length === 1">
+                      <span class="goschema" @click="goToSchema()">Create Schema</span>                      
                       </div>
                     </div>              
                     <div class="form-group">
-                      <label><strong>Reason<span style="color: red">*</span>:</strong></label>
-                      <tool-tip class="pl-2" infoMessage="Reason for the template"></tool-tip>
+                      <tool-tip infoMessage="Reason for the template"></tool-tip>
+                      <label><strong>Reason<span style="color: red">*</span>:</strong></label>                      
                       <input class="form-control" type="text" v-model="presentationTemplate.reason" />
 
 
                     </div>
                     <div class="form-group">
-                      <label><strong>Callback URI<span style="color: red">*</span>:</strong></label>
-                      <tool-tip class="pl-2" infoMessage="Callback URI"></tool-tip>
+                      <tool-tip infoMessage="Callback URI"></tool-tip>
+                      <label><strong>Callback URI<span style="color: red">*</span>:</strong></label>                      
 
                       <input class="form-control" type="url" v-model="presentationTemplate.callbackUrl" />
 
 
                     </div>
                     <div class="form-group">
+                      <tool-tip infoMessage="Required"></tool-tip>                      
+                      <label><strong>Required </strong></label>
                       <input type="checkbox" class="ml-2" v-model="presentationTemplate.required" />
-                      <label><strong class="pl-2" >Required </strong></label>
-                      <tool-tip class="pl-2" infoMessage="Required"></tool-tip>
                     </div>
 
                   </form>

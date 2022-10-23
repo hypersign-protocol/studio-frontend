@@ -16,6 +16,14 @@ export function isValidURL(str) {
 //             return false;
 //           }
 // }
+export function isValidSchemaAttrName(str) {
+  const regExp = /(?!^.*[A-Z]{2,}.*$)^[a-z][A-Za-z]*[0-9]*$/
+  if(regExp.test(str)){
+    return true
+  } else {
+    return false
+  }
+}
 export function isEmpty(str) {
     if (str == " ") {
         return true;

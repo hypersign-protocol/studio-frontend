@@ -119,13 +119,13 @@
           <StudioSideBar title="Create Schema">
               <div class="container">
                 <div class="form-group">
-                  <label for="schemaName"><strong>Schema Name<span style="color: red">*</span>:</strong></label>
-                  <tool-tip class="pl-2" infoMessage="Name of the schema"></tool-tip>
+                  <tool-tip infoMessage="Name of the schema"></tool-tip>
+                  <label for="schemaName"><strong>Schema Name<span style="color: red">*</span>:</strong></label>                  
                   <input type="text" class="form-control" id="schemaName" v-model="credentialName" aria-describedby="schemaNameHelp">
                 </div>
                 <div class="form-group">
-                  <label for="schDescription"><strong>Description:</strong></label>
-                  <tool-tip class="pl-2" infoMessage="Description for the schema"></tool-tip>
+                  <tool-tip infoMessage="Description for the schema"></tool-tip>
+                  <label for="schDescription"><strong>Description:</strong></label>                  
 
                   <textarea type="text" class="form-control" id="schDescription" v-model="credentialDescription"  rows="5" cols="20" aria-describedby="orgNameHelp"></textarea>
                 </div>
@@ -161,8 +161,8 @@
 
                     <div class="row g-3 align-items-center w-100">
                         <div class="col-lg-3 col-md-3 text-left">
-                          <label for="attributeName" class="col-form-label">Name<span style="color: red">*</span>: </label>
-                          <tool-tip class= "pl-2" infoMessage="Attribute Name"></tool-tip>
+                          <tool-tip infoMessage="Attribute Name"></tool-tip>
+                          <label for="attributeName" class="col-form-label">Name<span style="color: red">*</span>: </label>                          
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                             <input v-model="selected.attributeName" type="text" id="attributeName" class="form-control w-100"
@@ -172,8 +172,8 @@
 
                     <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
-                        <label for="type" class="col-form-label">Type<span style="color: red">*</span>:</label>
-                        <tool-tip class="pl-2" infoMessage="Type of the attribute"></tool-tip>
+                        <tool-tip infoMessage="Type of the attribute"></tool-tip>
+                        <label for="type" class="col-form-label">Type<span style="color: red">*</span>:</label>                        
 
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
@@ -186,8 +186,8 @@
 
                      <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
-                          <label for="format" class="col-form-label">Format: </label>
-                          <tool-tip class= "pl-2" infoMessage="Format of the attribute"></tool-tip>
+                          <tool-tip infoMessage="Format of the attribute"></tool-tip>
+                          <label for="format" class="col-form-label">Format: </label>                          
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                             <input v-model="selected.attributeFormat" type="text"  placeholder="Enter attribute Format (eg email)" id="type" class="form-control w-100" >
@@ -196,8 +196,8 @@
 
                      <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
-                        <label for="required" class="col-form-label">Required: </label>
-                        <tool-tip class="pl-2" infoMessage="Required field"></tool-tip>
+                        <tool-tip infoMessage="Required field"></tool-tip>
+                        <label for="required" class="col-form-label">Required: </label>                        
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                              <input type="checkbox" v-model="selected.attributeRequired" id="required" >
@@ -230,9 +230,9 @@
                   </b-collapse>
                 </div>
                 <div class="form-group">
+                  <tool-tip infoMessage="Additional Properties"></tool-tip>                             
+                  <label for="schDescription"><strong>Additional Properties</strong></label>
                   <input v-model="additionalProperties" type="checkbox" style="margin-left:5px;" />
-                  <label for="schDescription"><strong class="pl-2">Additional Properties</strong></label>
-                  <tool-tip class="pl-2" infoMessage="Additional Properties"></tool-tip>
 
                 </div>
                 <div class="form-group row">
@@ -275,9 +275,13 @@
               <td>{{ row.schemaDetails ? row.schemaDetails.name : "-" }}</td>
               <td>{{ row.schemaDetails ? row.schemaDetails.modelVersion : "-" }}</td>
               <td class="word-wrap">{{ row.schemaDetails ? row.schemaDetails.schema.description : "-" }}</td>
-              <td class="word-wrap">{{ row.schemaDetails ? Object.keys(row.schemaDetails.schema.properties).toString() :
-                  "-"
-              }}</td>
+              <td v-if="row.schemaDetails">
+              <div v-for="prop in Object.keys(row.schemaDetails.schema.properties)" style="display:inline-block;">
+              <span class="flash card rounded m-1 p-1 d">
+                {{prop}}
+                </span>
+              </div>
+              </td>
 
               <td>{{ row.schemaDetails ? row.schemaDetails.authored : "-" }}</td>
 
@@ -309,7 +313,7 @@ import HfButtons from "../components/element/HfButtons.vue"
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
-import { isValidURL, isEmpty, ifSpaceExists } from '../mixins/fieldValidation'
+import { isValidURL, isEmpty, ifSpaceExists, isValidSchemaAttrName } from '../mixins/fieldValidation'
 import message from '../mixins/messages'
 export default {
   name: "Schema",
@@ -333,10 +337,11 @@ export default {
       user: {},
       options: [
           { text: "Select Type", value: null },
-          { text: "String", value: "STRING" },
-          { text: "Int", value: "INT" },
-          { text: "Float", value: "FLOAT" },
-          { text: "Date", value: "DATE" },
+          { text: "string", value: "string" },
+          { text: "integer", value: "integer" },
+          { text: "number", value: "number" },
+          { text: "boolean", value: "boolean" },
+          { text: "date", value: "date" },
         ],
       page: 1,
       visible:false,
@@ -459,7 +464,9 @@ export default {
         return this.notifyErr(message.SCHEMA.INVALID_ATTRIBUTE_NAME)
       } else if (ifSpaceExists(this.selected.attributeName)) {
          return this.notifyErr('There should not be space in attribute name')
-      }else if (this.selected.attributeTypes === ' ' || this.selected.attributeTypes === null) {
+      } else if(!isValidSchemaAttrName(this.selected.attributeName)){
+        return this.notifyErr('Name should be camelCase')
+      } else if (this.selected.attributeTypes === ' ' || this.selected.attributeTypes === null) {
         return this.notifyErr(message.SCHEMA.EMPTY_ATTRIBUTE_TYPE)
       } else if (isValidURL(this.selected.attributeFormat)) {
         return this.notifyErr(message.SCHEMA.INVALID_FORMAT)
