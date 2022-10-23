@@ -178,7 +178,7 @@ h5 span {
             </tr>
           </tbody>
         </table>
-        <hf-pop-up Header="Scan QR Or Copy URL"> 
+        <hf-pop-up Header="Send Credential"> 
             <Info message="Scan QR code or Copy the link and send it to the credential owner so that they can accept in their wallet" />
             <div class="d-flex justify-content-center"><vue-qr margin="1" :text="credUrl" :size="200"
               logoBackgroundColor="white" logoCornerRadius="2"></vue-qr>
