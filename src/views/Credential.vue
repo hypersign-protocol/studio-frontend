@@ -66,18 +66,30 @@ h5 span {
               @executeAction="openSlider()"
             ></hf-buttons>
           </div>    
-            <StudioSideBar title="Issue Credential">
+            <StudioSideBar :title="isEdit? 'Edit Credential' : 'Issue Credential'">
               <div class="container">
                 <div class="form-group row">
                   <div class="col-md-12">
                     <form style="padding: 5px">
-                    <div class="form-group">
+                    <div class="form-group" v-if="isEdit===true">
+                      <tool-tip infoMessage="Your VC Id"></tool-tip>
+                      <label for="fordid"><strong>VC ID:</strong></label>
+                      <input type="text" class="form-control"
+                        v-model="vcId" disabled/>
+                    </div>
+                    <div class="form-group" v-if="isEdit===false">
                       <tool-tip infoMessage="Enter DID to whome you are issuing credential"></tool-tip>
                       <label for="fordid"><strong>Subject DID<span style="color: red">*</span>:</strong></label>                      
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" v-else>
+                      <tool-tip infoMessage="Credential issued to this DID"></tool-tip>
+                      <label for="fordid"><strong>Subject DID:</strong></label>
+                      <input type="text" class="form-control"
+                        v-model="holderDid" disabled/>
+                    </div>
+                    <div class="form-group" v-if="isEdit===false">
                       <tool-tip infoMessage="Select Schema to issue credential"></tool-tip>
                       <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>                      
                       <!-- <b-form-select v-model="selected" :options="selectOptions"
@@ -102,7 +114,7 @@ h5 span {
                           <input v-if="attr.type == 'number'" type="number" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
                           <input v-if="attr.type == 'string'" type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
                     </div>
-                    <div class="form-group pt-2">
+                    <div class="form-group pt-2" v-if="isEdit===false">
                       <tool-tip infoMessage="Enter expiry time for the credential"></tool-tip>
                       <label for="fordid"><strong>Expiry Date<span style="color: red">*</span>:</strong></label>                      
                       <!-- <input type="date" class="form-control"
@@ -116,6 +128,27 @@ h5 span {
                           />
                       <!-- </div>   -->
                     </div>
+                     <div class="form-group pt-2" v-else>
+                      <tool-tip infoMessage="Expiry time for the issued credential"></tool-tip>
+                      <label for="fordid"><strong>Expiry Date:</strong></label>                      
+                      <input type="text" class="form-control"
+                      v-model="expiryDateTime" disabled
+                         />
+                    </div>
+                    <div class="form-group" v-if="isEdit===true">
+                      <tool-tip infoMessage="Current status of credential"></tool-tip>
+                      <label for="fordid"><strong>Current Status</strong></label>                      
+                      <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
+                        v-model="currentStatus" disabled />
+                    </div>
+                    <div class="form-group" v-if="isEdit===true">
+                      <tool-tip infoMessage="Select Status for the issued credential"></tool-tip>
+                      <label for="forselectschema"><strong>Select Status<span style="color: red">*</span>:</strong></label>                  
+                      <hf-select-drop-down
+                      :options="credStatusOptions"
+                       @selected="e =>{onStatusSelectDropDownChange(e)}"
+                      ></hf-select-drop-down>                    
+                    </div>
                   </form>
                   </div>
                 </div>
@@ -123,10 +156,18 @@ h5 span {
                   <div class="col-md-12">
                     <hr />    
                     <hf-buttons 
+                    v-if="isEdit === false"
                       name="Save"
                       style="text-align: right;"
                       class="btn btn-primary ml-auto mt-4"
                       @executeAction="issueCredential()"
+                    ></hf-buttons>
+                    <hf-buttons
+                      v-else
+                      name="Update"
+                      style="text-align: right;"
+                      class="btn btn-primary ml-auto mt-4"
+                      @executeAction="updateCredStatus()"
                     ></hf-buttons>
                   </div>
                 </div>
@@ -148,6 +189,7 @@ h5 span {
               <th>Status</th>
               <th>Status Reason</th>
               <th></th>
+              <th>Edit</th>
             </tr>
           </thead>
           <tbody>
@@ -175,6 +217,12 @@ h5 span {
                 ></hf-buttons>
                 <span v-else>-</span>
               </td>
+              <td v-if="row.credStatus">
+                <i class="fas fa-pencil-alt"
+                @click="editCred(row)" title="Click to edit this vc" style="cursor: pointer"
+                ></i>
+              </td>
+              <td v-else>-</td>
             </tr>
           </tbody>
         </table>
@@ -230,7 +278,10 @@ export default {
   },
   data() {
     return {
+      currentStatus:'',
+      vcId:'',
       authToken: localStorage.getItem('authToken'),
+      isEdit:false,
       description: "An issuer can issue a credential to a subject (or holder) which can be verfied by the verifier independently, without having him to connect with the issuer. They are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries.  For example: an airline company can issue a flight ticket (\"verfiable credential\") using schema (issued by DGCA) to the passenger.",
       active: 0,
       host: location.hostname,
@@ -249,7 +300,13 @@ export default {
         { text: "Create new schema", value: "create" },
         { text: "Select existing schema", value: "existing" },
       ],
+      credStatusOptions:[
+        { text: "Select status", value: null},
+        { text: "Suspend", value: "SUSPENDED"},
+        { text: "Revoke", value: "REVOKED"}
+      ],
       selected: null,
+      selectedStatus:null,
       attributeValues: {},
       vcCredStatusMap: {}, 
       schemaList: [],
@@ -282,6 +339,33 @@ export default {
     });
   },
   methods: {
+    editCred(cred) {
+      this.clearEdit()
+      this.isEdit = true      
+      this.$root.$emit("bv::toggle::collapse", "sidebar-right");
+      this.holderDid = cred.subjectDid
+      this.expiryDateTime = cred.expiryDate
+      this.currentStatus = cred.credStatus.claim.currentStatus
+      this.vcId =cred.vc.id
+    },
+    clearEdit() {
+      this.holderDid = ''
+      this.expiryDateTime = null
+      this.currentStatus = ''
+      this.vcId = ''
+    },
+    updateCredStatus() {
+      const QR_DATA = {
+      QRType:"ISSUE_CREDENTIAL",
+			data:{
+      status: this.selectedStatus,
+      vcId: this.vcId,
+      credentialStatusUrl:`https://jagrat.hypersign.id/rest/hypersign-protocol/hidnode/ssi/credential/${this.vcId}`,
+				}
+    }
+      const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`      
+      this.openWallet(URL)
+    },
     showInputField(type) {
       console.log(type)
       if(type !=='date' || type !=='boolean'){
@@ -319,6 +403,7 @@ export default {
       this.$router.push('schema')
     },
     openSlider() {
+      this.isEdit = false
       this.clearAll();
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
     },
@@ -374,6 +459,11 @@ export default {
           "popUpWindow",
           `height=800,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes`
         );
+      }
+    },
+    onStatusSelectDropDownChange(event) {
+      if(event) {
+        this.selectedStatus = event
       }
     },
     OnSchemaSelectDropDownChange(event) {  
