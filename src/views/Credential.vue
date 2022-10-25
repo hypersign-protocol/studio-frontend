@@ -109,9 +109,18 @@ h5 span {
                           format="YYYY-MM-DD" 
                           v-model="attr.value"
                           />
-                          <input class="ml-2" v-if="attr.type === 'boolean'" type="checkbox" v-model="attr.value" id="required" >
-                          <input v-if="attr.type === 'integer' " type="number" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
-                          <input v-if="attr.type == 'number'" type="number" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                          <!-- <input class="ml-2" v-if="attr.type === 'boolean'" type="radio" v-model="attr.value" id="required" >                      -->
+                          <b-form-radio-group
+                          class="pl-2"
+                          style="display:inline-block;"
+                          v-if="attr.type === 'boolean'"
+                          id="radio-group-1"
+                          v-model="attr.value"
+                          :options="booleanOption"                        
+                          name="radio-options-currency"                            
+                        ></b-form-radio-group>
+                          <input v-if="attr.type === 'integer' " type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                          <input v-if="attr.type == 'number'" type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
                           <input v-if="attr.type == 'string'" type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
                     </div>
                     <div class="form-group pt-2" v-if="isEdit===false">
@@ -258,7 +267,7 @@ import HfButtons from "../components/element/HfButtons.vue"
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
-import { isEmpty, isValidDid } from '../mixins/fieldValidation'
+import { isEmpty, isValidDid, isValidURL } from '../mixins/fieldValidation'
 import message from '../mixins/messages'
 import Datepicker from 'vuejs-datetimepicker'
 import VueQr from "vue-qr"
@@ -278,6 +287,10 @@ export default {
   },
   data() {
     return {
+      booleanOption:[
+        {text:true, value:true},
+        {text:false, value:false},
+      ],
       currentStatus:'',
       vcId:'',
       authToken: localStorage.getItem('authToken'),
@@ -476,13 +489,13 @@ export default {
         const requiredFields = selectedSchema.schemaDetails.schema.required  
         for (const e of Object.entries(schemaMap)) {
           let dataToPush = {
-            id: id + event,
+            id: event,
             type: e[1].type,
             name: e[0],
           }
           switch(e[1].type){
             case 'boolean':
-               dataToPush['value'] = false
+               dataToPush['value'] = null
                break;
             case 'string':
               dataToPush['value'] = ""
@@ -543,13 +556,87 @@ export default {
     },
     generateAttributeMap() {
       let attributesMap = [];
+      let dataToSend;
       if (this.issueCredAttributes.length > 0) {
         this.issueCredAttributes.forEach((e) => {
-          attributesMap[e.name] = e.value;
-          if(e.type !== 'boolean' && e.required === true){
-          if (isEmpty(e.value)) {
-            throw new Error(`Please enter value in ${this.CapitaliseString(e.name)} field`)
+          // if(e.type !== 'boolean'){
+          // if (isEmpty(e.value)) {
+          //   throw new Error(`Please enter value in ${this.CapitaliseString(e.name)} field`)
+          // } else if(e.type === 'number') {
+          //   if(isNaN(parseInt(e.value))){
+          //     throw new Error('Enter a number')
+          //   }
+          // }
+          // }   
+            switch(e.type) {
+            case 'string': {
+              console.log('hhh')
+              if(e.required === true) {
+                if(e.value === '' || isValidURL(e.value)){
+                  console.log('in string')
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              } else {
+                 if(isValidURL(e.value)){
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }              
+              break;
+            }
+            case 'number': {
+              if(e.required === true){
+                if(e.value === '' || isNaN(parseInt(e.value))) {
+                throw new Error(`Please enter value in ${this.CapitaliseString(e.name)} field`)
+              }
+              } else {
+                if(e.value !=='' && isNaN(parseInt(e.value))) {
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }              
+              break;
+            }
+            case 'integer': {
+              if(e.required === true){
+                if(e.value === '' || isNaN(parseInt(e.value))) {
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              } else {
+                if(e.value !=='' && isNaN(parseInt(e.value))) {
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }
+              break;
+            }            
+            case 'date': {
+              if(e.required === true) {
+                if(e.value === '' || isValidURL(e.value)){
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              } else {
+                 if(isValidURL(e.value)){
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }     
+              break;
+            }
+            case 'boolean': {
+              if(e.required === true) {
+                if(e.value === null){
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }
+              break;
+            }
+            default :
+            throw new Error('invalid type')    
           }
+          if(e.value !=='' && e.value !== null){
+            dataToSend = {
+            name:e.name,
+            type:e.type,
+            value: e.value,            
+          }  
+          attributesMap.push(dataToSend)
           }
         });
       }
