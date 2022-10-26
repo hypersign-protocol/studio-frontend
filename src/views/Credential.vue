@@ -662,7 +662,8 @@ export default {
           return this.notifyErr("Expiry time should be gretter than current date & time");
         }
         this.isLoading = true
-        const fields = Object.assign({}, attributeMap)
+       // const fields = Object.assign({}, attributeMap)
+       const fields = attributeMap
         const schemaId = this.selected
         const issuerDid = this.user.id
         const subjectDid = this.holderDid
