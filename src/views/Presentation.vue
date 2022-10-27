@@ -362,6 +362,8 @@ export default {
                   this.$store.commit('deleteTemplate',id)
                   this.notifySuccess(id,'Template deleted successfully')
                 }          
+          } else {
+            this.notifyErr('Please enter correct template id')
           }
         }
       }catch (e){
@@ -526,6 +528,8 @@ export default {
             this.notifySuccess('Template Successfully created')
           }
           // this.openSlider();
+          this.clearAll()
+          this.$root.$emit("bv::toggle::collapse", "sidebar-right");
         })
       } catch (e) {
         this.isLoading = false
