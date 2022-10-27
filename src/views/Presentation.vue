@@ -332,9 +332,7 @@ export default {
       this.presentationTemplate.required = temp.required
     },
     clickRowToDelete(temp) {
-      console.log('in delete')
-      console.log(temp)
-      // this.resetAllValues();
+     this.deleteId = ''
       this.tempToDelete = temp._id;
       this.$root.$emit('modal-show');
     },
@@ -360,7 +358,8 @@ export default {
                 if(json.data._id){
                   const id = json.data._id
                   this.$store.commit('deleteTemplate',id)
-                  this.notifySuccess(id,'Template deleted successfully')
+                  this.notifySuccess(`Template with ${id} id deleted successfully`)
+                  this.$root.$emit('modal-close')
                 }          
           } else {
             this.notifyErr('Please enter correct template id')
@@ -473,8 +472,9 @@ export default {
     },
     async generatePresentation() {
       this.isLoading = true
+      let issuerDid = []
       try {
-        const issuerDid = this.presentationTemplate.issuerDid.split(',')
+        issuerDid.push(this.presentationTemplate.issuerDid)
         if (isEmpty(this.presentationTemplate.schemaId)) {
           return this.notifyErr(message.CREDENTIAL.SELECT_SCHEMA)
         } else if (isEmpty(this.presentationTemplate.reason)) {
@@ -521,7 +521,7 @@ export default {
           headers: headers,
         }).then((res) => res.json()).then(json => {
           if(this.isEdit === true) {
-            this.$store.commit('updateTemplate',json)
+            this.$store.commit('updateTemplate',json.data)
             this.notifySuccess('Template Successfully updated')
           } else{
             this.$store.commit('insertApresentationTemplate', json.data.presentationTemplateObj)
