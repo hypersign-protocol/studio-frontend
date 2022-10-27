@@ -498,7 +498,7 @@ export default {
           callbackUrl: this.presentationTemplate.callbackUrl,
           orgDid:this.$store.state.selectedOrgDid
         }
-        if(isEdit === true) {
+        if(this.isEdit === true) {
           body = {
           _id:this.id,
           issuerDid,
