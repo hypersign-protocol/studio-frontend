@@ -328,6 +328,7 @@ export default {
   },
   data() {
     return {
+      reservedKeys:['id'],
       counter:0,
       flash:null,
       isAdd:true,
@@ -400,19 +401,22 @@ export default {
       this.isAdd = false
     },
     updateSchemaAttribute() {
+      let isValid = this.handleValidation()
+      if(isValid) {
       let obj = {
-          name: this.selected.attributeName,
-          type: this.selected.attributeTypes,
-          format: this.selected.attributeFormat,
-          isRequired: this.selected.attributeRequired,
-          id: this.selectedId
-        }
+        name: this.selected.attributeName,
+        type: this.selected.attributeTypes,
+        format: this.selected.attributeFormat,
+        isRequired: this.selected.attributeRequired,
+        id: this.selectedId
+      }
       const indexToUpdate = this.attributes.findIndex((x)=>x.id === this.selectedId)
       if(indexToUpdate > -1){
       this.attributes[indexToUpdate] = obj
       EventBus.$emit("resetOption",this.selected.attributeTypes);
       this.clearSelected()
       this.isAdd = true
+      }
       }
       
     },
@@ -450,28 +454,42 @@ export default {
       this.credentialName = ''
       this.credentialDescription = ''
       this.selected.attributeName = ''
+      EventBus.$emit("resetOption",this.selected.attributeTypes)
       this.selected.attributeTypes = null
       this.selected.attributeFormat = ''
       this.selected.attributeRequired = false
       this.additionalProperties = false
-      this.attributes = []
-      
+      this.attributes = []      
     },
-    addBlankAttrBox() {
+    handleValidation() {
+      let isValid = true
       if (isEmpty(this.selected.attributeName)) {
+        isValid = false
         return this.notifyErr(message.SCHEMA.EMPTY_SCHEMA_ATTRIBUTE_NAME)
+      } else if(this.reservedKeys.includes(this.selected.attributeName)) {
+        isValid = false
+        return this.notifyErr(this.selected.attributeName + ' ' + message.SCHEMA.PROTECTED_TERM)
       } else if (isValidURL(this.selected.attributeName)) {
+        isValid = false
         return this.notifyErr(message.SCHEMA.INVALID_ATTRIBUTE_NAME)
       } else if (ifSpaceExists(this.selected.attributeName)) {
-         return this.notifyErr('There should not be space in attribute name')
+        isValid = false
+        return this.notifyErr(message.SCHEMA.NO_SPACE)
       } else if(!isValidSchemaAttrName(this.selected.attributeName)){
-        return this.notifyErr('Name should be camelCase')
+        isValid = false
+        return this.notifyErr(message.SCHEMA.NAME_CAMELCASE)
       } else if (this.selected.attributeTypes === ' ' || this.selected.attributeTypes === null) {
+        isValid = false
         return this.notifyErr(message.SCHEMA.EMPTY_ATTRIBUTE_TYPE)
       } else if (isValidURL(this.selected.attributeFormat)) {
+        isValid = false
         return this.notifyErr(message.SCHEMA.INVALID_FORMAT)
       }
-      
+    return isValid
+    },
+    addBlankAttrBox() {
+      let isValid = this.handleValidation()
+      if(isValid){
         let obj = {
           name: this.selected.attributeName,
           type: this.selected.attributeTypes,
@@ -485,6 +503,7 @@ export default {
         EventBus.$emit("resetOption",this.selected.attributeTypes)
         this.selected.attributeFormat = "";
         this.selected.attributeRequired = false;     
+      }
     },
     ssePopulateSchema(id, store) {
       const sse = new EventSource(`${this.$config.studioServer.SCHEMA_SSE}${id}`);

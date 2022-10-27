@@ -6,6 +6,9 @@ const ORGANIZATION = {
 }
 
 const SCHEMA = {
+    PROTECTED_TERM: "is protected term you can't use it",
+    NO_SPACE: "There should not be space in attribute name",
+    NAME_CAMELCASE: "Name should be camelCase",
     EMPTY_SCHEMA_NAME: "Please enter Schema name",
     INVALID_SCHEMA_NAME: " Enter valid Schema name",
     EMPTY_SCHEMA_ATTRIBUTE: "Atleast one attribute is required",
