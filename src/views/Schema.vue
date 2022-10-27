@@ -98,6 +98,12 @@
 .rounded {
   cursor: pointer;
 }
+.schemaProp {
+  background-color: lightgoldenrodyellow;
+  color: grey;
+  border: 1ps solid lightcyan;
+  font-size:small;  
+}
 </style>
 <template>
   <div class="home">
@@ -277,7 +283,7 @@
               <td class="word-wrap">{{ row.schemaDetails ? row.schemaDetails.schema.description : "-" }}</td>
               <td v-if="row.schemaDetails">
               <div v-for="prop in Object.keys(row.schemaDetails.schema.properties)" style="display:inline-block;">
-              <span class="flash card rounded m-1 p-1 d">
+              <span class="schemaProp card rounded m-1 p-1 d">
                 {{prop}}
                 </span>
               </div>
