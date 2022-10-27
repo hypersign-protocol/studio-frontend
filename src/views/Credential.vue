@@ -197,8 +197,7 @@ h5 span {
               <!-- <th>Credential Hash</th> -->
               <th>Status</th>
               <th>Status Reason</th>
-              <th></th>
-              <th>Edit</th>
+              <th></th>              
             </tr>
           </thead>
           <tbody>
@@ -216,21 +215,15 @@ h5 span {
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
               <td> {{ row.credStatus ? row.credStatus.claim.currentStatus : row.status}}</td>
               <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
-              <td>               
-                <hf-buttons
-                  v-if="row.credStatus"
-                  name="Send"
-                  style="text-align: right;"
-                  class="btn btn-primary"
-                  @executeAction="generateCred(`${row._id}`)"
-                ></hf-buttons>
-                <span v-else>-</span>
-              </td>
               <td v-if="row.credStatus">
-                <i class="fas fa-pencil-alt"
-                @click="editCred(row)" title="Click to edit this vc" style="cursor: pointer"
+                <i class="fa fa-paper-plane"
+                style="float:left;cursor: pointer"
+                @click="generateCred(`${row._id}`)" title="Click to send this credential"
                 ></i>
-              </td>
+                <i class="fas fa-pencil-alt"
+                @click="editCred(row)" title="Click to edit this vc"
+                style="float:right; margin-left:-10px;cursor: pointer;"
+                ></i>              
               <td v-else>-</td>
             </tr>
           </tbody>
