@@ -147,7 +147,14 @@ export default new Vuex.Store({
         insertApresentationTemplate(state, payload) {
             if (!state.templateList.find(x => x._id === payload._id)) {
                 state.templateList.push(payload);
+            } else {
+                console.log('already exists template id =' + payload._id);
+                this.commit('updateTemplate', payload);
             }
+        },
+        updateTemplate(state,payload) {
+            const tempToUpdateIndex = state.templateList.findIndex(x => x._id === payload._id);
+            Object.assign(state.templateList[tempToUpdateIndex], {...payload});
         },
         insertAcredential(state, payload) {
             if (!state.vcList.find(x => x._id === payload._id)) {
@@ -163,11 +170,19 @@ export default new Vuex.Store({
         },
         updateSidebarStatus(state,payload) {
             state.showSideNavbar = payload
-        }
+        },
 
         //     fetchAllOrgDataOnOrgSelect(state, payload) {
         //         console.log(state , payload);
         // }
+        deleteTemplate(state,payload) {
+            let index = state.templateList.findIndex(x => x._id === payload)
+            if(index > -1) {
+                state.templateList.splice(index,1)
+            } else {
+                console.log('template not found in tempList' + payload);
+            }
+        }
     },
     actions: {
         insertAschema({ commit }, payload) {
