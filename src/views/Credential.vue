@@ -479,7 +479,8 @@ export default {
       const sse = new EventSource(`${this.$config.studioServer.CRED_SSE}${id}`);
       sse.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.status === "Registered" || data.status === "Failed") {
+        console.log(data.status)
+        if (data.status === "Registered" || data.status === "Failed" || data.status === "Live" || data.status === "Suspended" || data.status === "Revoked") {
           
           sse.close();
           store.dispatch("insertAcredential", data)
