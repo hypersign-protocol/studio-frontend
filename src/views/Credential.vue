@@ -137,26 +137,39 @@ h5 span {
                           />
                       <!-- </div>   -->
                     </div>
-                     <div class="form-group pt-2" v-else>
+                    <div class="form-group pt-2" v-if="isEdit === true">
+                      <tool-tip infoMessage="Expiry time for the issued credential"></tool-tip>
+                      <label for="fordid"><strong>Issuance Date:</strong></label>                      
+                      <input type="text" class="form-control"
+                      v-model="issuanceDate" disabled
+                         />
+                    </div>
+                     <div class="form-group pt-2" v-if="isEdit === true">
                       <tool-tip infoMessage="Expiry time for the issued credential"></tool-tip>
                       <label for="fordid"><strong>Expiry Date:</strong></label>                      
                       <input type="text" class="form-control"
                       v-model="expiryDateTime" disabled
                          />
                     </div>
-                    <div class="form-group" v-if="isEdit===true">
+                    <!-- <div class="form-group" v-if="isEdit===true">
                       <tool-tip infoMessage="Current status of credential"></tool-tip>
                       <label for="fordid"><strong>Current Status</strong></label>                      
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="currentStatus" disabled />
-                    </div>
+                    </div> -->
                     <div class="form-group" v-if="isEdit===true">
                       <tool-tip infoMessage="Select Status for the issued credential"></tool-tip>
-                      <label for="forselectschema"><strong>Select Status<span style="color: red">*</span>:</strong></label>                  
-                      <hf-select-drop-down
+                      <label for="forselectschema"><strong>Status<span style="color: red">*</span>:</strong></label>                  
+                      <!-- <hf-select-drop-down
                       :options="credStatusOptions"
                        @selected="e =>{onStatusSelectDropDownChange(e)}"
-                      ></hf-select-drop-down>                    
+                      ></hf-select-drop-down>                     -->
+                      <b-form-select
+                      v-model="selectedStatus"
+                      :options="credStatusOptions"
+                      @input="onStatusSelectDropDownChange"                    
+                      >
+                      </b-form-select>
                     </div>
                   </form>
                   </div>
@@ -197,7 +210,9 @@ h5 span {
               <!-- <th>Credential Hash</th> -->
               <th>Status</th>
               <th>Status Reason</th>
-              <th></th>              
+
+              <th></th>
+
             </tr>
           </thead>
           <tbody>
@@ -216,14 +231,14 @@ h5 span {
               <td> {{ row.credStatus ? row.credStatus.claim.currentStatus : row.status}}</td>
               <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
               <td v-if="row.credStatus">
-                <i class="fa fa-paper-plane"
+              <i class="fa fa-paper-plane"
+                @click="generateCred(`${row._id}`)" title="Click to senf this vc"
                 style="float:left;cursor: pointer"
-                @click="generateCred(`${row._id}`)" title="Click to send this credential"
                 ></i>
                 <i class="fas fa-pencil-alt"
                 @click="editCred(row)" title="Click to edit this vc"
                 style="float:right; margin-left:-10px;cursor: pointer;"
-                ></i>              
+                ></i>
               <td v-else>-</td>
             </tr>
           </tbody>
@@ -284,7 +299,7 @@ export default {
         {text:true, value:true},
         {text:false, value:false},
       ],
-      currentStatus:'',
+      currentStatus:null,
       vcId:'',
       authToken: localStorage.getItem('authToken'),
       isEdit:false,
@@ -308,6 +323,7 @@ export default {
       ],
       credStatusOptions:[
         { text: "Select status", value: null},
+        { text: "Live", value: "LIVE"},
         { text: "Suspend", value: "SUSPENDED"},
         { text: "Revoke", value: "REVOKED"}
       ],
@@ -319,6 +335,7 @@ export default {
       fullPage: true,
       isLoading: false,
       holderDid: "",
+      issuanceDate:null,
       expiryDateTime:null,
       schema_page: 1,
       credUrl:"",
@@ -351,6 +368,23 @@ export default {
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
       this.holderDid = cred.subjectDid
       this.expiryDateTime = cred.expiryDate
+      this.issuanceDate = cred.credStatus.issuanceDate
+      switch(cred.credStatus.claim.currentStatus){
+        case 'Live':
+          this.selectedStatus = 'LIVE'
+          break;
+        case 'Suspended':
+          this.selectedStatus = 'SUSPENDED'
+          break;
+        case 'Revoked':
+          this.selectedStatus = 'REVOKED'
+          break;
+        case 'Expired':
+          this.selectedStatus = 'EXPIRED'
+          break;
+        default :
+          this.notifyError('Invalid credential status')
+        }
       this.currentStatus = cred.credStatus.claim.currentStatus
       this.vcId =cred.vc.id
     },
@@ -360,17 +394,49 @@ export default {
       this.currentStatus = ''
       this.vcId = ''
     },
-    updateCredStatus() {
-      const QR_DATA = {
-      QRType:"ISSUE_CREDENTIAL",
-			data:{
-      status: this.selectedStatus,
-      vcId: this.vcId,
-      credentialStatusUrl:`https://jagrat.hypersign.id/rest/hypersign-protocol/hidnode/ssi/credential/${this.vcId}`,
-				}
+  async updateCredStatus() {
+    //   const QR_DATA = {
+    //   QRType:"ISSUE_CREDENTIAL",
+		// 	data:{
+    //   status: this.selected,
+    //   vcId: this.vcId,
+    //   credentialStatusUrl:`https://jagrat.hypersign.id/rest/hypersign-protocol/hidnode/ssi/credential/${this.vcId}`,
+		// 		}
+    // }
+    try {
+      this.isLoading = true
+      const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
+      const creadData = {
+          status: this.selectedStatus,
+          vcId: this.vcId,
+          }
+
+      const headers = {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.authToken}`
+        };
+        fetch(url,{
+        method: "PUT",
+        headers,
+        body: JSON.stringify({QR_DATA: creadData})        
+        }).then((res) => res.json())
+        .then(json =>{
+          const { QR_DATA } = json.data
+          const id = QR_DATA.data._id
+          if(json.message === 'success') {
+            this.notifySuccess('cred status updated successfully')
+            const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`      
+            this.openWallet(URL)
+             this.ssePopulateCredStatus(id, this.$store)
+              this.openSlider();
+          }
+        })
+    } catch (e) {
+      console.log(e)
+    } finally{
+      this.isLoading = false
     }
-      const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`      
-      this.openWallet(URL)
+      
     },
     showInputField(type) {
       console.log(type)
@@ -417,7 +483,7 @@ export default {
       const sse = new EventSource(`${this.$config.studioServer.CRED_SSE}${id}`);
       sse.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.status === "Registered" || data.status === "Failed") {
+        if (data.status === "Registered" || data.status === "Failed" || data.status === "Live" || data.status === "Suspended" || data.status === "Revoked") {
           
           sse.close();
           store.dispatch("insertAcredential", data)
@@ -468,11 +534,13 @@ export default {
       }
     },
     onStatusSelectDropDownChange(event) {
-      if(event) {
-        this.selectedStatus = event
-      }
+      this.selectedStatus = event
+      // if(event) {
+        
+      // }
     },
     OnSchemaSelectDropDownChange(event) {  
+      this.selected = null
       this.selected = event;
       if (event) {
         this.issueCredAttributes = [];        
@@ -563,10 +631,8 @@ export default {
           // }   
             switch(e.type) {
             case 'string': {
-              console.log('hhh')
               if(e.required === true) {
                 if(e.value === '' || isValidURL(e.value)){
-                  console.log('in string')
                 throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
               }
               } else {
@@ -655,15 +721,12 @@ export default {
           return this.notifyErr("Expiry time should be gretter than current date & time");
         }
         this.isLoading = true
-       // const fields = Object.assign({}, attributeMap)
-       const fields = attributeMap
+        const fields = attributeMap
         const schemaId = this.selected
         const issuerDid = this.user.id
         const subjectDid = this.holderDid
         const expiryDate = this.expiryDateTime
-
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
-
         const headers = {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.authToken}`
@@ -689,7 +752,6 @@ export default {
               this.$store.dispatch("insertAcredential", creadRecord)
               const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
               this.openWallet(URL)
-
               this.ssePopulateCredStatus(creadRecord._id, this.$store)
               this.openSlider();
              
