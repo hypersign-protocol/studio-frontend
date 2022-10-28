@@ -165,9 +165,9 @@ h5 span {
                        @selected="e =>{onStatusSelectDropDownChange(e)}"
                       ></hf-select-drop-down>                     -->
                       <b-form-select
-                      v-model="selected"
+                      v-model="selectedStatus"
                       :options="credStatusOptions"
-                      @change="onStatusSelectDropDownChange()"                    
+                      @input="onStatusSelectDropDownChange"                    
                       >
                       </b-form-select>
                     </div>
@@ -189,7 +189,7 @@ h5 span {
                       name="Update"
                       style="text-align: right;"
                       class="btn btn-primary ml-auto mt-4"
-                      @executeAction="issueCredential()"
+                      @executeAction="updateCredStatus()"
                     ></hf-buttons>
                   </div>
                 </div>
@@ -361,27 +361,25 @@ export default {
   },
   methods: {
     editCred(cred) {
-      this.selected = null
       this.clearEdit()
       this.isEdit = true      
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
       this.holderDid = cred.subjectDid
       this.expiryDateTime = cred.expiryDate
       this.issuanceDate = cred.credStatus.issuanceDate
-      let option
       switch(cred.credStatus.claim.currentStatus){
         case 'Live':
           console.log(cred.credStatus.claim.currentStatus)
-          this.selected = 'LIVE'
+          this.selectedStatus = 'LIVE'
           break;
         case 'Suspend':
-          this.selected = 'SUSPENDED'
+          this.selectedStatus = 'SUSPENDED'
           break;
         case 'Revoke':
-          this.selected = 'REVOKED'
+          this.selectedStatus = 'REVOKED'
           break;
         default :
-          this.selected = 'EXPIRED'
+          this.selectedStatus = 'EXPIRED'
       }
       this.currentStatus = cred.credStatus.claim.currentStatus
       this.vcId =cred.vc.id
@@ -392,17 +390,49 @@ export default {
       this.currentStatus = ''
       this.vcId = ''
     },
-    updateCredStatus() {
-      const QR_DATA = {
-      QRType:"ISSUE_CREDENTIAL",
-			data:{
-      status: this.selected,
-      vcId: this.vcId,
-      credentialStatusUrl:`https://jagrat.hypersign.id/rest/hypersign-protocol/hidnode/ssi/credential/${this.vcId}`,
-				}
+  async updateCredStatus() {
+    //   const QR_DATA = {
+    //   QRType:"ISSUE_CREDENTIAL",
+		// 	data:{
+    //   status: this.selected,
+    //   vcId: this.vcId,
+    //   credentialStatusUrl:`https://jagrat.hypersign.id/rest/hypersign-protocol/hidnode/ssi/credential/${this.vcId}`,
+		// 		}
+    // }
+    try {
+      this.isLoading = true
+      const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
+      const creadData = {
+          status: this.selectedStatus,
+          vcId: this.vcId,
+          }
+
+      const headers = {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.authToken}`
+        };
+        fetch(url,{
+        method: "PUT",
+        headers,
+        body: JSON.stringify({QR_DATA: creadData})        
+        }).then((res) => res.json())
+        .then(json =>{
+          const { QR_DATA } = json.data
+          const id = QR_DATA.data._id
+          if(json.message === 'success') {
+            this.notifySuccess('cred status updated successfully')
+            const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`      
+            this.openWallet(URL)
+             this.ssePopulateCredStatus(id, this.$store)
+              this.openSlider();
+          }
+        })
+    } catch (e) {
+      console.log(e)
+    } finally{
+      this.isLoading = false
     }
-      const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`      
-      this.openWallet(URL)
+      
     },
     showInputField(type) {
       console.log(type)
@@ -500,8 +530,7 @@ export default {
       }
     },
     onStatusSelectDropDownChange(event) {
-      this.selected = null
-      this.selected = event
+      this.selectedStatus = event
       // if(event) {
         
       // }
@@ -690,21 +719,17 @@ export default {
           return this.notifyErr("Expiry time should be gretter than current date & time");
         }
         this.isLoading = true
-       // const fields = Object.assign({}, attributeMap)
-       const fields = attributeMap
+        const fields = Object.assign({}, attributeMap)
         const schemaId = this.selected
         const issuerDid = this.user.id
         const subjectDid = this.holderDid
         const expiryDate = this.expiryDateTime
-
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
-
         const headers = {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.authToken}`
         };
-        let method = "POST"
-        let creadData = {
+        const creadData = {
           fields,
           schemaId,
           issuerDid,
@@ -712,43 +737,20 @@ export default {
           expiryDate,
           orgDid:this.$store.state.selectedOrgDid
         };
-        if(this.isEdit === true ) {
-          method = "PUT"
-          creadData = {
-          status: this.selected,
-          vcId: this.vcId,
-          }
-        }
         this.QrData.data = creadData
         fetch(url, {
-          method: method,
+          method: "POST",
           headers,
           body: JSON.stringify({ QR_DATA: this.QrData }),
         }).then((res) => res.json())
           .then(json => {
-            const { QR_DATA } = json.data   
-            let creadRecord
-            let id       
-            if(this.isEdit !== true ){
-                id = json.data.creadRecord._id           
-               creadRecord = json.data.creadRecord
-            }
-           
+            const { QR_DATA, creadRecord } = json.data
             if (json.message === 'success') {
-              if(this.isEdit === true ) {
-                this.$store.dispatch("insertAcredential", creadRecord)
-              } else {
-                this.notifySuccess("Credential creation initiated. Please approve the trancation from your wallet")
-                this.$store.dispatch("insertAcredential", creadRecord)
-              }
-              
+              this.notifySuccess("Credential creation initiated. Please approve the trancation from your wallet")
+              this.$store.dispatch("insertAcredential", creadRecord)
               const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
               this.openWallet(URL)
-
-              if(this.isEdit === true){
-                id = QR_DATA.data._id
-              }
-              this.ssePopulateCredStatus(id, this.$store)
+              this.ssePopulateCredStatus(creadRecord._id, this.$store)
               this.openSlider();
              
            } else {
