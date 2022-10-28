@@ -210,7 +210,9 @@ h5 span {
               <!-- <th>Credential Hash</th> -->
               <th>Status</th>
               <th>Status Reason</th>
+
               <th></th>
+
             </tr>
           </thead>
           <tbody>
