@@ -167,7 +167,7 @@ h5 span {
                       <b-form-select
                       v-model="selected"
                       :options="credStatusOptions"
-                      
+                      @change="onStatusSelectDropDownChange()"                    
                       >
                       </b-form-select>
                     </div>
@@ -396,7 +396,7 @@ export default {
       const QR_DATA = {
       QRType:"ISSUE_CREDENTIAL",
 			data:{
-      status: this.selectedStatus,
+      status: this.selected,
       vcId: this.vcId,
       credentialStatusUrl:`https://jagrat.hypersign.id/rest/hypersign-protocol/hidnode/ssi/credential/${this.vcId}`,
 				}
@@ -715,7 +715,7 @@ export default {
         if(this.isEdit === true ) {
           method = "PUT"
           creadData = {
-          status: this.selectedStatus,
+          status: this.selected,
           vcId: this.vcId,
           }
         }
@@ -730,7 +730,7 @@ export default {
             let creadRecord
             let id       
             if(this.isEdit !== true ){
-                id = creadData._id           
+                id = json.data.creadRecord._id           
                creadRecord = json.data.creadRecord
             }
            
