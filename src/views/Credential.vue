@@ -137,26 +137,39 @@ h5 span {
                           />
                       <!-- </div>   -->
                     </div>
-                     <div class="form-group pt-2" v-else>
+                    <div class="form-group pt-2" v-if="isEdit === true">
+                      <tool-tip infoMessage="Expiry time for the issued credential"></tool-tip>
+                      <label for="fordid"><strong>Issuance Date:</strong></label>                      
+                      <input type="text" class="form-control"
+                      v-model="issuanceDate" disabled
+                         />
+                    </div>
+                     <div class="form-group pt-2" v-if="isEdit === true">
                       <tool-tip infoMessage="Expiry time for the issued credential"></tool-tip>
                       <label for="fordid"><strong>Expiry Date:</strong></label>                      
                       <input type="text" class="form-control"
                       v-model="expiryDateTime" disabled
                          />
                     </div>
-                    <div class="form-group" v-if="isEdit===true">
+                    <!-- <div class="form-group" v-if="isEdit===true">
                       <tool-tip infoMessage="Current status of credential"></tool-tip>
                       <label for="fordid"><strong>Current Status</strong></label>                      
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="currentStatus" disabled />
-                    </div>
+                    </div> -->
                     <div class="form-group" v-if="isEdit===true">
                       <tool-tip infoMessage="Select Status for the issued credential"></tool-tip>
-                      <label for="forselectschema"><strong>Select Status<span style="color: red">*</span>:</strong></label>                  
-                      <hf-select-drop-down
+                      <label for="forselectschema"><strong>Status<span style="color: red">*</span>:</strong></label>                  
+                      <!-- <hf-select-drop-down
                       :options="credStatusOptions"
                        @selected="e =>{onStatusSelectDropDownChange(e)}"
-                      ></hf-select-drop-down>                    
+                      ></hf-select-drop-down>                     -->
+                      <b-form-select
+                      v-model="selected"
+                      :options="credStatusOptions"
+                      
+                      >
+                      </b-form-select>
                     </div>
                   </form>
                   </div>
@@ -176,7 +189,7 @@ h5 span {
                       name="Update"
                       style="text-align: right;"
                       class="btn btn-primary ml-auto mt-4"
-                      @executeAction="updateCredStatus()"
+                      @executeAction="issueCredential()"
                     ></hf-buttons>
                   </div>
                 </div>
@@ -198,7 +211,6 @@ h5 span {
               <th>Status</th>
               <th>Status Reason</th>
               <th></th>
-              <th>Edit</th>
             </tr>
           </thead>
           <tbody>
@@ -216,21 +228,15 @@ h5 span {
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
               <td> {{ row.credStatus ? row.credStatus.claim.currentStatus : row.status}}</td>
               <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
-              <td>               
-                <hf-buttons
-                  v-if="row.credStatus"
-                  name="Send"
-                  style="text-align: right;"
-                  class="btn btn-primary"
-                  @executeAction="generateCred(`${row._id}`)"
-                ></hf-buttons>
-                <span v-else>-</span>
-              </td>
               <td v-if="row.credStatus">
-                <i class="fas fa-pencil-alt"
-                @click="editCred(row)" title="Click to edit this vc" style="cursor: pointer"
+              <i class="fa fa-paper-plane"
+                @click="generateCred(`${row._id}`)" title="Click to senf this vc"
+                style="float:left;cursor: pointer"
                 ></i>
-              </td>
+                <i class="fas fa-pencil-alt"
+                @click="editCred(row)" title="Click to edit this vc"
+                style="float:right; margin-left:-10px;cursor: pointer;"
+                ></i>
               <td v-else>-</td>
             </tr>
           </tbody>
@@ -291,7 +297,7 @@ export default {
         {text:true, value:true},
         {text:false, value:false},
       ],
-      currentStatus:'',
+      currentStatus:null,
       vcId:'',
       authToken: localStorage.getItem('authToken'),
       isEdit:false,
@@ -315,6 +321,7 @@ export default {
       ],
       credStatusOptions:[
         { text: "Select status", value: null},
+        { text: "Live", value: "LIVE"},
         { text: "Suspend", value: "SUSPENDED"},
         { text: "Revoke", value: "REVOKED"}
       ],
@@ -326,6 +333,7 @@ export default {
       fullPage: true,
       isLoading: false,
       holderDid: "",
+      issuanceDate:null,
       expiryDateTime:null,
       schema_page: 1,
       credUrl:"",
@@ -353,11 +361,28 @@ export default {
   },
   methods: {
     editCred(cred) {
+      this.selected = null
       this.clearEdit()
       this.isEdit = true      
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
       this.holderDid = cred.subjectDid
       this.expiryDateTime = cred.expiryDate
+      this.issuanceDate = cred.credStatus.issuanceDate
+      let option
+      switch(cred.credStatus.claim.currentStatus){
+        case 'Live':
+          console.log(cred.credStatus.claim.currentStatus)
+          this.selected = 'LIVE'
+          break;
+        case 'Suspend':
+          this.selected = 'SUSPENDED'
+          break;
+        case 'Revoke':
+          this.selected = 'REVOKED'
+          break;
+        default :
+          this.selected = 'EXPIRED'
+      }
       this.currentStatus = cred.credStatus.claim.currentStatus
       this.vcId =cred.vc.id
     },
@@ -475,11 +500,14 @@ export default {
       }
     },
     onStatusSelectDropDownChange(event) {
-      if(event) {
-        this.selectedStatus = event
-      }
+      this.selected = null
+      this.selected = event
+      // if(event) {
+        
+      // }
     },
     OnSchemaSelectDropDownChange(event) {  
+      this.selected = null
       this.selected = event;
       if (event) {
         this.issueCredAttributes = [];        
@@ -675,7 +703,8 @@ export default {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.authToken}`
         };
-        const creadData = {
+        let method = "POST"
+        let creadData = {
           fields,
           schemaId,
           issuerDid,
@@ -683,21 +712,43 @@ export default {
           expiryDate,
           orgDid:this.$store.state.selectedOrgDid
         };
+        if(this.isEdit === true ) {
+          method = "PUT"
+          creadData = {
+          status: this.selectedStatus,
+          vcId: this.vcId,
+          }
+        }
         this.QrData.data = creadData
         fetch(url, {
-          method: "POST",
+          method: method,
           headers,
           body: JSON.stringify({ QR_DATA: this.QrData }),
         }).then((res) => res.json())
           .then(json => {
-            const { QR_DATA, creadRecord } = json.data
+            const { QR_DATA } = json.data   
+            let creadRecord
+            let id       
+            if(this.isEdit !== true ){
+                id = creadData._id           
+               creadRecord = json.data.creadRecord
+            }
+           
             if (json.message === 'success') {
-              this.notifySuccess("Credential creation initiated. Please approve the trancation from your wallet")
-              this.$store.dispatch("insertAcredential", creadRecord)
+              if(this.isEdit === true ) {
+                this.$store.dispatch("insertAcredential", creadRecord)
+              } else {
+                this.notifySuccess("Credential creation initiated. Please approve the trancation from your wallet")
+                this.$store.dispatch("insertAcredential", creadRecord)
+              }
+              
               const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
               this.openWallet(URL)
 
-              this.ssePopulateCredStatus(creadRecord._id, this.$store)
+              if(this.isEdit === true){
+                id = QR_DATA.data._id
+              }
+              this.ssePopulateCredStatus(id, this.$store)
               this.openSlider();
              
            } else {
