@@ -369,18 +369,20 @@ export default {
       this.issuanceDate = cred.credStatus.issuanceDate
       switch(cred.credStatus.claim.currentStatus){
         case 'Live':
-          console.log(cred.credStatus.claim.currentStatus)
           this.selectedStatus = 'LIVE'
           break;
-        case 'Suspend':
+        case 'Suspended':
           this.selectedStatus = 'SUSPENDED'
           break;
-        case 'Revoke':
+        case 'Revoked':
           this.selectedStatus = 'REVOKED'
           break;
-        default :
+        case 'Expired':
           this.selectedStatus = 'EXPIRED'
-      }
+          break;
+        default :
+          this.notifyError('Invalid credential status')
+        }
       this.currentStatus = cred.credStatus.claim.currentStatus
       this.vcId =cred.vc.id
     },
@@ -479,7 +481,6 @@ export default {
       const sse = new EventSource(`${this.$config.studioServer.CRED_SSE}${id}`);
       sse.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log(data.status)
         if (data.status === "Registered" || data.status === "Failed" || data.status === "Live" || data.status === "Suspended" || data.status === "Revoked") {
           
           sse.close();
@@ -628,10 +629,8 @@ export default {
           // }   
             switch(e.type) {
             case 'string': {
-              console.log('hhh')
               if(e.required === true) {
                 if(e.value === '' || isValidURL(e.value)){
-                  console.log('in string')
                 throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
               }
               } else {
