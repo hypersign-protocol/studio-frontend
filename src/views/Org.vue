@@ -8,7 +8,7 @@
   }
   
   .eventCard {
-    border-left: 10px solid var(--ds-background-accent-red-subtler, #ADE8FF8F);
+    border-left: 10px solid var(--ds-background-accent-red-subtler, rgba(241, 179, 25, 0.24));
   }
   
   .eventCard:hover {
