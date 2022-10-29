@@ -57,7 +57,7 @@ h5 span {
             <hf-buttons 
               name="+ Create"
               style="text-align: right;"
-              class="btn btn-primary ml-auto mt-4"
+              class="btn btn-primary ml-auto mt-4 button-theme"
               @executeAction="openSlider()"
             ></hf-buttons>
           </div>    

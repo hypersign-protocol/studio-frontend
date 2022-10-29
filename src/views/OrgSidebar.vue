@@ -1,8 +1,8 @@
 <template>
-  <div class="home">
-    <div class="form-group" style="display:flex">
-      <h3 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">Organizations</h3>
-      <h3 v-else class="mt-4" style="text-align: left;">Create your first organization!</h3>
+  <div class="">
+    <div class="" style="display:flex">
+      <h4 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">Organizations</h4>
+      <h4 v-else class="mt-4" style="text-align: left;">Create your first organization!</h4>
 
       <hf-buttons 
       name="+ Organization"
