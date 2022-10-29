@@ -1,9 +1,4 @@
 <style scoped>
-.home{
-    margin-left: auto;
-    margin-right: auto;
-    width: 1500px;
-}
 .floatLeft {
   float: left;
 }

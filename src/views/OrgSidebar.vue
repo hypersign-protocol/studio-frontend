@@ -124,11 +124,6 @@ color: grey;
 display: inline;
 padding-left: 5px;
 }
-  .home {
-    margin-left: auto;
-    margin-right: auto;
-    width: 1500px;
-  }
   
   .container {
     padding: 20px;

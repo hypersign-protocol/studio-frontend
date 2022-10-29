@@ -2,12 +2,6 @@
 <org-content/>
 </template>
   <style scoped>
-  .home {
-    margin-left: auto;
-    margin-right: auto;
-    width: 1500px;
-  }
-  
   .container {
     padding: 20px;
     text-align: left;

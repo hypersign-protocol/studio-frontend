@@ -40,7 +40,7 @@
 .subtitle {
   padding-left: 10px;
   color: gray;
-  font-size: larger;
+  /* font-size: larger; */
   margin-top: auto;
 }
 .container-collapsed {
@@ -59,16 +59,12 @@ padding-left: 5px;
 <template>
   <div id="app">
    <b-navbar toggleable="lg" type="dark" variant="white" class="navStyle" v-if="showIcon">
-    <b-navbar-brand href="#" style="display:flex;">
+    <b-navbar-brand href="#" style="display:flex; width: 80%; margin-left: 1em;">
       <img src="https://thumb.tildacdn.com/tild3065-3765-4865-b331-393637653931/-/resize/150x/-/format/webp/hypersign_Yellow.png" alt="">
-      <h4 class="subtitle">| {{ $config.app.name }} ({{ $config.app.version }})</h4>
+      <h5 class="subtitle">| {{ $config.app.name }} ({{ $config.app.version }})</h5>
     </b-navbar-brand>
-
-    <b-navbar-toggle target="nav-collapse" type="dark" style="background-color:grey;">
-    </b-navbar-toggle>
-
-    <b-collapse id="nav-collapse" is-nav>
-      <b-navbar-nav class="ml-auto" style="padding-right:100px; position:static;">
+    <b-collapse id="nav-collapse" is-nav style="width: 20%;">
+      <b-navbar-nav class="ml-auto">
 
         <b-nav-item-dropdown right v-if="showIcon">
           <template #button-content>
@@ -78,11 +74,11 @@ padding-left: 5px;
           </b-iconstack>
           </template>
           <div class="copyDiv">
-          <span>{{shorten(userDetails.email)}}</span><br>
-          <span>{{shorten(userDetails.did)}}</span>
-          <span
-          @click="copyToClip(userDetails.did,'DID')"
-          ><i class="far fa-copy"></i></span>
+            <span>{{shorten(userDetails.email)}}</span><br>
+            <span>{{shorten(userDetails.did)}}</span>
+            <span
+            @click="copyToClip(userDetails.did,'DID')"
+            ><i class="far fa-copy"></i></span>
           </div>
           <hf-buttons name="Logout" class="btn btn-primary" @executeAction="logoutAll()"></hf-buttons>
         </b-nav-item-dropdown>
@@ -115,24 +111,6 @@ padding-left: 5px;
 </template>
 
 <style>
-#app {
-  /* font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50; */
-
-
-  color: #212529;
-text-align: left;
-background-color: #fff;
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-font-size: 14px;
-font-style: normal;
-font-weight: 400;
-line-height: 1.42857142857143;
-text-decoration-skip-ink: auto;
-}
 .v-sidebar-menu .vsm--link_level-1 .vsm--icon {
   font-size: 16px;
   width: 40px !important;

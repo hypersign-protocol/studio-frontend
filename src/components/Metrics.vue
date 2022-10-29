@@ -44,7 +44,6 @@
 .tile {
   font-size: xxx-large;
   background: aliceblue;
-  border-bottom: 1px solid #8080802b;
 }
 .fVal {
   font-size: small;
@@ -65,7 +64,7 @@ display: flex;
 }
 
 .card-header{
-  height: 50%;
+  height: 30%;
 }
 
 </style>
@@ -74,28 +73,28 @@ display: flex;
   <div class="row">
      
         <div class="col-lg-3">
-          <div class="card">
-            <div class="card-body tile">{{allMetricsData.schemasCount}}</div>
-            <div class="card-header">AUTHORED SCHEMAS</div>
+          <div class="card event-card">
+            <div class="card-body tile-number">{{allMetricsData.schemasCount}}</div>
+            <div class="card-header card-head">AUTHORED SCHEMAS</div>
           </div>
         </div>
         <div class="col-lg-3">
-          <div class="card">
-            <div class="card-body tile">{{ allMetricsData.credentialsCount }}</div>
-            <div class="card-header">ISSUED CREDENTIALS</div>
+          <div class="card event-card">
+            <div class="card-body tile-number">{{ allMetricsData.credentialsCount }}</div>
+            <div class="card-header card-head">ISSUED CREDENTIALS</div>
           </div>
         </div>
         <div class="col-lg-3">
-          <div class="card">
-            <div class="card-body tile">{{ allMetricsData.orgsCount }}</div>
-            <div class="card-header">ORGANIZATIONS</div>
+          <div class="card event-card">
+            <div class="card-body tile-number">{{ allMetricsData.orgsCount }}</div>
+            <div class="card-header card-head">ORGANIZATIONS</div>
           </div>
         </div>
         
         <div class="col-lg-3">
-          <div class="card">
-            <div class="card-body tile">{{ allMetricsData.templatesCount }}</div>
-            <div class="card-header">PRESENTATION TEMPLATES</div>
+          <div class="card event-card">
+            <div class="card-body tile-number">{{ allMetricsData.templatesCount }}</div>
+            <div class="card-header card-head">PRESENTATION TEMPLATES</div>
           </div>
         </div>
       </div>  

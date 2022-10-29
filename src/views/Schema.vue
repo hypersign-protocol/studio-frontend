@@ -1,10 +1,4 @@
 <style scoped>
-.home {
-  margin-left: auto;
-  margin-right: auto;
-  width: 1500px;
-}
-
 .flash {
   cursor: pointer;
   background-color: #1faa596b;
@@ -257,7 +251,7 @@
     </div>
     <div class="row" style="margin-top: 2%;" v-if="schemaList.length > 0">
       <div class="col-md-12">
-        <table class="table table-bordered" style="background:#FFFF">
+        <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
               <th>Schema Id</th>
