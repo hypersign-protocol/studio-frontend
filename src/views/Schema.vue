@@ -207,7 +207,7 @@
                     <div class="form-group row mt-4" v-if="isAdd">
                       <div class="col-sm-10">                        
                         <hf-buttons 
-                          name="Add +"        
+                          name="Add"        
                           class="btn btn-primary"
                           @executeAction="addBlankAttrBox()"
                         ></hf-buttons>
