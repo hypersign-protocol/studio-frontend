@@ -1,9 +1,11 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import config from '../config'
+import UtilsMixin from '../mixins/utils.js'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
+    mixin:[UtilsMixin],
     state: {
         schemaList: [],
         vcList: [],
@@ -64,7 +66,7 @@ export default new Vuex.Store({
             let schemaIdnames = state.schemaList.map(x => {
                 if (x.schemaId && x.schemaId !== undefined && x.status === 'Registered') {
                     return {
-                        text: x.schemaDetails.name,
+                        text: x.schemaDetails.name + ' '+ `{${UtilsMixin.methods.truncate(x.schemaId,60)}}`,
                         value: x.schemaId
                     }
                 } else {
