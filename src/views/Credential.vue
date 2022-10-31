@@ -682,11 +682,11 @@ export default {
             switch(e.type) {
             case 'string': {
               if(e.required === true) {
-                if(e.value === '' || isValidURL(e.value)){
+                if(e.value === '' || isValidURL(e.value) || !isNaN(parseInt(e.value))){
                 throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
               }
               } else {
-                 if(isValidURL(e.value)){
+                 if(isValidURL(e.value)|| !isNaN(parseInt(e.value))){
                 throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
               }
               }              
