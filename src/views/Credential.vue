@@ -126,7 +126,7 @@ h5 span {
                       <!-- <div class="form-control"> -->
                           <Datepicker 
                           class="datepicker"
-                          name="toDate"
+                          name="expiryDateTime"
                           format="YYYY-MM-DD h:i:s" 
                           v-model="expiryDateTime"
                           />
@@ -140,17 +140,17 @@ h5 span {
                          />
                     </div>
                     <div class="form-group pt-2" v-if="isEdit === true">
-                      <tool-tip infoMessage="Expiry time of the issued credential"></tool-tip>
+                      <tool-tip infoMessage="Issuance Date of the issued credential"></tool-tip>
                       <label for="fordid"><strong>Issuance Date:</strong></label>                      
-                      <input type="text" class="form-control"
-                      v-model="issuanceDate" disabled
+                      <input type="text" class="form-control"                      
+                      v-model="new Date(issuanceDate).toLocaleString()" disabled
                          />
                     </div>
                      <div class="form-group pt-2" v-if="isEdit === true">
-                      <tool-tip infoMessage="Expiry time for the issued credential"></tool-tip>
+                      <tool-tip infoMessage="Expiry Date for the issued credential"></tool-tip>
                       <label for="fordid"><strong>Expiry Date:</strong></label>                      
                       <input type="text" class="form-control"
-                      v-model="expiryDateTime" disabled
+                      v-model="new Date(expiryDateTime).toLocaleString()" disabled
                          />
                     </div>
                     <!-- <div class="form-group" v-if="isEdit===true">
@@ -233,8 +233,8 @@ h5 span {
                 <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.SCHEMA_GET_REST}${row.schemaId}:`" target="_blank">{{ shorten(row.schemaId) }}</a>
               </td>
               <td>{{ shorten(row.subjectDid) }}</td>
-              <td>{{ row.credStatus ? row.credStatus.issuanceDate: "-"}}</td>
-              <td>{{ row.credStatus ? row.credStatus.expirationDate : "-"}}</td>
+              <td>{{ row.credStatus ? new Date(row.credStatus.issuanceDate).toLocaleString(): "-"}}</td>
+              <td>{{ row.credStatus ? new Date(row.credStatus.expirationDate).toLocaleString() : "-"}}</td>
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
               <td> {{ row.credStatus ? row.credStatus.claim.currentStatus : row.status}}</td>
               <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
