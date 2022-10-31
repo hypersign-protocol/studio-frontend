@@ -240,7 +240,7 @@ h5 span {
               <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
               <td v-if="row.credStatus">
               <i class="fa fa-paper-plane"
-                v-if="noEdit(row)"
+                v-if="row.credStatus.claim.currentStatus==='Live'"
                 @click="generateCred(`${row._id}`)" title="Click to send this vc"
                 style="float:left;cursor: pointer"
                 ></i>
