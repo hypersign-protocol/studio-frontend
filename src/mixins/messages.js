@@ -25,6 +25,7 @@ const CREDENTIAL = {
 }
 
 const PRESENTATION = {
+    ISSUER_DID_EMPTY: "Please enter Issuer DID",
     REASON: "Please enter reason for creating template",
     CALLBACK_URL: "Please enter callback url",
     INVALID_URL: "Please enter a valid url"
