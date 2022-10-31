@@ -166,17 +166,14 @@
       </div>
       <!-- </div> -->
     </div>
-<hf-pop-up
-    Header="Delete Event"
+    <hf-pop-up
+    Header="Delete Presentation Template"
     >
-    <!-- <hf-notes
-    notes="Delete template"
-    ></hf-notes> -->
-    <div class="row g-3 align-items-center w-100  mt-4">
+    <div class="row g-3 align-items-center  mt-4">
         <div class="col-lg-3 col-md-3 text-left">
           <label for="DeleteId" class="col-form-label">Template Id :</label>
         </div>
-        <div class=" col-lg-9 col-md-9 px-0">
+        <div class=" col-lg-9 col-md-9">
           <input v-model="deleteId" type="text" placeholder="6241c8057f5e...e2eaec05d" id="DeleteId" class="form-control w-100" >
         </div>   
     </div>
@@ -184,7 +181,7 @@
       <hf-buttons
       name="Delete"
       @executeAction="deleteTemp()"
-      title="Delete an event"
+      title="Delete Presentation Template"
       customClass="btn btn-danger"
       ></hf-buttons>
       </div>
