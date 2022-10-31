@@ -133,7 +133,14 @@ h5 span {
                       <!-- </div>   -->
                     </div>
                     <div class="form-group pt-2" v-if="isEdit === true">
-                      <tool-tip infoMessage="Expiry time for the issued credential"></tool-tip>
+                      <tool-tip infoMessage="Credential Hash of the issued credential"></tool-tip>
+                      <label for="fordid"><strong>Credential Hash:</strong></label>                      
+                      <input type="text" class="form-control"
+                      v-model="credHash" disabled
+                         />
+                    </div>
+                    <div class="form-group pt-2" v-if="isEdit === true">
+                      <tool-tip infoMessage="Expiry time of the issued credential"></tool-tip>
                       <label for="fordid"><strong>Issuance Date:</strong></label>                      
                       <input type="text" class="form-control"
                       v-model="issuanceDate" disabled
@@ -165,6 +172,12 @@ h5 span {
                       @input="onStatusSelectDropDownChange"                    
                       >
                       </b-form-select>
+                    </div>
+                    <div class="form-group" v-if="isEdit === true">
+                      <tool-tip infoMessage="Status Reason for the status change"></tool-tip>
+                      <label for="fordid"><strong>Status Reason:</strong></label>
+                      <input type="text" class="form-control"
+                        v-model="statusReason"/>
                     </div>
                   </form>
                   </div>
@@ -227,13 +240,16 @@ h5 span {
               <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
               <td v-if="row.credStatus">
               <i class="fa fa-paper-plane"
-                @click="generateCred(`${row._id}`)" title="Click to senf this vc"
+                v-if="noEdit(row)"
+                @click="generateCred(`${row._id}`)" title="Click to send this vc"
                 style="float:left;cursor: pointer"
                 ></i>
                 <i class="fas fa-pencil-alt"
+                v-if="noEdit(row)"
                 @click="editCred(row)" title="Click to edit this vc"
                 style="float:right; margin-left:-10px;cursor: pointer;"
                 ></i>
+                <span v-else>-</span>
               <td v-else>-</td>
             </tr>
           </tbody>
@@ -317,7 +333,6 @@ export default {
         { text: "Select existing schema", value: "existing" },
       ],
       credStatusOptions:[
-        { text: "Select status", value: null},
         { text: "Live", value: "LIVE"},
         { text: "Suspend", value: "SUSPENDED"},
         { text: "Revoke", value: "REVOKED"}
@@ -332,6 +347,8 @@ export default {
       holderDid: "",
       issuanceDate:null,
       expiryDateTime:null,
+      preStatusSelect:'',
+      statusReason:'',
       schema_page: 1,
       credUrl:"",
       QrData: {
@@ -357,19 +374,39 @@ export default {
     });
   },
   methods: {
+    noEdit(row){
+      if(row.credStatus.claim.currentStatus === 'Revoked' || row.credStatus.claim.currentStatus === 'Expired'){
+        return false
+      } else {
+        return true
+      }
+    },
     editCred(cred) {
       this.clearEdit()
       this.isEdit = true      
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
       this.holderDid = cred.subjectDid
+      this.credHash = cred.credStatus.credentialHash
       this.expiryDateTime = cred.expiryDate
       this.issuanceDate = cred.credStatus.issuanceDate
+      this.preStatusSelect = cred.credStatus.claim.currentStatus
+      this.statusReason = cred.credStatus.claim.statusReason
       switch(cred.credStatus.claim.currentStatus){
         case 'Live':
           this.selectedStatus = 'LIVE'
+          this. credStatusOptions=[
+        { text: "Live", value: "LIVE", disabled:true},
+        { text: "Suspend", value: "SUSPENDED"},
+        { text: "Revoke", value: "REVOKED"}
+        ]
           break;
         case 'Suspended':
           this.selectedStatus = 'SUSPENDED'
+          this. credStatusOptions=[
+        { text: "Suspended", value: "SUSPENDED", disabled:true},
+        { text: "Live", value: "LIVE"},
+        { text: "Revoke", value: "REVOKED"}
+        ]
           break;
         case 'Revoked':
           this.selectedStatus = 'REVOKED'
@@ -388,6 +425,8 @@ export default {
       this.expiryDateTime = null
       this.currentStatus = ''
       this.vcId = ''
+      this.preStatusSelect = ''
+      this.statusReason = ''
     },
   async updateCredStatus() {
     //   const QR_DATA = {
@@ -400,10 +439,26 @@ export default {
     // }
     try {
       this.isLoading = true
+      //check for status check
+      switch(this.preStatusSelect){
+        case 'Live':
+          if(this.selectedStatus === 'LIVE'){
+            return this.notifyErr('Credential already Live')
+          }
+          break;
+        case 'Suspended':
+          if(this.selectedStatus === 'SUSPENDED'){
+            return this.notifyErr('Credential already Suspended')
+          }
+          break;
+        default :
+          return this.notifyErr('Invalid status')
+      }
       const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
       const creadData = {
           status: this.selectedStatus,
           vcId: this.vcId,
+          statusReason:this.statusReason
           }
 
       const headers = {
@@ -530,6 +585,7 @@ export default {
     },
     onStatusSelectDropDownChange(event) {
       this.selectedStatus = event
+      this.statusReason = ''
       // if(event) {
         
       // }
@@ -539,7 +595,6 @@ export default {
       this.selected = event;
       if (event) {
         this.issueCredAttributes = [];        
-        const id = this.issueCredAttributes.length;
         const selectedSchema = this.$store.getters.findSchemaBySchemaID(event);
         const schemaMap =  selectedSchema.schemaDetails.schema.properties;
         const requiredFields = selectedSchema.schemaDetails.schema.required  
@@ -720,7 +775,7 @@ export default {
         const schemaId = this.selected
         const issuerDid = this.user.id
         const subjectDid = this.holderDid
-        const expiryDate = this.expiryDateTime
+        const expirationDate = this.expiryDateTime
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
         const headers = {
           "Content-Type": "application/json",
@@ -731,7 +786,7 @@ export default {
           schemaId,
           issuerDid,
           subjectDid,
-          expiryDate,
+          expirationDate,
           orgDid:this.$store.state.selectedOrgDid
         };
         this.QrData.data = creadData
