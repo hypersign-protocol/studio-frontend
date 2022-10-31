@@ -55,7 +55,7 @@
                     </div>
                     <div class="form-group">
                       <tool-tip infoMessage="Did of the issuer"></tool-tip>
-                      <label><strong> IssuerDid<span style="color: red">*</span>:</strong></label>                      
+                      <label><strong> Issuer DID<span style="color: red">*</span>:</strong></label>                      
 
                       <input class="form-control" type="text" v-model="presentationTemplate.issuerDid"/>
 
@@ -208,7 +208,7 @@ import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
 import message from '../mixins/messages'
-import { isEmpty, isValidURL } from '../mixins/fieldValidation'
+import { isEmpty, isValidURL, isValidDid } from '../mixins/fieldValidation'
 export default {
   name: "Presentation",
   components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading, HfSelectDropDown, ToolTip, HfPopUp},
@@ -314,13 +314,11 @@ export default {
         }
     },
     editTemp(temp) {
-      console.log('in edit')
       this.isEdit = true
-      console.log(temp)
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
       this.id = temp._id
       this.presentationTemplate.name = temp.name
-      this.presentationTemplate.issuerDid = temp.issuerDid
+      this.presentationTemplate.issuerDid = temp.issuerDid[0]
       EventBus.$emit("setOption",temp.schemaId)
       this.presentationTemplate.reason = temp.reason
       this.presentationTemplate.callbackUrl = temp.callbackUrl
@@ -469,8 +467,11 @@ export default {
       this.isLoading = true
       let issuerDid = []
       try {
-        issuerDid.push(this.presentationTemplate.issuerDid)
-        if (isEmpty(this.presentationTemplate.schemaId)) {
+        if(isEmpty(this.presentationTemplate.issuerDid)){
+          return this.notifyErr(message.PRESENTATION.ISSUER_DID_EMPTY)
+        } else if(!isValidDid(this.presentationTemplate.issuerDid)){
+          return this.notifyErr(message.CREDENTIAL.INVALID_DID)
+        } else if (isEmpty(this.presentationTemplate.schemaId)) {
           return this.notifyErr(message.CREDENTIAL.SELECT_SCHEMA)
         } else if (isEmpty(this.presentationTemplate.reason)) {
           return this.notifyErr(message.PRESENTATION.REASON)
@@ -479,6 +480,7 @@ export default {
         } else if (!isValidURL(this.presentationTemplate.callbackUrl)) {
           return this.notifyErr(message.PRESENTATION.INVALID_URL)
         } 
+        issuerDid.push(this.presentationTemplate.issuerDid)
         const headers = {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.authToken}`
