@@ -74,27 +74,27 @@ display: flex;
      
         <div class="col-lg-3">
           <div class="card event-card">
-            <div class="card-body tile-number">{{allMetricsData.schemasCount}}</div>
-            <div class="card-header card-head">AUTHORED SCHEMAS</div>
+            <div class="card-body tile-number">{{allMetricsData.schemasCount}}</div>            
+            <div class="card-header card-head"><i class="fa fa-table mr-2"></i>AUTHORED SCHEMAS</div>
           </div>
         </div>
         <div class="col-lg-3">
           <div class="card event-card">
             <div class="card-body tile-number">{{ allMetricsData.credentialsCount }}</div>
-            <div class="card-header card-head">ISSUED CREDENTIALS</div>
+            <div class="card-header card-head"><i class="fa fa-id-card mr-2"></i>ISSUED CREDENTIALS</div>
           </div>
         </div>
         <div class="col-lg-3">
           <div class="card event-card">
             <div class="card-body tile-number">{{ allMetricsData.orgsCount }}</div>
-            <div class="card-header card-head">ORGANIZATIONS</div>
+            <div class="card-header card-head"><i style="font-size:1.2em" class="fa fa-university mr-2"></i>ORGANIZATIONS</div>
           </div>
         </div>
         
         <div class="col-lg-3">
           <div class="card event-card">
             <div class="card-body tile-number">{{ allMetricsData.templatesCount }}</div>
-            <div class="card-header card-head">PRESENTATION TEMPLATES</div>
+            <div class="card-header card-head"><i class="fa fa-desktop mr-2"></i>PRESENTATION TEMPLATES</div>
           </div>
         </div>
       </div>  

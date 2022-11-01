@@ -1,7 +1,8 @@
 <template>
   <div class="">
     <div class="" style="display:flex">
-      <h4 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">Organizations</h4>
+      <h4 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">
+      <i class="fa fa-university mr-2"></i>Organizations</h4>
       <h4 v-else class="mt-4" style="text-align: left;">Create your first organization!</h4>
 
       <hf-buttons 
@@ -27,7 +28,7 @@
 
         <div class="form-group">
           <tool-tip infoMessage="Your Organization Name"></tool-tip>
-          <label for="orgName"><strong>Organization Name<span style="color: red">*</span>:</strong></label>          
+          <label for="orgName"><strong>Name<span style="color: red">*</span>:</strong></label>          
           <input type="text" class="form-control" id="orgName" v-model="orgStore.name" aria-describedby="orgNameHelp"
             placeholder="Enter your org name">
           <!-- <small id="orgNameHelp" class="form-text text-muted">Some help text</small> -->
@@ -60,7 +61,7 @@
         </div>
       </div>
     </StudioSideBar>
-    <div class="row" v-if="orgList.length > 0">
+    <div class="row scroll" v-if="orgList.length > 0">
       <div class="col-lg-4" v-for="eachOrg in orgList" :key="eachOrg._id">
 
         <b-card :title="truncate(eachOrg.name,20)" tag="article" style="max-width: 30rem; margin-top: 10px; max-height:25rem"
@@ -148,6 +149,11 @@ padding-left: 5px;
     min-height: 1px;
     padding: 1.25rem;
   
+  }
+  .scroll{
+    padding-top: 1em;
+    overflow: auto;
+    height:490px;
   }
   </style>
 
