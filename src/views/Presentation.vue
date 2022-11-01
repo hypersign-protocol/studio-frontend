@@ -145,14 +145,14 @@
               <td>{{row.callbackUrl}}</td>
               <td>
               <i 
-              class="fas fa-pencil-alt"
-              style="float:left;cursor: pointer"
+              class="fas fa-pencil-alt pr-1"
+              style="cursor: pointer"
               title="Click to update"
               @click="editTemp(row)"
               ></i>
               <i 
               class="fas fa-trash-alt"
-              style="float:right; margin-left:-10px;cursor: pointer;"
+              style="cursor: pointer;"
               title="Click to delete"
               @click="clickRowToDelete(row)"
               ></i>
