@@ -61,3 +61,11 @@ export function isValidDid(str) {
     return true
   }
 }
+
+export function isFloat(n) {
+  if(n === n && n % 1 !== 0){
+      return true;
+  }else{
+      return false;
+  }
+  }

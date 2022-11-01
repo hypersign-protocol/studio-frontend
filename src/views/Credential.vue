@@ -286,7 +286,7 @@ import HfButtons from "../components/element/HfButtons.vue"
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
-import { isEmpty, isValidDid, isValidURL } from '../mixins/fieldValidation'
+import { isEmpty, isValidDid, isValidURL, isFloat } from '../mixins/fieldValidation'
 import message from '../mixins/messages'
 import Datepicker from 'vuejs-datetimepicker'
 import VueQr from "vue-qr"
@@ -694,11 +694,11 @@ export default {
             }
             case 'number': {
               if(e.required === true){
-                if(e.value === '' || isNaN(parseInt(e.value))) {
-                throw new Error(`Please enter value in ${this.CapitaliseString(e.name)} field`)
+                if(e.value === '' || !(Number(e.value))) {
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
               }
               } else {
-                if(e.value !=='' && isNaN(parseInt(e.value))) {
+                if(e.value !=='' && !(Number(e.value))) {
                 throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
               }
               }              
@@ -706,11 +706,11 @@ export default {
             }
             case 'integer': {
               if(e.required === true){
-                if(e.value === '' || isNaN(parseInt(e.value))) {
+                if(e.value === '' || isFloat(e.value) || isNaN(e.value)) {
                 throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
               }
               } else {
-                if(e.value !=='' && isNaN(parseInt(e.value))) {
+                if(e.value !=='' && ((isFloat(e.value) || isNaN(e.value)))) {
                 throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
               }
               }
