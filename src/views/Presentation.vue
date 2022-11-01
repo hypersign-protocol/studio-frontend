@@ -114,7 +114,7 @@
     </div>
     <div class="row" style="margin-top: 2%;" v-if="templateList.length >0">
       <div class="col-md-12">
-        <table class="table table-bordered" style="background:#FFFF">
+        <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
               <th>Template Id </th>
@@ -145,14 +145,14 @@
               <td>{{row.callbackUrl}}</td>
               <td>
               <i 
-              class="fas fa-pencil-alt"
-              style="float:left;cursor: pointer"
+              class="fas fa-pencil-alt pr-1"
+              style="cursor: pointer"
               title="Click to update"
               @click="editTemp(row)"
               ></i>
               <i 
               class="fas fa-trash-alt"
-              style="float:right; margin-left:-10px;cursor: pointer;"
+              style="cursor: pointer;"
               title="Click to delete"
               @click="clickRowToDelete(row)"
               ></i>

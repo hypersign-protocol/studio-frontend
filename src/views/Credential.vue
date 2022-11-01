@@ -207,7 +207,7 @@ h5 span {
     </div>
     <div class="row" style="margin-top: 2%;" v-if="vcList.length > 0">
       <div class="col-md-12">
-        <table class="table table-bordered" style="background:#FFFF">
+        <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
               <th>VC Id</th>
