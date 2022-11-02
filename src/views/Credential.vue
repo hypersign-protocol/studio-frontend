@@ -52,7 +52,8 @@ h5 span {
       <div class="col-md-12" style="text-align: left">
         <Info :message="description" />
           <div class="form-group" style="display:flex">
-           <h3 v-if="vcList.length > 0" class="mt-4" style="text-align: left;">Credentials</h3>
+           <h3 v-if="vcList.length > 0" class="mt-4" style="text-align: left;">
+            <i class="fa fa-id-card mr-2" ></i>Credentials</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Issue your first credential!</h3>
             <hf-buttons 
               name="+ Create"
@@ -183,7 +184,7 @@ h5 span {
                       <b-form-select
                       v-model="selectedStatus"
                       :options="credStatusOptions"
-                      @input="onStatusSelectDropDownChange"                    
+                      @change="onStatusSelectDropDownChange"                    
                       >
                       </b-form-select>
                     </div>
@@ -241,7 +242,7 @@ h5 span {
             <tr v-for="row in vcList" :key="row.vc_id">
             
               <td>
-                <a :href="`${row.vc_id}:`" target="_blank>" v-if="row.vc_id">{{ removeUrl(row.vc_id) }}</a>
+                <a :href="`${row.vc_id}:`" target="_blank>">{{ row.vc_id ? removeUrl(row.vc_id) : '-' }}</a>
               </td>
               <td>
                 <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.SCHEMA_GET_REST}${row.schemaId}:`" target="_blank">{{ shorten(row.schemaId) }}</a>
@@ -437,6 +438,7 @@ export default {
       this.vcId =cred.vc.id
     },
     clearEdit() {
+      this.selectedStatus = null
       this.issuerDid = ''
       this.holderDid = ''
       this.expiryDateTime = null
@@ -699,12 +701,8 @@ export default {
             switch(e.type) {
             case 'string': {
               if(e.required === true) {
-                if(e.value === '' || isValidURL(e.value)){
-                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
-              }
-              } else {
-                 if(isValidURL(e.value)){
-                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+                if(e.value === ''){
+                throw new Error(`Please enter input in ${this.CapitaliseString(e.name)} field`)
               }
               }              
               break;
@@ -840,6 +838,7 @@ export default {
       }
     },
     clearAll() {    
+      this.issuerDid = ""
       this.holderDid = "";
       this.expiryDateTime = null
       this.issueCredAttributes = []

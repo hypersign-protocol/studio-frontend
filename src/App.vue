@@ -52,6 +52,13 @@ color: grey;
 display: inline;
 padding-left: 5px;
 }
+.hov{
+padding: 0 1.5em 0 1.5em;
+}
+.hov:hover{
+background-color: #dee2e6;
+cursor: pointer;
+}
 </style>
 <template>
   <div id="app">
@@ -70,24 +77,26 @@ padding-left: 5px;
             <b-icon stacked icon="person" scale="0.6" variant="secondary"></b-icon>
           </b-iconstack>
           </template>
-
-          <b-dropdown-item :title="userDetails.email">{{shorten(userDetails.email)}}
+          <div style="display:inline;">
+          <div class="hov"
+          :title="userDetails.email">
+          <span>{{shorten(userDetails.email)}}
             <span @click="copyToClip(userDetails.email,'Email')"
             ><i class="far fa-copy"></i>
-            </span>
-          </b-dropdown-item>
-          <b-dropdown-divider></b-dropdown-divider>
-          <b-dropdown-item :title="userDetails.did">{{shorten(userDetails.did)}}
-            <span @click="copyToClip(userDetails.did,'DID')"
-            ><i class="far fa-copy"></i></span>
-          </b-dropdown-item>
-          <b-dropdown-divider></b-dropdown-divider>
-          <b-dropdown-item title="Logout" >
-            <i class="fas fa-sign-out-alt"
-            style="cursor:pointer; font-size:1.3rem;"
-            @click="logoutAll()"            
-            ></i>
-          </b-dropdown-item>          
+            </span></span>
+          </div><hr>
+          <div class="hov" style="display:flex;"
+          :title="userDetails.did">{{shorten(userDetails.did)}}
+            <i class="far fa-copy"
+            @click="copyToClip(userDetails.did,'DID')"></i>
+          </div><hr>
+          <div class="hov" @click="logoutAll()"
+          title="Logout">
+          <i class="fas fa-sign-out-alt"
+            style="cursor:pointer; font-size:1.3rem;"                        
+          ></i>
+          </div>
+          </div>
         </b-nav-item-dropdown>
       </b-navbar-nav>
     </b-collapse>
