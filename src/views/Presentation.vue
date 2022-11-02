@@ -81,8 +81,8 @@
                     <div class="form-group">
                       <tool-tip infoMessage="Reason for the template"></tool-tip>
                       <label><strong>Reason<span style="color: red">*</span>:</strong></label>                      
-                      <input class="form-control" type="text" v-model="presentationTemplate.reason" />
-
+                      <input class="form-control" type="text" @keyup='charCount()' v-model="presentationTemplate.reason" />
+                      <span>{{remainingCharText}}</span>
 
                     </div>
                     <div class="form-group">
@@ -117,33 +117,35 @@
         <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
-              <th>Template Id </th>
-              <th>Domain</th>
+              <th>Template Id </th>        
               <th>Name</th>
               <!-- <th>Issuer DID</th> -->
               <th>Schema Id</th>
               <th>Reason</th>
-              <th>CallbackUrl</th>
+              <th>Call Back Url</th>
               <th></th>
             </tr>
           </thead>
 
           <tbody>
             <tr v-for="row in templateList" :key="row">
-              <td>{{row._id}}
+              <td class="align-middle">
+                <div class="align-middle" style="display:flex;">
+                <span class="mr-1">{{shorten(row._id)}}</span>
                 <i class="far fa-copy"
                 style="cursor:pointer;"
                 title="Click to copy Template Id"
                 @click="copyToClip(row._id,'Template Id')"
                 ></i>
-              </td>
-              <td>{{row.domain}}</td>
-              <td>{{row.name}}</td>
+                </div>
+              </td>              
+              <td class="align-middle">{{row.name}}</td>
               <!-- <td>{{row.issuerDid.toString()}}</td> -->
-              <td>{{ shorten(row.schemaId)}}</td>
-              <td>{{row.reason}}</td>
-              <td>{{row.callbackUrl}}</td>
-              <td>
+              <td class="align-middle">{{ shorten(row.schemaId)}}</td>
+              <td class="align-middle">{{row.reason}}</td>
+              <td class="align-middle">{{row.callbackUrl}}</td>
+              <td class="align-middle">
+              <div style="display:flex">
               <i 
               class="fas fa-pencil-alt pr-1"
               style="cursor: pointer"
@@ -156,6 +158,7 @@
               title="Click to delete"
               @click="clickRowToDelete(row)"
               ></i>
+              </div>
               </td>
             </tr>
           </tbody>
@@ -224,6 +227,8 @@ export default {
     return {
       isEdit:false,
       deleteId:'',
+      maxChar:105,
+      remainingCharText:'Remaining 105 characters',
       tempToDelete:'',    
       description: "The subject (or holder) generates verifiable presentation from one or more verifiable \
       credentials, issued by one or more issuers, that is shared with a specific verifier. \
@@ -293,6 +298,14 @@ export default {
     });
   },
   methods: {
+    charCount(){
+      if(this.presentationTemplate.reason.length > this.maxChar) {
+        this.remainingCharText = "Exceeded"+" "+this.maxChar+" "+"characters limit"
+      } else {
+        let remainingChar = this.maxChar - this.presentationTemplate.reason.length;
+        this.remainingCharText = "Remaining"+" "+remainingChar+" "+"characters."      
+        }
+    },
     copyToClip(textToCopy,contentType) {
         if (textToCopy) {
             navigator.clipboard
@@ -318,6 +331,7 @@ export default {
       this.presentationTemplate.issuerDid = temp.issuerDid[0]
       EventBus.$emit("setOption",temp.schemaId)
       this.presentationTemplate.reason = temp.reason
+      this.charCount()
       this.presentationTemplate.callbackUrl = temp.callbackUrl
       this.presentationTemplate.required = temp.required
     },
@@ -382,6 +396,8 @@ export default {
       this.presentationTemplate.callbackUrl = ''
       this.presentationTemplate.reason = ''
       this.isEdit = false
+      this.maxChar=105,
+      this.remainingCharText='Remaining 105 characters'
     },
     openSlider() {
       this.clearAll()
@@ -464,7 +480,9 @@ export default {
       this.isLoading = true
       let issuerDid = []
       try {
-        if(isEmpty(this.presentationTemplate.issuerDid)){
+          if(this.presentationTemplate.name!=='' && this.presentationTemplate.name.length >31){
+            return this.notifyErr(message.PRESENTATION.NAME_LIMIT_EXCEED)
+        } else if(isEmpty(this.presentationTemplate.issuerDid)){
           return this.notifyErr(message.PRESENTATION.ISSUER_DID_EMPTY)
         } else if(!isValidDid(this.presentationTemplate.issuerDid)){
           return this.notifyErr(message.CREDENTIAL.INVALID_DID)
@@ -472,6 +490,8 @@ export default {
           return this.notifyErr(message.CREDENTIAL.SELECT_SCHEMA)
         } else if (isEmpty(this.presentationTemplate.reason)) {
           return this.notifyErr(message.PRESENTATION.REASON)
+        } else if (this.presentationTemplate.reason.length >this.maxChar) {
+          return this.notifyErr(message.PRESENTATION.REASON_LIMIT_EXCEED)
         } else if (isEmpty(this.presentationTemplate.callbackUrl)) {
           return this.notifyErr(message.PRESENTATION.CALLBACK_URL)
         } else if (!isValidURL(this.presentationTemplate.callbackUrl)) {

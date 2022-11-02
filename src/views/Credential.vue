@@ -78,11 +78,25 @@ h5 span {
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
-                    <div class="form-group" v-else>
+                    <div class="form-group" v-if="isEdit===false">
+                      <tool-tip infoMessage="Enter Issuer DID for this Credential"></tool-tip>
+                      <label for="fordid"><strong>Issuer DID<span style="color: red">*</span>:</strong></label>                      
+                      <input type="text" class="form-control" placeholder="Issuer did (did:hs:...)"
+                        v-model="issuerDid" />
+                    </div>
+                    <div v-else>
+                    <div class="form-group">
                       <tool-tip infoMessage="Credential issued to this DID"></tool-tip>
                       <label for="fordid"><strong>Subject DID:</strong></label>
                       <input type="text" class="form-control"
                         v-model="holderDid" disabled/>
+                    </div>
+                    <div class="form-group">
+                      <tool-tip infoMessage="Enter Issuer DID for this Credential"></tool-tip>
+                      <label for="fordid"><strong>Issuer DID:</strong></label>                      
+                      <input type="text" class="form-control" placeholder="Issuer did (did:hs:...)"
+                        v-model="issuerDid" disabled/>
+                    </div>
                     </div>
                     <div class="form-group" v-if="isEdit===false">
                       <tool-tip infoMessage="Select Schema to issue credential"></tool-tip>
@@ -312,6 +326,7 @@ export default {
       ],
       currentStatus:null,
       vcId:'',
+      issuerDid:'',
       authToken: localStorage.getItem('authToken'),
       isEdit:false,
       description: "An issuer can issue a credential to a subject (or holder) which can be verfied by the verifier independently, without having him to connect with the issuer. They are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries.  For example: an airline company can issue a flight ticket (\"verfiable credential\") using schema (issued by DGCA) to the passenger.",
@@ -386,6 +401,7 @@ export default {
       this.isEdit = true      
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
       this.holderDid = cred.subjectDid
+      this.issuerDid = cred.issuerDid
       this.credHash = cred.credStatus.credentialHash
       this.expiryDateTime = cred.expiryDate
       this.issuanceDate = cred.credStatus.issuanceDate
@@ -421,6 +437,7 @@ export default {
       this.vcId =cred.vc.id
     },
     clearEdit() {
+      this.issuerDid = ''
       this.holderDid = ''
       this.expiryDateTime = null
       this.currentStatus = ''
@@ -756,6 +773,10 @@ export default {
         const ToDate = new Date();
         if (isEmpty(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.EMPTY_HOLDER_DID)
+        } else if(isEmpty(this.issuerDid)) {
+          return this.notifyErr(message.CREDENTIAL.EMPTY_ISSUER_DID)
+        } else if(!isValidDid(this.issuerDid)) {
+          return this.notifyErr(message.CREDENTIAL.INVALID_DID)
         } else if (!isValidDid(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.INVALID_DID)
         } else if (isEmpty(this.selected)) {
@@ -773,7 +794,7 @@ export default {
         this.isLoading = true
         const fields = attributeMap
         const schemaId = this.selected
-        const issuerDid = this.user.id
+        const issuerDid = this.issuerDid
         const subjectDid = this.holderDid
         const expirationDate = this.expiryDateTime
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;

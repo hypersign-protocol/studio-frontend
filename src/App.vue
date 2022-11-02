@@ -46,9 +46,6 @@
 .container-collapsed {
   padding-left: 150px;
 }
-.copyDiv {
-padding: 20px;
-}
 .far{
 cursor: pointer;
 color: grey;
@@ -63,24 +60,34 @@ padding-left: 5px;
       <img src="https://thumb.tildacdn.com/tild3065-3765-4865-b331-393637653931/-/resize/150x/-/format/webp/hypersign_Yellow.png" alt="">
       <h5 class="subtitle">| {{ $config.app.name }} ({{ $config.app.version }})</h5>
     </b-navbar-brand>
-    <b-collapse id="nav-collapse" is-nav style="width: 20%;">
+    <b-collapse id="nav-collapse" is-nav style="width: 30%;">
       <b-navbar-nav class="ml-auto">
 
         <b-nav-item-dropdown right v-if="showIcon">
           <template #button-content>
             <b-iconstack font-scale="3">
-            <b-icon stacked icon="circle" variant="info"></b-icon>
-            <b-icon stacked icon="person" scale="0.6" variant="info"></b-icon>
+            <b-icon stacked icon="circle" variant="secondary"></b-icon>
+            <b-icon stacked icon="person" scale="0.6" variant="secondary"></b-icon>
           </b-iconstack>
           </template>
-          <div class="copyDiv">
-            <span>{{shorten(userDetails.email)}}</span><br>
-            <span>{{shorten(userDetails.did)}}</span>
-            <span
-            @click="copyToClip(userDetails.did,'DID')"
+
+          <b-dropdown-item :title="userDetails.email">{{shorten(userDetails.email)}}
+            <span @click="copyToClip(userDetails.email,'Email')"
+            ><i class="far fa-copy"></i>
+            </span>
+          </b-dropdown-item>
+          <b-dropdown-divider></b-dropdown-divider>
+          <b-dropdown-item :title="userDetails.did">{{shorten(userDetails.did)}}
+            <span @click="copyToClip(userDetails.did,'DID')"
             ><i class="far fa-copy"></i></span>
-          </div>
-          <hf-buttons name="Logout" class="btn btn-primary" @executeAction="logoutAll()"></hf-buttons>
+          </b-dropdown-item>
+          <b-dropdown-divider></b-dropdown-divider>
+          <b-dropdown-item title="Logout" >
+            <i class="fas fa-sign-out-alt"
+            style="cursor:pointer; font-size:1.3rem;"
+            @click="logoutAll()"            
+            ></i>
+          </b-dropdown-item>          
         </b-nav-item-dropdown>
       </b-navbar-nav>
     </b-collapse>

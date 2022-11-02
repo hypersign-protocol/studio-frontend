@@ -19,12 +19,15 @@ const SCHEMA = {
 }
 
 const CREDENTIAL = {
+    EMPTY_ISSUER_DID: "Please enter Issuer DID",
     EMPTY_HOLDER_DID: "Please enter Subject Did",
     SELECT_SCHEMA: "Please select schema",
     INVALID_DID: "Please enter a valid did"
 }
 
 const PRESENTATION = {
+    NAME_LIMIT_EXCEED: "Name should be less than 30 characters",
+    REASON_LIMIT_EXCEED: "Reason should be less than 105 characters",
     ISSUER_DID_EMPTY: "Please enter Issuer DID",
     REASON: "Please enter reason for creating template",
     CALLBACK_URL: "Please enter callback url",
