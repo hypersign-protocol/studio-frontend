@@ -98,7 +98,10 @@ padding-left: 5px;
           ? 'container-collapsed-not'
           : 'container-collapsed',
     ]">
-      <sidebar-menu class="sidebar-wrapper" v-if="showSideNavbar" @toggle-collapse="onToggleCollapse" :collapsed="isSidebarCollapsed" :theme="'white-theme'" width="220px"
+    <router-view />
+  </div>
+    <notifications group="foo" />
+    <sidebar-menu class="sidebar-wrapper" v-if="showSideNavbar" @toggle-collapse="onToggleCollapse" :collapsed="isSidebarCollapsed" :theme="'white-theme'" width="220px"
       :menu="getSideMenu()"
       >
       <div slot="header" style="background:#363740">
@@ -111,9 +114,6 @@ padding-left: 5px;
           </div>
         </div>
       </sidebar-menu>
-    <router-view />
-  </div>
-    <notifications group="foo" />
   </div>
 </template>
 
