@@ -26,6 +26,7 @@ const CREDENTIAL = {
 }
 
 const PRESENTATION = {
+    VALID_NAME: "Enter valid Name",
     NAME_LIMIT_EXCEED: "Name should be less than 30 characters",
     REASON_LIMIT_EXCEED: "Reason should be less than 105 characters",
     ISSUER_DID_EMPTY: "Please enter Issuer DID",

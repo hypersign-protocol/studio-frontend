@@ -26,7 +26,8 @@
         <Info :message="description" />
         
           <div class="form-group" style="display:flex">
-           <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">Presentation Template</h3>
+           <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">
+            <i class="fa fa-desktop mr-2"></i>Presentation Template</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first presentation template!</h3>            
             <hf-buttons 
               name="+ Create"
@@ -49,7 +50,8 @@
                     <div class="form-group">
                       <tool-tip infoMessage="Name for the Presentation template"></tool-tip>
                       <label ><strong>Name (optional) :</strong></label>                      
-                      <input class="form-control" type="text" v-model="presentationTemplate.name" />
+                      <input class="form-control" type="text" v-model="presentationTemplate.name" 
+                      placeholder="Enter name for this presentation"/>
 
 
                     </div>
@@ -57,7 +59,8 @@
                       <tool-tip infoMessage="Did of the issuer"></tool-tip>
                       <label><strong> Issuer DID<span style="color: red">*</span>:</strong></label>                      
 
-                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid"/>
+                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid"
+                      placeholder="Issuer did (did:hs:...)"/>
 
 
                     </div>
@@ -81,7 +84,8 @@
                     <div class="form-group">
                       <tool-tip infoMessage="Reason for the template"></tool-tip>
                       <label><strong>Reason<span style="color: red">*</span>:</strong></label>                      
-                      <input class="form-control" type="text" @keyup='charCount()' v-model="presentationTemplate.reason" />
+                      <input class="form-control" type="text" @keyup='charCount()' v-model="presentationTemplate.reason" 
+                      placeholder="Reason for the template"/>
                       <span>{{remainingCharText}}</span>
 
                     </div>
@@ -89,7 +93,8 @@
                       <tool-tip infoMessage="Callback URI"></tool-tip>
                       <label><strong>Callback URI<span style="color: red">*</span>:</strong></label>                      
 
-                      <input class="form-control" type="url" v-model="presentationTemplate.callbackUrl" />
+                      <input class="form-control" type="url" v-model="presentationTemplate.callbackUrl" 
+                      placeholder="Callback URI"/>
 
 
                     </div>
@@ -482,6 +487,8 @@ export default {
       try {
           if(this.presentationTemplate.name!=='' && this.presentationTemplate.name.length >31){
             return this.notifyErr(message.PRESENTATION.NAME_LIMIT_EXCEED)
+        } else if(this.presentationTemplate.name!=='' && isValidURL(this.presentationTemplate.name)){
+          return this.notifyErr(message.PRESENTATION.VALID_NAME)
         } else if(isEmpty(this.presentationTemplate.issuerDid)){
           return this.notifyErr(message.PRESENTATION.ISSUER_DID_EMPTY)
         } else if(!isValidDid(this.presentationTemplate.issuerDid)){

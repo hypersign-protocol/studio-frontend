@@ -98,6 +98,14 @@
   border: 1ps solid lightcyan;
   font-size:small;  
 }
+.theme-color{
+  background-color:rgba(241, 179, 25, 0.24);
+  color: #212529;
+}
+.bg-transparant{
+  background-color: transparent !important;
+  color: #212529;
+}
 </style>
 <template>
   <div class="home">
@@ -107,7 +115,8 @@
       <div class="col-md-12" style="text-align: left">
         <Info :message="description" />
           <div class="form-group" style="display:flex">
-           <h3 v-if="schemaList.length > 0" class="mt-4" style="text-align: left;">Schema</h3>
+           <h3 v-if="schemaList.length > 0" class="mt-4" style="text-align: left;">
+            <i class="fa fa-table mr-2"></i>Schema</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first schema!</h3>      
             <hf-buttons 
               name="+ Create"
@@ -120,26 +129,28 @@
               <div class="container">
                 <div class="form-group">
                   <tool-tip infoMessage="Name of the schema"></tool-tip>
-                  <label for="schemaName"><strong>Schema Name<span style="color: red">*</span>:</strong></label>                  
-                  <input type="text" class="form-control" id="schemaName" v-model="credentialName" aria-describedby="schemaNameHelp">
+                  <label for="schemaName"><strong>Name<span style="color: red">*</span>:</strong></label>                  
+                  <input type="text" class="form-control" id="schemaName" v-model="credentialName" aria-describedby="schemaNameHelp"
+                  placeholder="Enter Schema name">
                 </div>
                 <div class="form-group">
                   <tool-tip infoMessage="Description for the schema"></tool-tip>
                   <label for="schDescription"><strong>Description:</strong></label>                  
 
-                  <textarea type="text" class="form-control" id="schDescription" v-model="credentialDescription"  rows="5" cols="20" aria-describedby="orgNameHelp"></textarea>
+                  <textarea type="text" class="form-control" id="schDescription" v-model="credentialDescription"  rows="5" cols="20" aria-describedby="orgNameHelp"
+                  placeholder="Enter Description for this schema"></textarea>
                 </div>
                 <div class="form-group card">
-                  <div class="card-header">
-                    <b-button block v-b-toggle.accordion-1 style="text-decoration:none" variant="link"
+                  <b-card-header header-tag="header" class="p-1 border-0 accordin-header theme-color" role="tab">
+                    <b-button block v-b-toggle.accordion-1 style="text-decoration:none; color:#212529;" variant="secondary"
                     :aria-expanded="visible ? 'true' : 'false'"
                     @click="visible = !visible"
                     aria-controls="collapse-1"
-                    class="text-left"
+                    class="text-left border-0 theme-color bg-transparant"
                     title="Create schema configuration">Fields Configurations
                     <i :class="!visible ? 'fa fa-arrow-down' : 'fa fa-arrow-up'" style="float:right;"></i>
                     </b-button>
-                  </div>
+                  </b-card-header>
                   <b-collapse id="collapse-1" class="mt-2" v-model="visible" style="padding:10px">
                     <div class="selected-media-wrapper d-flex p-2 mb-4"  style="overflow-y: auto" v-if="attributes.length > 0">
                       <div v-for="(attr,id) in attributes" v-bind:key="attr.id">
@@ -166,7 +177,7 @@
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                             <input v-model="selected.attributeName" type="text" id="attributeName" class="form-control w-100"
-                            placeholder="">
+                            placeholder="firstName">
                         </div>
                     </div>
 
@@ -283,7 +294,7 @@
               </div>
               </td>
 
-              <td>{{ row.schemaDetails ? row.schemaDetails.authored : "-" }}</td>
+              <td>{{ row.schemaDetails ? new Date(row.schemaDetails.authored).toLocaleString() : "-" }}</td>
 
               <td style="word-wrap: break-word;min-width: 200px;max-width: 200px;">
                 <a target="_blank"

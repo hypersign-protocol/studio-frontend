@@ -1,8 +1,8 @@
 <template>
   <div class="">
     <div class="" style="display:flex">
-      <h4 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">
-      <i class="fa fa-university mr-2"></i>Organizations</h4>
+      <h3 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">
+      <i class="fa fa-university mr-2"></i>Organizations</h3>
       <h4 v-else class="mt-4" style="text-align: left;">Create your first organization!</h4>
 
       <hf-buttons 
@@ -163,6 +163,7 @@ import StudioSideBar from "../components/element/StudioSideBar.vue";
 import UtilsMixin from '../mixins/utils';
 import {isEmpty, isValidURL} from '../mixins/fieldValidation'
 import 'vue-loading-overlay/dist/vue-loading.css';
+import validator from 'validator';
 import Loading from "vue-loading-overlay";
 import HfButtons from '../components/element/HfButtons.vue'
 import ToolTip from '../components/element/ToolTip.vue'
@@ -282,9 +283,9 @@ export default {
         return this.notifyErr(messages.ORGANIZATION.INVALID_ORG_NAME)
       } else if(isEmpty(this.orgStore.domain)) {
         return this.notifyErr(messages.ORGANIZATION.DOMAIN_NAME_EMPTY)
-       } //else if (!isValidURL(this.orgStore.domain)){
-      //   return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
-      // }
+       } else if (!this.orgStore.domain.includes('http://localhost') && !validator.isURL(this.orgStore.domain)){
+        return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
+      }
       let url
       let method
       if (this.edit) {
