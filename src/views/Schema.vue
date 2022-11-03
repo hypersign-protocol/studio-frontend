@@ -108,7 +108,7 @@
 }
 </style>
 <template>
-  <div class="home">
+  <div :class="isContainerShift ?'homeShift':'home'">
     <loading :active.sync="isLoading" :can-cancel="true" :is-full-page="fullPage"></loading>
 
     <div class="row">
@@ -116,12 +116,12 @@
         <Info :message="description" />
           <div class="form-group" style="display:flex">
            <h3 v-if="schemaList.length > 0" class="mt-4" style="text-align: left;">
-            <i class="fa fa-table mr-2"></i>Schema</h3>
+            <i class="fa fa-table mr-2"></i>Schemas</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first schema!</h3>      
             <hf-buttons 
               name="+ Create"
               style="text-align: right;"
-              class="btn btn-primary ml-auto mt-4"
+              class="ml-auto mt-4"
               @executeAction="openSlider()"
             ></hf-buttons>
           </div> 
@@ -195,7 +195,7 @@
                       </div>
                     </div>
 
-                     <div class="row g-3 align-items-center w-100 mt-4">
+                     <!-- <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
                           <tool-tip infoMessage="Format of the attribute"></tool-tip>
                           <label for="format" class="col-form-label">Format: </label>                          
@@ -203,7 +203,7 @@
                         <div class="col-lg-9 col-md-9 px-0">
                             <input v-model="selected.attributeFormat" type="text"  placeholder="Enter attribute Format (eg email)" id="type" class="form-control w-100" >
                         </div>
-                    </div>
+                    </div> -->
 
                      <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
@@ -218,8 +218,7 @@
                     <div class="form-group row mt-4" v-if="isAdd">
                       <div class="col-sm-10">                        
                         <hf-buttons 
-                          name="Add"        
-                          class="btn btn-primary"
+                          name="Add"                          
                           @executeAction="addBlankAttrBox()"
                         ></hf-buttons>
                       </div>
@@ -240,18 +239,17 @@
                     </div>
                   </b-collapse>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                   <tool-tip infoMessage="Additional Properties"></tool-tip>                             
                   <label for="schDescription"><strong>Additional Properties</strong></label>
                   <input v-model="additionalProperties" type="checkbox" style="margin-left:5px;" />
 
-                </div>
+                </div> -->
                 <div class="form-group row">
                   <div class="col-md-12">
                     <hr/>                    
                     <hf-buttons 
-                      name="Save"        
-                      class="btn btn-primary"
+                      name="Save"                      
                       @executeAction="createSchema()"
                     ></hf-buttons>
                   </div>
@@ -335,6 +333,9 @@ export default {
     },
     selectedOrg() {
       return this.$store.getters.getSelectedOrg;
+    },
+    isContainerShift() {
+      return this.$store.state.containerShift
     }
   },
   data() {
@@ -362,12 +363,12 @@ export default {
       selected:{
       attributeName: "",
       attributeTypes: null,
-      attributeFormat: "",
+      // attributeFormat: "",
       attributeRequired: false,
       },
       attributes: [],
       issueCredAttributes: [],
-      additionalProperties: false,
+      // additionalProperties: false,
       showSchema: true,
       radioSelected: "create",
       credentialName: "",
@@ -406,7 +407,7 @@ export default {
       let updateData = found
       this.selectedId = id
       this.selected.attributeName = updateData.name
-      this.selected.attributeFormat = updateData.format
+      // this.selected.attributeFormat = updateData.format
       this.selected.attributeRequired = updateData.isRequired
       EventBus.$emit("setOption",updateData.type);
       this.isAdd = false
@@ -417,7 +418,7 @@ export default {
       let obj = {
         name: this.selected.attributeName,
         type: this.selected.attributeTypes,
-        format: this.selected.attributeFormat,
+        // format: this.selected.attributeFormat,
         isRequired: this.selected.attributeRequired,
         id: this.selectedId
       }
@@ -449,7 +450,7 @@ export default {
         attributeName : "",
         attributeTypes : null,
         attributeRequired : false,
-        attributeFormat : ""
+        // attributeFormat : ""
       }
     },
     openSlider() {
@@ -467,9 +468,9 @@ export default {
       this.selected.attributeName = ''
       EventBus.$emit("resetOption",this.selected.attributeTypes)
       this.selected.attributeTypes = null
-      this.selected.attributeFormat = ''
+      // this.selected.attributeFormat = ''
       this.selected.attributeRequired = false
-      this.additionalProperties = false
+      // this.additionalProperties = false
       this.attributes = []      
     },
     handleValidation() {
@@ -492,10 +493,11 @@ export default {
       } else if (this.selected.attributeTypes === ' ' || this.selected.attributeTypes === null) {
         isValid = false
         return this.notifyErr(message.SCHEMA.EMPTY_ATTRIBUTE_TYPE)
-      } else if (isValidURL(this.selected.attributeFormat)) {
-        isValid = false
-        return this.notifyErr(message.SCHEMA.INVALID_FORMAT)
-      }
+      } 
+      // else if (isValidURL(this.selected.attributeFormat)) {
+      //   isValid = false
+      //   return this.notifyErr(message.SCHEMA.INVALID_FORMAT)
+      // }
     return isValid
     },
     addBlankAttrBox() {
@@ -504,7 +506,7 @@ export default {
         let obj = {
           name: this.selected.attributeName,
           type: this.selected.attributeTypes,
-          format: this.selected.attributeFormat,
+          // format: this.selected.attributeFormat,
           isRequired: this.selected.attributeRequired,
         }
         this.counter +=1
@@ -512,7 +514,7 @@ export default {
         this.attributes.push(obj)
         this.selected.attributeName = "";
         EventBus.$emit("resetOption",this.selected.attributeTypes)
-        this.selected.attributeFormat = "";
+        // this.selected.attributeFormat = "";
         this.selected.attributeRequired = false;     
       }
     },
@@ -563,7 +565,7 @@ export default {
           author: this.user.id,
           fields: this.attributes,
           description: this.credentialDescription,
-          additionalProperties: this.additionalProperties,
+          // additionalProperties: this.additionalProperties,
           orgDid: this.$store.state.selectedOrgDid
         };
         this.QrData.data = schemaData
