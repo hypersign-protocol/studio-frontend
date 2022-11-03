@@ -7,6 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     mixin:[UtilsMixin],
     state: {
+        containerShift:false,
         schemaList: [],
         vcList: [],
         templateList: [],
@@ -100,6 +101,9 @@ export default new Vuex.Store({
                     templatesCount:0,
                 }
             }
+        },
+        shiftContainer(state,payload) {
+            state.containerShift = payload
         },
         increaseOrgCount(state) {
             state.userProfile.count.orgsCount +=1;

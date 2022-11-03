@@ -42,7 +42,11 @@
     margin-right: auto;
     width: 100em;
 }
-
+.homeShift{
+    margin-left: auto;
+    margin-right: auto;
+    width: 80em;
+    }
 body{
     color: #636363;
 }

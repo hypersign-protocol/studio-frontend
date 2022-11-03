@@ -31,8 +31,8 @@ const PRESENTATION = {
     REASON_LIMIT_EXCEED: "Reason should be less than 105 characters",
     ISSUER_DID_EMPTY: "Please enter Issuer DID",
     REASON: "Please enter reason for creating template",
-    CALLBACK_URL: "Please enter callback url",
-    INVALID_URL: "Please enter a valid url"
+    CALLBACK_URL: "Please enter callback URI",
+    INVALID_URL: "Please enter a valid callback URI"
 }
 module.exports = {
     ORGANIZATION,

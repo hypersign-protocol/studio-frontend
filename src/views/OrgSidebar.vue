@@ -6,9 +6,9 @@
       <h4 v-else class="mt-4" style="text-align: left;">Create your first organization!</h4>
 
       <hf-buttons 
-      name="+ Organization"
+      name="+ Create"
       style="text-align: right;"
-      class="btn btn-primary ml-auto mt-4"
+      class="ml-auto mt-4"
       @executeAction="openSlider()"
       ></hf-buttons>
     </div>
@@ -57,7 +57,7 @@
          <hf-buttons name="Update" class="btn btn-primary" @executeAction="createAnOrg()"></hf-buttons>
         </div>
         <div class="form-group" v-else>
-          <hf-buttons name="Save" class="btn btn-primary" @executeAction="createAnOrg()"></hf-buttons>
+          <hf-buttons name="Save" @executeAction="createAnOrg()"></hf-buttons>
         </div>
       </div>
     </StudioSideBar>
@@ -264,6 +264,7 @@ export default {
       this.$store.commit('selectAnOrg', orgDid)
       this.$router.push('/studio/credential')
       this.$store.dispatch('fetchAllOrgDataOnOrgSelect')
+      this.$store.commit('shiftContainer',false)
       
     },
     openSlider() {

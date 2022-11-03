@@ -45,7 +45,7 @@ h5 span {
 }
 </style>
 <template>
-  <div class="home">
+  <div :class="isContainerShift ?'homeShift':'home'">
     <loading :active.sync="isLoading" :can-cancel="true" :is-full-page="fullPage"></loading>
 
     <div class="row">
@@ -58,7 +58,7 @@ h5 span {
             <hf-buttons 
               name="+ Create"
               style="text-align: right;"
-              class="btn btn-primary ml-auto mt-4 button-theme"
+              class="ml-auto mt-4"
               @executeAction="openSlider()"
             ></hf-buttons>
           </div>    
@@ -204,14 +204,14 @@ h5 span {
                     v-if="isEdit === false"
                       name="Save"
                       style="text-align: right;"
-                      class="btn btn-primary ml-auto mt-4"
+                      class="ml-auto mt-4"
                       @executeAction="issueCredential()"
                     ></hf-buttons>
                     <hf-buttons
                       v-else
                       name="Update"
                       style="text-align: right;"
-                      class="btn btn-primary ml-auto mt-4"
+                      class="ml-auto mt-4"
                       @executeAction="updateCredStatus()"
                     ></hf-buttons>
                   </div>
@@ -227,7 +227,7 @@ h5 span {
             <tr>
               <th>VC Id</th>
               <th>Schema Id</th>
-              <th>Holder DID</th>
+              <th>Subject DID</th>
               <th>Issuance Date</th>
               <th>Expiration Date</th>
               <!-- <th>Credential Hash</th> -->
@@ -252,9 +252,10 @@ h5 span {
               <td>{{ row.credStatus ? new Date(row.credStatus.expirationDate).toLocaleString() : "-"}}</td>
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
               <td> {{ row.credStatus ? row.credStatus.claim.currentStatus : row.status}}</td>
-              <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
+              <td :v-b-tooltip.hover="row.credStatus ? row.credStatus.claim.statusReason : ''">{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
               <td v-if="row.credStatus">
-              <i class="fa fa-paper-plane"
+              <div style="display:flex;">
+              <i class="fa fa-paper-plane mr-2"
                 v-if="row.credStatus.claim.currentStatus==='Live'"
                 @click="generateCred(`${row._id}`)" title="Click to send this vc"
                 style="float:left;cursor: pointer"
@@ -262,9 +263,10 @@ h5 span {
                 <i class="fas fa-pencil-alt"
                 v-if="noEdit(row)"
                 @click="editCred(row)" title="Click to edit this vc"
-                style="float:right; margin-left:-10px;cursor: pointer;"
-                ></i>
-                <span v-else>-</span>
+                style="cursor: pointer;"
+                ></i>                      
+                </div></td>
+                <!-- <span v-else>-</span>              -->
               <td v-else>-</td>
             </tr>
           </tbody>
@@ -317,6 +319,9 @@ export default {
     },
     selectedOrg(){
       return this.$store.getters.getSelectedOrg;
+    },
+    isContainerShift() {
+      return this.$store.state.containerShift
     }
   },
   data() {

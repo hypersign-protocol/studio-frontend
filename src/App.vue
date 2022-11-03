@@ -44,7 +44,7 @@
   margin-top: auto;
 }
 .container-collapsed {
-  padding-left: 150px;
+  margin-left: 17em;
 }
 .far{
 cursor: pointer;
@@ -62,7 +62,7 @@ cursor: pointer;
 </style>
 <template>
   <div id="app">
-   <b-navbar toggleable="lg" type="dark" variant="white" class="navStyle" v-if="showIcon">
+   <b-navbar toggleable="lg" type="dark" variant="white" class="navStyle" v-if="showIcon" sticky>
     <b-navbar-brand href="#" style="display:flex; width: 80%; margin-left: 1em;">
       <img src="https://thumb.tildacdn.com/tild3065-3765-4865-b331-393637653931/-/resize/150x/-/format/webp/hypersign_Yellow.png" alt="">
       <h5 class="subtitle">| {{ $config.app.name }} ({{ $config.app.version }})</h5>
@@ -79,11 +79,12 @@ cursor: pointer;
           </template>
           <div style="display:inline;">
           <div class="hov"
-          :title="userDetails.email">
-          <span>{{shorten(userDetails.email)}}
-            <span @click="copyToClip(userDetails.email,'Email')"
-            ><i class="far fa-copy"></i>
-            </span></span>
+          style="display:flex;"
+          :title="userDetails.email"
+          >
+          {{shorten(userDetails.email)}}
+          <i class="far fa-copy mt-1"
+          @click="copyToClip(userDetails.email,'Email')"></i>
           </div><hr>
           <div class="hov" style="display:flex;"
           :title="userDetails.did">{{shorten(userDetails.did)}}
@@ -107,7 +108,10 @@ cursor: pointer;
           ? 'container-collapsed-not'
           : 'container-collapsed',
     ]">
-      <sidebar-menu class="sidebar-wrapper" v-if="showSideNavbar" @toggle-collapse="onToggleCollapse" :collapsed="isSidebarCollapsed" :theme="'white-theme'" width="220px"
+    <router-view class="containerData"/>
+  </div>
+    <notifications group="foo" />
+    <sidebar-menu class="sidebar-wrapper" v-if="showSideNavbar" @toggle-collapse="onToggleCollapse" :collapsed="isSidebarCollapsed" :theme="'white-theme'" width="220px"
       :menu="getSideMenu()"
       >
       <div slot="header" style="background:#363740">
@@ -120,9 +124,6 @@ cursor: pointer;
           </div>
         </div>
       </sidebar-menu>
-    <router-view />
-  </div>
-    <notifications group="foo" />
   </div>
 </template>
 
@@ -197,7 +198,7 @@ cursor: pointer;
 }
 .sidebar-wrapper {
   min-width: 70px;
-  margin-top: 70px;
+  margin-top: 65px;
   box-shadow: 0 0 15px 0 rgba(34,41,47,.05);
 }
 .v-sidebar-menu.vsm_white-theme .vsm--mobile-bg{
@@ -299,8 +300,10 @@ export default {
     onToggleCollapse(collapsed) {
       if (collapsed) {
         this.isSidebarCollapsed = true;
+        this.$store.commit('shiftContainer',false)        
       } else {
         this.isSidebarCollapsed = false;
+        this.$store.commit('shiftContainer',true)        
       }
     },
      initializeStore() {

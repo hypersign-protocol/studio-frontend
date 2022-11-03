@@ -18,7 +18,7 @@
 }
 </style>
 <template>
-  <div class="home">
+  <div :class="isContainerShift ?'homeShift':'home'">
     <loading :active.sync="isLoading" :can-cancel="true" :is-full-page="fullPage"></loading>
 
     <div class="row">
@@ -27,12 +27,12 @@
         
           <div class="form-group" style="display:flex">
            <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">
-            <i class="fa fa-desktop mr-2"></i>Presentation Template</h3>
+            <i class="fa fa-desktop mr-2"></i>Presentation Templates</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first presentation template!</h3>            
             <hf-buttons 
               name="+ Create"
               style="text-align: right;"
-              class="btn btn-primary ml-auto mt-4"
+              class="ml-auto mt-4"
               @executeAction="openSlider()"
             ></hf-buttons>
           </div>
@@ -98,17 +98,16 @@
 
 
                     </div>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                       <tool-tip infoMessage="Required"></tool-tip>                      
                       <label><strong>Required </strong></label>
                       <input type="checkbox" class="ml-2" v-model="presentationTemplate.required" />
-                    </div>
+                    </div> -->
 
                   </form>
                   <hr />
                   <hf-buttons 
-                    name="Save"            
-                    class="btn btn-primary"
+                    name="Save"                    
                     @executeAction="generatePresentation()"
                   ></hf-buttons>
                 </div>
@@ -127,7 +126,7 @@
               <!-- <th>Issuer DID</th> -->
               <th>Schema Id</th>
               <th>Reason</th>
-              <th>Call Back Url</th>
+              <th>Call Back URI</th>
               <th></th>
             </tr>
           </thead>
@@ -227,6 +226,9 @@ export default {
     selectOptions(){
       return this.$store.getters.listOfAllSchemaOptions;
     },
+    isContainerShift() {
+      return this.$store.state.containerShift
+    }
   },
   data() {
     return {
@@ -338,7 +340,7 @@ export default {
       this.presentationTemplate.reason = temp.reason
       this.charCount()
       this.presentationTemplate.callbackUrl = temp.callbackUrl
-      this.presentationTemplate.required = temp.required
+      // this.presentationTemplate.required = temp.required
     },
     clickRowToDelete(temp) {
      this.deleteId = ''
@@ -397,7 +399,7 @@ export default {
       this.presentationTemplate.issuerDid = ''
       this.presentationTemplate.domain = ''
       this.presentationTemplate.name = ''
-      this.presentationTemplate.required = true
+      // this.presentationTemplate.required = true
       this.presentationTemplate.callbackUrl = ''
       this.presentationTemplate.reason = ''
       this.isEdit = false
@@ -517,7 +519,7 @@ export default {
           name: this.presentationTemplate.name,
           schemaId: this.presentationTemplate.schemaId,
           reason: this.presentationTemplate.reason,
-          required: this.presentationTemplate.required,
+          // required: this.presentationTemplate.required,
           callbackUrl: this.presentationTemplate.callbackUrl,
           orgDid:this.$store.state.selectedOrgDid
         }
@@ -529,7 +531,7 @@ export default {
           name: this.presentationTemplate.name,
           schemaId: this.presentationTemplate.schemaId,
           reason: this.presentationTemplate.reason,
-          required: this.presentationTemplate.required,
+          // required: this.presentationTemplate.required,
           callbackUrl: this.presentationTemplate.callbackUrl,
           orgDid:this.$store.state.selectedOrgDid
         }
