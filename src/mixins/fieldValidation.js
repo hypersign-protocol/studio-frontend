@@ -51,7 +51,7 @@ export function ifSpaceExists(str) {
  
 export function isValidDid(str) {
   str = str.split(':')
-  if (!str[0]=='did') {
+  if (str[0]!=='did') {
     return false
   } else if(! (str.length==3 || str.length==4)) {
     return false
@@ -61,3 +61,11 @@ export function isValidDid(str) {
     return true
   }
 }
+
+export function isFloat(n) {
+  if(n === n && n % 1 !== 0){
+      return true;
+  }else{
+      return false;
+  }
+  }

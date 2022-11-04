@@ -1,13 +1,14 @@
 <template>
-  <div class="home">
-    <div class="form-group" style="display:flex">
-      <h3 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">Organizations</h3>
-      <h3 v-else class="mt-4" style="text-align: left;">Create your first organization!</h3>
+  <div class="">
+    <div class="" style="display:flex">
+      <h3 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">
+      <i class="fa fa-university mr-2"></i>Organizations</h3>
+      <h4 v-else class="mt-4" style="text-align: left;">Create your first organization!</h4>
 
       <hf-buttons 
-      name="+ Organization"
+      name="+ Create"
       style="text-align: right;"
-      class="btn btn-primary ml-auto mt-4"
+      class="ml-auto mt-4"
       @executeAction="openSlider()"
       ></hf-buttons>
     </div>
@@ -27,7 +28,7 @@
 
         <div class="form-group">
           <tool-tip infoMessage="Your Organization Name"></tool-tip>
-          <label for="orgName"><strong>Organization Name<span style="color: red">*</span>:</strong></label>          
+          <label for="orgName"><strong>Name<span style="color: red">*</span>:</strong></label>          
           <input type="text" class="form-control" id="orgName" v-model="orgStore.name" aria-describedby="orgNameHelp"
             placeholder="Enter your org name">
           <!-- <small id="orgNameHelp" class="form-text text-muted">Some help text</small> -->
@@ -56,11 +57,11 @@
          <hf-buttons name="Update" class="btn btn-primary" @executeAction="createAnOrg()"></hf-buttons>
         </div>
         <div class="form-group" v-else>
-          <hf-buttons name="Save" class="btn btn-primary" @executeAction="createAnOrg()"></hf-buttons>
+          <hf-buttons name="Save" @executeAction="createAnOrg()"></hf-buttons>
         </div>
       </div>
     </StudioSideBar>
-    <div class="row" v-if="orgList.length > 0">
+    <div class="row scroll" v-if="orgList.length > 0">
       <div class="col-lg-4" v-for="eachOrg in orgList" :key="eachOrg._id">
 
         <b-card :title="truncate(eachOrg.name,20)" tag="article" style="max-width: 30rem; margin-top: 10px; max-height:25rem"
@@ -124,11 +125,6 @@ color: grey;
 display: inline;
 padding-left: 5px;
 }
-  .home {
-    margin-left: auto;
-    margin-right: auto;
-    width: 1500px;
-  }
   
   .container {
     padding: 20px;
@@ -136,7 +132,7 @@ padding-left: 5px;
   }
   
   .eventCard {
-    border-left: 10px solid var(--ds-background-accent-red-subtler, #ADE8FF8F);
+    border-left: 10px solid var(--ds-background-accent-red-subtler, rgba(241, 179, 25, 0.24));
   }
   
   .eventCard:hover {
@@ -154,6 +150,11 @@ padding-left: 5px;
     padding: 1.25rem;
   
   }
+  .scroll{
+    padding-top: 1em;
+    overflow: auto;
+    height:490px;
+  }
   </style>
 
   <script>
@@ -162,6 +163,7 @@ import StudioSideBar from "../components/element/StudioSideBar.vue";
 import UtilsMixin from '../mixins/utils';
 import {isEmpty, isValidURL} from '../mixins/fieldValidation'
 import 'vue-loading-overlay/dist/vue-loading.css';
+import validator from 'validator';
 import Loading from "vue-loading-overlay";
 import HfButtons from '../components/element/HfButtons.vue'
 import ToolTip from '../components/element/ToolTip.vue'
@@ -262,6 +264,7 @@ export default {
       this.$store.commit('selectAnOrg', orgDid)
       this.$router.push('/studio/credential')
       this.$store.dispatch('fetchAllOrgDataOnOrgSelect')
+      this.$store.commit('shiftContainer',false)
       
     },
     openSlider() {
@@ -281,9 +284,9 @@ export default {
         return this.notifyErr(messages.ORGANIZATION.INVALID_ORG_NAME)
       } else if(isEmpty(this.orgStore.domain)) {
         return this.notifyErr(messages.ORGANIZATION.DOMAIN_NAME_EMPTY)
-       } //else if (!isValidURL(this.orgStore.domain)){
-      //   return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
-      // }
+       } else if (!this.orgStore.domain.includes('http://localhost') && !validator.isURL(this.orgStore.domain)){
+        return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
+      }
       let url
       let method
       if (this.edit) {

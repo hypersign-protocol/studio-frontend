@@ -1,9 +1,4 @@
 <style scoped>
-.home{
-    margin-left: auto;
-    margin-right: auto;
-    width: 1500px;
-}
 .floatLeft {
   float: left;
 }
@@ -23,7 +18,7 @@
 }
 </style>
 <template>
-  <div class="home">
+  <div :class="isContainerShift ?'homeShift':'home'">
     <loading :active.sync="isLoading" :can-cancel="true" :is-full-page="fullPage"></loading>
 
     <div class="row">
@@ -31,16 +26,17 @@
         <Info :message="description" />
         
           <div class="form-group" style="display:flex">
-           <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">Presentation Template</h3>
+           <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">
+            <i class="fa fa-desktop mr-2"></i>Presentation Templates</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first presentation template!</h3>            
             <hf-buttons 
               name="+ Create"
               style="text-align: right;"
-              class="btn btn-primary ml-auto mt-4"
+              class="ml-auto mt-4"
               @executeAction="openSlider()"
             ></hf-buttons>
           </div>
-          <StudioSideBar title="Create Presentation Template">
+          <StudioSideBar :title="isEdit ? 'Edit Presentation Template' : 'Create Presentation Template'">
 
               <div class="form-group row container">
                 <div class="col-md-12">
@@ -54,15 +50,17 @@
                     <div class="form-group">
                       <tool-tip infoMessage="Name for the Presentation template"></tool-tip>
                       <label ><strong>Name (optional) :</strong></label>                      
-                      <input class="form-control" type="text" v-model="presentationTemplate.name" />
+                      <input class="form-control" type="text" v-model="presentationTemplate.name" 
+                      placeholder="Enter name for this presentation"/>
 
 
                     </div>
                     <div class="form-group">
                       <tool-tip infoMessage="Did of the issuer"></tool-tip>
-                      <label><strong> IssuerDid<span style="color: red">*</span>:</strong></label>                      
+                      <label><strong> Issuer DID<span style="color: red">*</span>:</strong></label>                      
 
-                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid"/>
+                      <input class="form-control" type="text" v-model="presentationTemplate.issuerDid"
+                      placeholder="Issuer did (did:hs:...)"/>
 
 
                     </div>
@@ -86,29 +84,30 @@
                     <div class="form-group">
                       <tool-tip infoMessage="Reason for the template"></tool-tip>
                       <label><strong>Reason<span style="color: red">*</span>:</strong></label>                      
-                      <input class="form-control" type="text" v-model="presentationTemplate.reason" />
-
+                      <input class="form-control" type="text" @keyup='charCount()' v-model="presentationTemplate.reason" 
+                      placeholder="Reason for the template"/>
+                      <span>{{remainingCharText}}</span>
 
                     </div>
                     <div class="form-group">
                       <tool-tip infoMessage="Callback URI"></tool-tip>
                       <label><strong>Callback URI<span style="color: red">*</span>:</strong></label>                      
 
-                      <input class="form-control" type="url" v-model="presentationTemplate.callbackUrl" />
+                      <input class="form-control" type="url" v-model="presentationTemplate.callbackUrl" 
+                      placeholder="Callback URI"/>
 
 
                     </div>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                       <tool-tip infoMessage="Required"></tool-tip>                      
                       <label><strong>Required </strong></label>
                       <input type="checkbox" class="ml-2" v-model="presentationTemplate.required" />
-                    </div>
+                    </div> -->
 
                   </form>
                   <hr />
                   <hf-buttons 
-                    name="Save"            
-                    class="btn btn-primary"
+                    name="Save"                    
                     @executeAction="generatePresentation()"
                   ></hf-buttons>
                 </div>
@@ -119,29 +118,52 @@
     </div>
     <div class="row" style="margin-top: 2%;" v-if="templateList.length >0">
       <div class="col-md-12">
-        <table class="table table-bordered" style="background:#FFFF">
+        <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
-              <th>Template Id </th>
-              <th>Domain</th>
+              <th>Template Id </th>        
               <th>Name</th>
               <!-- <th>Issuer DID</th> -->
               <th>Schema Id</th>
               <th>Reason</th>
-              <th>CallbackUrl</th>
-              <!-- <th>author</th> -->
+              <th>Call Back URI</th>
+              <th></th>
             </tr>
           </thead>
 
           <tbody>
             <tr v-for="row in templateList" :key="row">
-              <td>{{row._id}}</td>
-              <td>{{row.domain}}</td>
-              <td>{{row.name}}</td>
+              <td class="align-middle">
+                <div class="align-middle" style="display:flex;">
+                <span class="mr-1">{{shorten(row._id)}}</span>
+                <i class="far fa-copy"
+                style="cursor:pointer;"
+                title="Click to copy Template Id"
+                @click="copyToClip(row._id,'Template Id')"
+                ></i>
+                </div>
+              </td>              
+              <td class="align-middle">{{row.name}}</td>
               <!-- <td>{{row.issuerDid.toString()}}</td> -->
-              <td>{{ shorten(row.schemaId)}}</td>
-              <td>{{row.reason}}</td>
-              <td>{{row.callbackUrl}}</td>
+              <td class="align-middle">{{ shorten(row.schemaId)}}</td>
+              <td class="align-middle">{{row.reason}}</td>
+              <td class="align-middle">{{row.callbackUrl}}</td>
+              <td class="align-middle">
+              <div style="display:flex">
+              <i 
+              class="fas fa-pencil-alt pr-1"
+              style="cursor: pointer"
+              title="Click to update"
+              @click="editTemp(row)"
+              ></i>
+              <i 
+              class="fas fa-trash-alt"
+              style="cursor: pointer;"
+              title="Click to delete"
+              @click="clickRowToDelete(row)"
+              ></i>
+              </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -151,11 +173,31 @@
       </div>
       <!-- </div> -->
     </div>
-
+    <hf-pop-up
+    Header="Delete Presentation Template"
+    >
+    <div class="row g-3 align-items-center  mt-4">
+        <div class="col-lg-3 col-md-3 text-left">
+          <label for="DeleteId" class="col-form-label">Template Id :</label>
+        </div>
+        <div class=" col-lg-9 col-md-9">
+          <input v-model="deleteId" type="text" placeholder="6241c8057f5e...e2eaec05d" id="DeleteId" class="form-control w-100" >
+        </div>   
+    </div>
+      <div class="mt-5 text-center">
+      <hf-buttons
+      name="Delete"
+      @executeAction="deleteTemp()"
+      title="Delete Presentation Template"
+      customClass="btn btn-danger"
+      ></hf-buttons>
+      </div>
+    </hf-pop-up>
   </div>
 </template>
 
 <script>
+import HfPopUp from "../components/element/hfPopup.vue"
 import fetch from "node-fetch";
 import UtilsMixin from '../mixins/utils';
 import StudioSideBar from "../components/element/StudioSideBar.vue";
@@ -170,10 +212,10 @@ import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
 import message from '../mixins/messages'
-import { isEmpty, isValidURL } from '../mixins/fieldValidation'
+import { isEmpty, isValidURL, isValidDid } from '../mixins/fieldValidation'
 export default {
   name: "Presentation",
-  components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading, HfSelectDropDown, ToolTip},
+  components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading, HfSelectDropDown, ToolTip, HfPopUp},
   computed:{
     templateList(){
       return this.$store.state.templateList;
@@ -184,9 +226,17 @@ export default {
     selectOptions(){
       return this.$store.getters.listOfAllSchemaOptions;
     },
+    isContainerShift() {
+      return this.$store.state.containerShift
+    }
   },
   data() {
     return {
+      isEdit:false,
+      deleteId:'',
+      maxChar:105,
+      remainingCharText:'Remaining 105 characters',
+      tempToDelete:'',    
       description: "The subject (or holder) generates verifiable presentation from one or more verifiable \
       credentials, issued by one or more issuers, that is shared with a specific verifier. \
       A verifiable presentation is a tamper-evident presentation encoded in such a way that \
@@ -208,6 +258,7 @@ export default {
         required: true,
         callbackUrl: '',
       },
+      id:'',
       selected:null,
       active: 0,
       host: location.hostname,
@@ -254,6 +305,84 @@ export default {
     });
   },
   methods: {
+    charCount(){
+      if(this.presentationTemplate.reason.length > this.maxChar) {
+        this.remainingCharText = "Exceeded"+" "+this.maxChar+" "+"characters limit"
+      } else {
+        let remainingChar = this.maxChar - this.presentationTemplate.reason.length;
+        this.remainingCharText = "Remaining"+" "+remainingChar+" "+"characters."      
+        }
+    },
+    copyToClip(textToCopy,contentType) {
+        if (textToCopy) {
+            navigator.clipboard
+                .writeText(textToCopy)
+                .then(() => {
+                    this.notifySuccess(
+                        `${contentType} copied!`
+                    );
+                })
+                .catch((err) => {
+                    this.notifyErr(
+                        'Error while copying',
+                        err
+                    );
+                });
+        }
+    },
+    editTemp(temp) {
+      this.isEdit = true
+      this.$root.$emit("bv::toggle::collapse", "sidebar-right");
+      this.id = temp._id
+      this.presentationTemplate.name = temp.name
+      this.presentationTemplate.issuerDid = temp.issuerDid[0]
+      EventBus.$emit("setOption",temp.schemaId)
+      this.presentationTemplate.reason = temp.reason
+      this.charCount()
+      this.presentationTemplate.callbackUrl = temp.callbackUrl
+      // this.presentationTemplate.required = temp.required
+    },
+    clickRowToDelete(temp) {
+     this.deleteId = ''
+      this.tempToDelete = temp._id;
+      this.$root.$emit('modal-show');
+    },
+   async deleteTemp() {
+      try {
+        if(this.deleteId === "") {
+          this.notifyErr("Please enter template id")
+        } 
+        this.isLoading = true
+        if(this.deleteId) {
+          if(this.deleteId === this.tempToDelete) {
+            const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.PRESENTATION_TEMPLATE_EP}/${this.tempToDelete}`;
+                const headers = {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${this.authToken}`               
+                };
+                const resp = await fetch(url, {
+                  headers,
+                  method: "DELETE",
+                });
+                const json = await resp.json();
+                console.log(json.data._id)
+                if(json.data._id){
+                  const id = json.data._id
+                  this.$store.commit('deleteTemplate',id)
+                  this.notifySuccess(`Template with ${id} id deleted successfully`)
+                  this.$root.$emit('modal-close')
+                }          
+          } else {
+            this.notifyErr('Please enter correct template id')
+          }
+        }
+      }catch (e){
+        console.log(e)
+      } finally {
+        this.isLoading = false
+      }
+
+    },
     goToSchema() {
       this.$router.push('schema')
     },
@@ -270,9 +399,12 @@ export default {
       this.presentationTemplate.issuerDid = ''
       this.presentationTemplate.domain = ''
       this.presentationTemplate.name = ''
-      this.presentationTemplate.required = true
+      // this.presentationTemplate.required = true
       this.presentationTemplate.callbackUrl = ''
       this.presentationTemplate.reason = ''
+      this.isEdit = false
+      this.maxChar=105,
+      this.remainingCharText='Remaining 105 characters'
     },
     openSlider() {
       this.clearAll()
@@ -353,41 +485,74 @@ export default {
     },
     async generatePresentation() {
       this.isLoading = true
+      let issuerDid = []
       try {
-        const issuerDid = this.presentationTemplate.issuerDid.split(',')
-        if (isEmpty(this.presentationTemplate.schemaId)) {
+          if(this.presentationTemplate.name!=='' && this.presentationTemplate.name.length >31){
+            return this.notifyErr(message.PRESENTATION.NAME_LIMIT_EXCEED)
+        } else if(this.presentationTemplate.name!=='' && isValidURL(this.presentationTemplate.name)){
+          return this.notifyErr(message.PRESENTATION.VALID_NAME)
+        } else if(isEmpty(this.presentationTemplate.issuerDid)){
+          return this.notifyErr(message.PRESENTATION.ISSUER_DID_EMPTY)
+        } else if(!isValidDid(this.presentationTemplate.issuerDid)){
+          return this.notifyErr(message.CREDENTIAL.INVALID_DID)
+        } else if (isEmpty(this.presentationTemplate.schemaId)) {
           return this.notifyErr(message.CREDENTIAL.SELECT_SCHEMA)
         } else if (isEmpty(this.presentationTemplate.reason)) {
           return this.notifyErr(message.PRESENTATION.REASON)
+        } else if (this.presentationTemplate.reason.length >this.maxChar) {
+          return this.notifyErr(message.PRESENTATION.REASON_LIMIT_EXCEED)
         } else if (isEmpty(this.presentationTemplate.callbackUrl)) {
           return this.notifyErr(message.PRESENTATION.CALLBACK_URL)
         } else if (!isValidURL(this.presentationTemplate.callbackUrl)) {
           return this.notifyErr(message.PRESENTATION.INVALID_URL)
         } 
+        issuerDid.push(this.presentationTemplate.issuerDid)
         const headers = {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.authToken}`
         }
-        const body = {
+        let method = "POST"
+        let body = {
           issuerDid,
           queryType: this.presentationTemplate.queryType,
           domain: this.presentationTemplate.domain,
           name: this.presentationTemplate.name,
           schemaId: this.presentationTemplate.schemaId,
           reason: this.presentationTemplate.reason,
-          required: this.presentationTemplate.required,
+          // required: this.presentationTemplate.required,
           callbackUrl: this.presentationTemplate.callbackUrl,
           orgDid:this.$store.state.selectedOrgDid
         }
-        const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.PRESENTATION_TEMPLATE_EP}`
+        if(this.isEdit === true) {
+          body = {
+          _id:this.id,
+          issuerDid,
+          queryType: this.presentationTemplate.queryType,
+          name: this.presentationTemplate.name,
+          schemaId: this.presentationTemplate.schemaId,
+          reason: this.presentationTemplate.reason,
+          // required: this.presentationTemplate.required,
+          callbackUrl: this.presentationTemplate.callbackUrl,
+          orgDid:this.$store.state.selectedOrgDid
+        }
+        method = "PUT"
+        }
+        let url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.PRESENTATION_TEMPLATE_EP}`
         fetch(url, {
           body: JSON.stringify(body),
-          method: "POST",
+          method: method,
           headers: headers,
         }).then((res) => res.json()).then(json => {
-          this.$store.commit('insertApresentationTemplate', json.data.presentationTemplateObj)
-          this.notifySuccess('Template Successfully created')
-          this.openSlider();
+          if(this.isEdit === true) {
+            this.$store.commit('updateTemplate',json.data)
+            this.notifySuccess('Template Successfully updated')
+          } else{
+            this.$store.commit('insertApresentationTemplate', json.data.presentationTemplateObj)
+            this.notifySuccess('Template Successfully created')
+          }
+          // this.openSlider();
+          this.clearAll()
+          this.$root.$emit("bv::toggle::collapse", "sidebar-right");
         })
       } catch (e) {
         this.isLoading = false

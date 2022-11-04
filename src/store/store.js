@@ -1,10 +1,13 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import config from '../config'
+import UtilsMixin from '../mixins/utils.js'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
+    mixin:[UtilsMixin],
     state: {
+        containerShift:false,
         schemaList: [],
         vcList: [],
         templateList: [],
@@ -64,7 +67,7 @@ export default new Vuex.Store({
             let schemaIdnames = state.schemaList.map(x => {
                 if (x.schemaId && x.schemaId !== undefined && x.status === 'Registered') {
                     return {
-                        text: x.schemaDetails.name,
+                        text: x.schemaDetails.name + ' '+ `{${UtilsMixin.methods.truncate(x.schemaId,60)}}`,
                         value: x.schemaId
                     }
                 } else {
@@ -98,6 +101,9 @@ export default new Vuex.Store({
                     templatesCount:0,
                 }
             }
+        },
+        shiftContainer(state,payload) {
+            state.containerShift = payload
         },
         increaseOrgCount(state) {
             state.userProfile.count.orgsCount +=1;
@@ -147,7 +153,14 @@ export default new Vuex.Store({
         insertApresentationTemplate(state, payload) {
             if (!state.templateList.find(x => x._id === payload._id)) {
                 state.templateList.push(payload);
+            } else {
+                console.log('already exists template id =' + payload._id);
+                this.commit('updateTemplate', payload);
             }
+        },
+        updateTemplate(state,payload) {
+            const tempToUpdateIndex = state.templateList.findIndex(x => x._id === payload._id);
+            Object.assign(state.templateList[tempToUpdateIndex], {...payload});
         },
         insertAcredential(state, payload) {
             if (!state.vcList.find(x => x._id === payload._id)) {
@@ -163,11 +176,19 @@ export default new Vuex.Store({
         },
         updateSidebarStatus(state,payload) {
             state.showSideNavbar = payload
-        }
+        },
 
         //     fetchAllOrgDataOnOrgSelect(state, payload) {
         //         console.log(state , payload);
         // }
+        deleteTemplate(state,payload) {
+            let index = state.templateList.findIndex(x => x._id === payload)
+            if(index > -1) {
+                state.templateList.splice(index,1)
+            } else {
+                console.log('template not found in tempList' + payload);
+            }
+        }
     },
     actions: {
         insertAschema({ commit }, payload) {

@@ -1,10 +1,4 @@
 <style scoped>
-.home {
-  margin-left: auto;
-  margin-right: auto;
-  width: 1500px;
-}
-
 .flash {
   cursor: pointer;
   background-color: #1faa596b;
@@ -98,21 +92,36 @@
 .rounded {
   cursor: pointer;
 }
+.schemaProp {
+  background-color: lightgoldenrodyellow;
+  color: grey;
+  border: 1ps solid lightcyan;
+  font-size:small;  
+}
+.theme-color{
+  background-color:rgba(241, 179, 25, 0.24);
+  color: #212529;
+}
+.bg-transparant{
+  background-color: transparent !important;
+  color: #212529;
+}
 </style>
 <template>
-  <div class="home">
+  <div :class="isContainerShift ?'homeShift':'home'">
     <loading :active.sync="isLoading" :can-cancel="true" :is-full-page="fullPage"></loading>
 
     <div class="row">
       <div class="col-md-12" style="text-align: left">
         <Info :message="description" />
           <div class="form-group" style="display:flex">
-           <h3 v-if="schemaList.length > 0" class="mt-4" style="text-align: left;">Schema</h3>
+           <h3 v-if="schemaList.length > 0" class="mt-4" style="text-align: left;">
+            <i class="fa fa-table mr-2"></i>Schemas</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first schema!</h3>      
             <hf-buttons 
               name="+ Create"
               style="text-align: right;"
-              class="btn btn-primary ml-auto mt-4"
+              class="ml-auto mt-4"
               @executeAction="openSlider()"
             ></hf-buttons>
           </div> 
@@ -120,26 +129,28 @@
               <div class="container">
                 <div class="form-group">
                   <tool-tip infoMessage="Name of the schema"></tool-tip>
-                  <label for="schemaName"><strong>Schema Name<span style="color: red">*</span>:</strong></label>                  
-                  <input type="text" class="form-control" id="schemaName" v-model="credentialName" aria-describedby="schemaNameHelp">
+                  <label for="schemaName"><strong>Name<span style="color: red">*</span>:</strong></label>                  
+                  <input type="text" class="form-control" id="schemaName" v-model="credentialName" aria-describedby="schemaNameHelp"
+                  placeholder="Enter Schema name">
                 </div>
                 <div class="form-group">
                   <tool-tip infoMessage="Description for the schema"></tool-tip>
                   <label for="schDescription"><strong>Description:</strong></label>                  
 
-                  <textarea type="text" class="form-control" id="schDescription" v-model="credentialDescription"  rows="5" cols="20" aria-describedby="orgNameHelp"></textarea>
+                  <textarea type="text" class="form-control" id="schDescription" v-model="credentialDescription"  rows="5" cols="20" aria-describedby="orgNameHelp"
+                  placeholder="Enter Description for this schema"></textarea>
                 </div>
                 <div class="form-group card">
-                  <div class="card-header">
-                    <b-button block v-b-toggle.accordion-1 style="text-decoration:none" variant="link"
+                  <b-card-header header-tag="header" class="p-1 border-0 accordin-header theme-color" role="tab">
+                    <b-button block v-b-toggle.accordion-1 style="text-decoration:none; color:#212529;" variant="secondary"
                     :aria-expanded="visible ? 'true' : 'false'"
                     @click="visible = !visible"
                     aria-controls="collapse-1"
-                    class="text-left"
+                    class="text-left border-0 theme-color bg-transparant"
                     title="Create schema configuration">Fields Configurations
                     <i :class="!visible ? 'fa fa-arrow-down' : 'fa fa-arrow-up'" style="float:right;"></i>
                     </b-button>
-                  </div>
+                  </b-card-header>
                   <b-collapse id="collapse-1" class="mt-2" v-model="visible" style="padding:10px">
                     <div class="selected-media-wrapper d-flex p-2 mb-4"  style="overflow-y: auto" v-if="attributes.length > 0">
                       <div v-for="(attr,id) in attributes" v-bind:key="attr.id">
@@ -166,7 +177,7 @@
                         </div>
                         <div class="col-lg-9 col-md-9 px-0">
                             <input v-model="selected.attributeName" type="text" id="attributeName" class="form-control w-100"
-                            placeholder="">
+                            placeholder="firstName">
                         </div>
                     </div>
 
@@ -184,7 +195,7 @@
                       </div>
                     </div>
 
-                     <div class="row g-3 align-items-center w-100 mt-4">
+                     <!-- <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
                           <tool-tip infoMessage="Format of the attribute"></tool-tip>
                           <label for="format" class="col-form-label">Format: </label>                          
@@ -192,7 +203,7 @@
                         <div class="col-lg-9 col-md-9 px-0">
                             <input v-model="selected.attributeFormat" type="text"  placeholder="Enter attribute Format (eg email)" id="type" class="form-control w-100" >
                         </div>
-                    </div>
+                    </div> -->
 
                      <div class="row g-3 align-items-center w-100 mt-4">
                         <div class="col-lg-3 col-md-3 text-left">
@@ -207,8 +218,7 @@
                     <div class="form-group row mt-4" v-if="isAdd">
                       <div class="col-sm-10">                        
                         <hf-buttons 
-                          name="Add +"        
-                          class="btn btn-primary"
+                          name="Add"                          
                           @executeAction="addBlankAttrBox()"
                         ></hf-buttons>
                       </div>
@@ -229,18 +239,17 @@
                     </div>
                   </b-collapse>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                   <tool-tip infoMessage="Additional Properties"></tool-tip>                             
                   <label for="schDescription"><strong>Additional Properties</strong></label>
                   <input v-model="additionalProperties" type="checkbox" style="margin-left:5px;" />
 
-                </div>
+                </div> -->
                 <div class="form-group row">
                   <div class="col-md-12">
                     <hr/>                    
                     <hf-buttons 
-                      name="Save"        
-                      class="btn btn-primary"
+                      name="Save"                      
                       @executeAction="createSchema()"
                     ></hf-buttons>
                   </div>
@@ -251,7 +260,7 @@
     </div>
     <div class="row" style="margin-top: 2%;" v-if="schemaList.length > 0">
       <div class="col-md-12">
-        <table class="table table-bordered" style="background:#FFFF">
+        <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
               <th>Schema Id</th>
@@ -277,13 +286,13 @@
               <td class="word-wrap">{{ row.schemaDetails ? row.schemaDetails.schema.description : "-" }}</td>
               <td v-if="row.schemaDetails">
               <div v-for="prop in Object.keys(row.schemaDetails.schema.properties)" style="display:inline-block;">
-              <span class="flash card rounded m-1 p-1 d">
+              <span class="schemaProp card rounded m-1 p-1 d">
                 {{prop}}
                 </span>
               </div>
               </td>
 
-              <td>{{ row.schemaDetails ? row.schemaDetails.authored : "-" }}</td>
+              <td>{{ row.schemaDetails ? new Date(row.schemaDetails.authored).toLocaleString() : "-" }}</td>
 
               <td style="word-wrap: break-word;min-width: 200px;max-width: 200px;">
                 <a target="_blank"
@@ -324,10 +333,14 @@ export default {
     },
     selectedOrg() {
       return this.$store.getters.getSelectedOrg;
+    },
+    isContainerShift() {
+      return this.$store.state.containerShift
     }
   },
   data() {
     return {
+      reservedKeys:['id'],
       counter:0,
       flash:null,
       isAdd:true,
@@ -350,12 +363,12 @@ export default {
       selected:{
       attributeName: "",
       attributeTypes: null,
-      attributeFormat: "",
+      // attributeFormat: "",
       attributeRequired: false,
       },
       attributes: [],
       issueCredAttributes: [],
-      additionalProperties: false,
+      // additionalProperties: false,
       showSchema: true,
       radioSelected: "create",
       credentialName: "",
@@ -394,25 +407,28 @@ export default {
       let updateData = found
       this.selectedId = id
       this.selected.attributeName = updateData.name
-      this.selected.attributeFormat = updateData.format
+      // this.selected.attributeFormat = updateData.format
       this.selected.attributeRequired = updateData.isRequired
       EventBus.$emit("setOption",updateData.type);
       this.isAdd = false
     },
     updateSchemaAttribute() {
+      let isValid = this.handleValidation()
+      if(isValid) {
       let obj = {
-          name: this.selected.attributeName,
-          type: this.selected.attributeTypes,
-          format: this.selected.attributeFormat,
-          isRequired: this.selected.attributeRequired,
-          id: this.selectedId
-        }
+        name: this.selected.attributeName,
+        type: this.selected.attributeTypes,
+        // format: this.selected.attributeFormat,
+        isRequired: this.selected.attributeRequired,
+        id: this.selectedId
+      }
       const indexToUpdate = this.attributes.findIndex((x)=>x.id === this.selectedId)
       if(indexToUpdate > -1){
       this.attributes[indexToUpdate] = obj
       EventBus.$emit("resetOption",this.selected.attributeTypes);
       this.clearSelected()
       this.isAdd = true
+      }
       }
       
     },
@@ -434,7 +450,7 @@ export default {
         attributeName : "",
         attributeTypes : null,
         attributeRequired : false,
-        attributeFormat : ""
+        // attributeFormat : ""
       }
     },
     openSlider() {
@@ -450,32 +466,47 @@ export default {
       this.credentialName = ''
       this.credentialDescription = ''
       this.selected.attributeName = ''
+      EventBus.$emit("resetOption",this.selected.attributeTypes)
       this.selected.attributeTypes = null
-      this.selected.attributeFormat = ''
+      // this.selected.attributeFormat = ''
       this.selected.attributeRequired = false
-      this.additionalProperties = false
-      this.attributes = []
-      
+      // this.additionalProperties = false
+      this.attributes = []      
     },
-    addBlankAttrBox() {
+    handleValidation() {
+      let isValid = true
       if (isEmpty(this.selected.attributeName)) {
+        isValid = false
         return this.notifyErr(message.SCHEMA.EMPTY_SCHEMA_ATTRIBUTE_NAME)
+      } else if(this.reservedKeys.includes(this.selected.attributeName)) {
+        isValid = false
+        return this.notifyErr(this.selected.attributeName + ' ' + message.SCHEMA.PROTECTED_TERM)
       } else if (isValidURL(this.selected.attributeName)) {
+        isValid = false
         return this.notifyErr(message.SCHEMA.INVALID_ATTRIBUTE_NAME)
       } else if (ifSpaceExists(this.selected.attributeName)) {
-         return this.notifyErr('There should not be space in attribute name')
+        isValid = false
+        return this.notifyErr(message.SCHEMA.NO_SPACE)
       } else if(!isValidSchemaAttrName(this.selected.attributeName)){
-        return this.notifyErr('Name should be camelCase')
+        isValid = false
+        return this.notifyErr(message.SCHEMA.NAME_CAMELCASE)
       } else if (this.selected.attributeTypes === ' ' || this.selected.attributeTypes === null) {
+        isValid = false
         return this.notifyErr(message.SCHEMA.EMPTY_ATTRIBUTE_TYPE)
-      } else if (isValidURL(this.selected.attributeFormat)) {
-        return this.notifyErr(message.SCHEMA.INVALID_FORMAT)
-      }
-      
+      } 
+      // else if (isValidURL(this.selected.attributeFormat)) {
+      //   isValid = false
+      //   return this.notifyErr(message.SCHEMA.INVALID_FORMAT)
+      // }
+    return isValid
+    },
+    addBlankAttrBox() {
+      let isValid = this.handleValidation()
+      if(isValid){
         let obj = {
           name: this.selected.attributeName,
           type: this.selected.attributeTypes,
-          format: this.selected.attributeFormat,
+          // format: this.selected.attributeFormat,
           isRequired: this.selected.attributeRequired,
         }
         this.counter +=1
@@ -483,8 +514,9 @@ export default {
         this.attributes.push(obj)
         this.selected.attributeName = "";
         EventBus.$emit("resetOption",this.selected.attributeTypes)
-        this.selected.attributeFormat = "";
+        // this.selected.attributeFormat = "";
         this.selected.attributeRequired = false;     
+      }
     },
     ssePopulateSchema(id, store) {
       const sse = new EventSource(`${this.$config.studioServer.SCHEMA_SSE}${id}`);
@@ -533,7 +565,7 @@ export default {
           author: this.user.id,
           fields: this.attributes,
           description: this.credentialDescription,
-          additionalProperties: this.additionalProperties,
+          // additionalProperties: this.additionalProperties,
           orgDid: this.$store.state.selectedOrgDid
         };
         this.QrData.data = schemaData

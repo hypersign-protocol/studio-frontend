@@ -1,9 +1,4 @@
 <style scoped>
-.home{
-    margin-left: auto;
-    margin-right: auto;
-    width: 1500px;
-  }
 .addmargin {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -42,8 +37,8 @@
 <template>
    <div class="home">
      <h2>Welcome, {{user.name}} !</h2>
-        <Metrics/>
-    <org-sidebar/>
+     <Metrics/>
+     <org-sidebar/>
    </div>
 </template>
 

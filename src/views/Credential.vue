@@ -1,9 +1,4 @@
 <style scoped>
-.home{
-    margin-left: auto;
-    margin-right: auto;
-    width: 1500px;
-}
 .card-header {
   background: aliceblue;
   padding: 0px;
@@ -50,34 +45,61 @@ h5 span {
 }
 </style>
 <template>
-  <div class="home">
+  <div :class="isContainerShift ?'homeShift':'home'">
     <loading :active.sync="isLoading" :can-cancel="true" :is-full-page="fullPage"></loading>
 
     <div class="row">
       <div class="col-md-12" style="text-align: left">
         <Info :message="description" />
           <div class="form-group" style="display:flex">
-           <h3 v-if="vcList.length > 0" class="mt-4" style="text-align: left;">Credentials</h3>
+           <h3 v-if="vcList.length > 0" class="mt-4" style="text-align: left;">
+            <i class="fa fa-id-card mr-2" ></i>Credentials</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Issue your first credential!</h3>
             <hf-buttons 
               name="+ Create"
               style="text-align: right;"
-              class="btn btn-primary ml-auto mt-4"
+              class="ml-auto mt-4"
               @executeAction="openSlider()"
             ></hf-buttons>
           </div>    
-            <StudioSideBar title="Issue Credential">
+            <StudioSideBar :title="isEdit? 'Edit Credential' : 'Issue Credential'">
               <div class="container">
                 <div class="form-group row">
                   <div class="col-md-12">
                     <form style="padding: 5px">
-                    <div class="form-group">
+                    <div class="form-group" v-if="isEdit===true">
+                      <tool-tip infoMessage="Your VC Id"></tool-tip>
+                      <label for="fordid"><strong>VC ID:</strong></label>
+                      <input type="text" class="form-control"
+                        v-model="vcId" disabled/>
+                    </div>
+                    <div class="form-group" v-if="isEdit===false">
                       <tool-tip infoMessage="Enter DID to whome you are issuing credential"></tool-tip>
                       <label for="fordid"><strong>Subject DID<span style="color: red">*</span>:</strong></label>                      
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
+                    <div class="form-group" v-if="isEdit===false">
+                      <tool-tip infoMessage="Enter Issuer DID for this Credential"></tool-tip>
+                      <label for="fordid"><strong>Issuer DID<span style="color: red">*</span>:</strong></label>                      
+                      <input type="text" class="form-control" placeholder="Issuer did (did:hs:...)"
+                        v-model="issuerDid" />
+                    </div>
+                    <div v-else>
                     <div class="form-group">
+                      <tool-tip infoMessage="Credential issued to this DID"></tool-tip>
+                      <label for="fordid"><strong>Subject DID:</strong></label>
+                      <input type="text" class="form-control"
+                        v-model="holderDid" disabled/>
+                    </div>
+                    <div class="form-group">
+                      <tool-tip infoMessage="Enter Issuer DID for this Credential"></tool-tip>
+                      <label for="fordid"><strong>Issuer DID:</strong></label>                      
+                      <input type="text" class="form-control" placeholder="Issuer did (did:hs:...)"
+                        v-model="issuerDid" disabled/>
+                    </div>
+                    </div>
+                    <div class="form-group" v-if="isEdit===false">
                       <tool-tip infoMessage="Select Schema to issue credential"></tool-tip>
                       <label for="forselectschema"><strong>Select Schema<span style="color: red">*</span>:</strong></label>                      
                       <!-- <b-form-select v-model="selected" :options="selectOptions"
@@ -97,12 +119,21 @@ h5 span {
                           format="YYYY-MM-DD" 
                           v-model="attr.value"
                           />
-                          <input class="ml-2" v-if="attr.type === 'boolean'" type="checkbox" v-model="attr.value" id="required" >
-                          <input v-if="attr.type === 'integer' " type="number" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
-                          <input v-if="attr.type == 'number'" type="number" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                          <!-- <input class="ml-2" v-if="attr.type === 'boolean'" type="radio" v-model="attr.value" id="required" >                      -->
+                          <b-form-radio-group
+                          class="pl-2"
+                          style="display:inline-block;"
+                          v-if="attr.type === 'boolean'"
+                          id="radio-group-1"
+                          v-model="attr.value"
+                          :options="booleanOption"                        
+                          name="radio-options-currency"                            
+                        ></b-form-radio-group>
+                          <input v-if="attr.type === 'integer' " type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
+                          <input v-if="attr.type == 'number'" type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
                           <input v-if="attr.type == 'string'" type="text" class="form-control" id="schemaName" v-model="attr.value" aria-describedby="schemaNameHelp" placeholder="Enter attribute value">
                     </div>
-                    <div class="form-group pt-2">
+                    <div class="form-group pt-2" v-if="isEdit===false">
                       <tool-tip infoMessage="Enter expiry time for the credential"></tool-tip>
                       <label for="fordid"><strong>Expiry Date<span style="color: red">*</span>:</strong></label>                      
                       <!-- <input type="date" class="form-control"
@@ -110,11 +141,58 @@ h5 span {
                       <!-- <div class="form-control"> -->
                           <Datepicker 
                           class="datepicker"
-                          name="toDate"
+                          name="expiryDateTime"
                           format="YYYY-MM-DD h:i:s" 
                           v-model="expiryDateTime"
                           />
                       <!-- </div>   -->
+                    </div>
+                    <div class="form-group pt-2" v-if="isEdit === true">
+                      <tool-tip infoMessage="Credential Hash of the issued credential"></tool-tip>
+                      <label for="fordid"><strong>Credential Hash:</strong></label>                      
+                      <input type="text" class="form-control"
+                      v-model="credHash" disabled
+                         />
+                    </div>
+                    <div class="form-group pt-2" v-if="isEdit === true">
+                      <tool-tip infoMessage="Issuance Date of the issued credential"></tool-tip>
+                      <label for="fordid"><strong>Issuance Date:</strong></label>                      
+                      <input type="text" class="form-control"                      
+                      v-model="new Date(issuanceDate).toLocaleString()" disabled
+                         />
+                    </div>
+                     <div class="form-group pt-2" v-if="isEdit === true">
+                      <tool-tip infoMessage="Expiry Date for the issued credential"></tool-tip>
+                      <label for="fordid"><strong>Expiry Date:</strong></label>                      
+                      <input type="text" class="form-control"
+                      v-model="new Date(expiryDateTime).toLocaleString()" disabled
+                         />
+                    </div>
+                    <!-- <div class="form-group" v-if="isEdit===true">
+                      <tool-tip infoMessage="Current status of credential"></tool-tip>
+                      <label for="fordid"><strong>Current Status</strong></label>                      
+                      <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
+                        v-model="currentStatus" disabled />
+                    </div> -->
+                    <div class="form-group" v-if="isEdit===true">
+                      <tool-tip infoMessage="Select Status for the issued credential"></tool-tip>
+                      <label for="forselectschema"><strong>Status<span style="color: red">*</span>:</strong></label>                  
+                      <!-- <hf-select-drop-down
+                      :options="credStatusOptions"
+                       @selected="e =>{onStatusSelectDropDownChange(e)}"
+                      ></hf-select-drop-down>                     -->
+                      <b-form-select
+                      v-model="selectedStatus"
+                      :options="credStatusOptions"
+                      @change="onStatusSelectDropDownChange"                    
+                      >
+                      </b-form-select>
+                    </div>
+                    <div class="form-group" v-if="isEdit === true">
+                      <tool-tip infoMessage="Status Reason for the status change"></tool-tip>
+                      <label for="fordid"><strong>Status Reason:</strong></label>
+                      <input type="text" class="form-control"
+                        v-model="statusReason"/>
                     </div>
                   </form>
                   </div>
@@ -123,10 +201,18 @@ h5 span {
                   <div class="col-md-12">
                     <hr />    
                     <hf-buttons 
+                    v-if="isEdit === false"
                       name="Save"
                       style="text-align: right;"
-                      class="btn btn-primary ml-auto mt-4"
+                      class="ml-auto mt-4"
                       @executeAction="issueCredential()"
+                    ></hf-buttons>
+                    <hf-buttons
+                      v-else
+                      name="Update"
+                      style="text-align: right;"
+                      class="ml-auto mt-4"
+                      @executeAction="updateCredStatus()"
                     ></hf-buttons>
                   </div>
                 </div>
@@ -136,45 +222,52 @@ h5 span {
     </div>
     <div class="row" style="margin-top: 2%;" v-if="vcList.length > 0">
       <div class="col-md-12">
-        <table class="table table-bordered" style="background:#FFFF">
+        <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
               <th>VC Id</th>
               <th>Schema Id</th>
-              <th>Holder DID</th>
+              <th>Subject DID</th>
               <th>Issuance Date</th>
               <th>Expiration Date</th>
               <!-- <th>Credential Hash</th> -->
               <th>Status</th>
               <th>Status Reason</th>
+
               <th></th>
+
             </tr>
           </thead>
           <tbody>
             <tr v-for="row in vcList" :key="row.vc_id">
             
               <td>
-                <a :href="`${row.vc_id}:`" target="_blank>" v-if="row.vc_id">{{ removeUrl(row.vc_id) }}</a>
+                <a :href="`${row.vc_id}:`" target="_blank>">{{ row.vc_id ? removeUrl(row.vc_id) : '-' }}</a>
               </td>
               <td>
                 <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.SCHEMA_GET_REST}${row.schemaId}:`" target="_blank">{{ shorten(row.schemaId) }}</a>
               </td>
               <td>{{ shorten(row.subjectDid) }}</td>
-              <td>{{ row.credStatus ? row.credStatus.issuanceDate: "-"}}</td>
-              <td>{{ row.credStatus ? row.credStatus.expirationDate : "-"}}</td>
+              <td>{{ row.credStatus ? new Date(row.credStatus.issuanceDate).toLocaleString(): "-"}}</td>
+              <td>{{ row.credStatus ? new Date(row.credStatus.expirationDate).toLocaleString() : "-"}}</td>
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
               <td> {{ row.credStatus ? row.credStatus.claim.currentStatus : row.status}}</td>
               <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
-              <td>               
-                <hf-buttons
-                  v-if="row.credStatus"
-                  name="Send"
-                  style="text-align: right;"
-                  class="btn btn-primary"
-                  @executeAction="generateCred(`${row._id}`)"
-                ></hf-buttons>
-                <span v-else>-</span>
-              </td>
+              <td v-if="row.credStatus">
+              <div style="display:flex;">
+              <i class="fa fa-paper-plane mr-2"
+                v-if="row.credStatus.claim.currentStatus==='Live'"
+                @click="generateCred(`${row._id}`)" title="Click to send this vc"
+                style="float:left;cursor: pointer"
+                ></i>
+                <i class="fas fa-pencil-alt"
+                v-if="noEdit(row)"
+                @click="editCred(row)" title="Click to edit this vc"
+                style="cursor: pointer;"
+                ></i>                      
+                </div></td>
+                <!-- <span v-else>-</span>              -->
+              <td v-else>-</td>
             </tr>
           </tbody>
         </table>
@@ -210,7 +303,7 @@ import HfButtons from "../components/element/HfButtons.vue"
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
 import EventBus from "../eventbus"
 import ToolTip from "../components/element/ToolTip.vue"
-import { isEmpty, isValidDid } from '../mixins/fieldValidation'
+import { isEmpty, isValidDid, isValidURL, isFloat } from '../mixins/fieldValidation'
 import message from '../mixins/messages'
 import Datepicker from 'vuejs-datetimepicker'
 import VueQr from "vue-qr"
@@ -226,11 +319,22 @@ export default {
     },
     selectedOrg(){
       return this.$store.getters.getSelectedOrg;
+    },
+    isContainerShift() {
+      return this.$store.state.containerShift
     }
   },
   data() {
     return {
+      booleanOption:[
+        {text:true, value:true},
+        {text:false, value:false},
+      ],
+      currentStatus:null,
+      vcId:'',
+      issuerDid:'',
       authToken: localStorage.getItem('authToken'),
+      isEdit:false,
       description: "An issuer can issue a credential to a subject (or holder) which can be verfied by the verifier independently, without having him to connect with the issuer. They are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries.  For example: an airline company can issue a flight ticket (\"verfiable credential\") using schema (issued by DGCA) to the passenger.",
       active: 0,
       host: location.hostname,
@@ -249,14 +353,23 @@ export default {
         { text: "Create new schema", value: "create" },
         { text: "Select existing schema", value: "existing" },
       ],
+      credStatusOptions:[
+        { text: "Live", value: "LIVE"},
+        { text: "Suspend", value: "SUSPENDED"},
+        { text: "Revoke", value: "REVOKED"}
+      ],
       selected: null,
+      selectedStatus:null,
       attributeValues: {},
       vcCredStatusMap: {}, 
       schemaList: [],
       fullPage: true,
       isLoading: false,
       holderDid: "",
+      issuanceDate:null,
       expiryDateTime:null,
+      preStatusSelect:'',
+      statusReason:'',
       schema_page: 1,
       credUrl:"",
       QrData: {
@@ -282,6 +395,123 @@ export default {
     });
   },
   methods: {
+    noEdit(row){
+      if(row.credStatus.claim.currentStatus === 'Revoked' || row.credStatus.claim.currentStatus === 'Expired'){
+        return false
+      } else {
+        return true
+      }
+    },
+    editCred(cred) {
+      this.clearEdit()
+      this.isEdit = true      
+      this.$root.$emit("bv::toggle::collapse", "sidebar-right");
+      this.holderDid = cred.subjectDid
+      this.issuerDid = cred.issuerDid
+      this.credHash = cred.credStatus.credentialHash
+      this.expiryDateTime = cred.expiryDate
+      this.issuanceDate = cred.credStatus.issuanceDate
+      this.preStatusSelect = cred.credStatus.claim.currentStatus
+      this.statusReason = cred.credStatus.claim.statusReason
+      switch(cred.credStatus.claim.currentStatus){
+        case 'Live':
+          this.selectedStatus = 'LIVE'
+          this. credStatusOptions=[
+        { text: "Live", value: "LIVE", disabled:true},
+        { text: "Suspend", value: "SUSPENDED"},
+        { text: "Revoke", value: "REVOKED"}
+        ]
+          break;
+        case 'Suspended':
+          this.selectedStatus = 'SUSPENDED'
+          this. credStatusOptions=[
+        { text: "Suspended", value: "SUSPENDED", disabled:true},
+        { text: "Live", value: "LIVE"},
+        { text: "Revoke", value: "REVOKED"}
+        ]
+          break;
+        case 'Revoked':
+          this.selectedStatus = 'REVOKED'
+          break;
+        case 'Expired':
+          this.selectedStatus = 'EXPIRED'
+          break;
+        default :
+          this.notifyError('Invalid credential status')
+        }
+      this.currentStatus = cred.credStatus.claim.currentStatus
+      this.vcId =cred.vc.id
+    },
+    clearEdit() {
+      this.selectedStatus = null
+      this.issuerDid = ''
+      this.holderDid = ''
+      this.expiryDateTime = null
+      this.currentStatus = ''
+      this.vcId = ''
+      this.preStatusSelect = ''
+      this.statusReason = ''
+    },
+  async updateCredStatus() {
+    //   const QR_DATA = {
+    //   QRType:"ISSUE_CREDENTIAL",
+		// 	data:{
+    //   status: this.selected,
+    //   vcId: this.vcId,
+    //   credentialStatusUrl:`https://jagrat.hypersign.id/rest/hypersign-protocol/hidnode/ssi/credential/${this.vcId}`,
+		// 		}
+    // }
+    try {
+      this.isLoading = true
+      //check for status check
+      switch(this.preStatusSelect){
+        case 'Live':
+          if(this.selectedStatus === 'LIVE'){
+            return this.notifyErr('Credential already Live')
+          }
+          break;
+        case 'Suspended':
+          if(this.selectedStatus === 'SUSPENDED'){
+            return this.notifyErr('Credential already Suspended')
+          }
+          break;
+        default :
+          return this.notifyErr('Invalid status')
+      }
+      const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
+      const creadData = {
+          status: this.selectedStatus,
+          vcId: this.vcId,
+          statusReason:this.statusReason
+          }
+
+      const headers = {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.authToken}`
+        };
+        fetch(url,{
+        method: "PUT",
+        headers,
+        body: JSON.stringify({QR_DATA: creadData})        
+        }).then((res) => res.json())
+        .then(json =>{
+          const { QR_DATA } = json.data
+          const id = QR_DATA.data._id
+          if(json.message === 'success') {
+            this.notifySuccess('cred status updated successfully')
+            const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`      
+            this.openWallet(URL)
+             this.ssePopulateCredStatus(id, this.$store)
+              this.openSlider();
+          }
+        })
+    } catch (e) {
+      console.log(e)
+    } finally{
+      this.isLoading = false
+    }
+      
+    },
     showInputField(type) {
       console.log(type)
       if(type !=='date' || type !=='boolean'){
@@ -319,6 +549,7 @@ export default {
       this.$router.push('schema')
     },
     openSlider() {
+      this.isEdit = false
       this.clearAll();
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
     },
@@ -326,7 +557,7 @@ export default {
       const sse = new EventSource(`${this.$config.studioServer.CRED_SSE}${id}`);
       sse.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.status === "Registered" || data.status === "Failed") {
+        if (data.status === "Registered" || data.status === "Failed" || data.status === "Live" || data.status === "Suspended" || data.status === "Revoked") {
           
           sse.close();
           store.dispatch("insertAcredential", data)
@@ -376,23 +607,30 @@ export default {
         );
       }
     },
+    onStatusSelectDropDownChange(event) {
+      this.selectedStatus = event
+      this.statusReason = ''
+      // if(event) {
+        
+      // }
+    },
     OnSchemaSelectDropDownChange(event) {  
+      this.selected = null
       this.selected = event;
       if (event) {
         this.issueCredAttributes = [];        
-        const id = this.issueCredAttributes.length;
         const selectedSchema = this.$store.getters.findSchemaBySchemaID(event);
         const schemaMap =  selectedSchema.schemaDetails.schema.properties;
         const requiredFields = selectedSchema.schemaDetails.schema.required  
         for (const e of Object.entries(schemaMap)) {
           let dataToPush = {
-            id: id + event,
+            id: event,
             type: e[1].type,
             name: e[0],
           }
           switch(e[1].type){
             case 'boolean':
-               dataToPush['value'] = false
+               dataToPush['value'] = null
                break;
             case 'string':
               dataToPush['value'] = ""
@@ -453,13 +691,81 @@ export default {
     },
     generateAttributeMap() {
       let attributesMap = [];
+      let dataToSend;
       if (this.issueCredAttributes.length > 0) {
         this.issueCredAttributes.forEach((e) => {
-          attributesMap[e.name] = e.value;
-          if(e.type !== 'boolean' && e.required === true){
-          if (isEmpty(e.value)) {
-            throw new Error(`Please enter value in ${this.CapitaliseString(e.name)} field`)
+          // if(e.type !== 'boolean'){
+          // if (isEmpty(e.value)) {
+          //   throw new Error(`Please enter value in ${this.CapitaliseString(e.name)} field`)
+          // } else if(e.type === 'number') {
+          //   if(isNaN(parseInt(e.value))){
+          //     throw new Error('Enter a number')
+          //   }
+          // }
+          // }   
+            switch(e.type) {
+            case 'string': {
+              if(e.required === true) {
+                if(e.value === ''){
+                throw new Error(`Please enter input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }              
+              break;
+            }
+            case 'number': {
+              if(e.required === true){
+                if(e.value === '' || !(Number(e.value))) {
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              } else {
+                if(e.value !=='' && !(Number(e.value))) {
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }              
+              break;
+            }
+            case 'integer': {
+              if(e.required === true){
+                if(e.value === '' || isFloat(e.value) || isNaN(e.value)) {
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              } else {
+                if(e.value !=='' && ((isFloat(e.value) || isNaN(e.value)))) {
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }
+              break;
+            }            
+            case 'date': {
+              if(e.required === true) {
+                if(e.value === '' || isValidURL(e.value)){
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              } else {
+                 if(isValidURL(e.value)){
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }     
+              break;
+            }
+            case 'boolean': {
+              if(e.required === true) {
+                if(e.value === null){
+                throw new Error(`Please enter valid input in ${this.CapitaliseString(e.name)} field`)
+              }
+              }
+              break;
+            }
+            default :
+            throw new Error('invalid type')    
           }
+          if(e.value !=='' && e.value !== null){
+            dataToSend = {
+            name:e.name,
+            type:e.type,
+            value: e.value,            
+          }  
+          attributesMap.push(dataToSend)
           }
         });
       }
@@ -470,6 +776,10 @@ export default {
         const ToDate = new Date();
         if (isEmpty(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.EMPTY_HOLDER_DID)
+        } else if(isEmpty(this.issuerDid)) {
+          return this.notifyErr(message.CREDENTIAL.EMPTY_ISSUER_DID)
+        } else if(!isValidDid(this.issuerDid)) {
+          return this.notifyErr(message.CREDENTIAL.INVALID_DID)
         } else if (!isValidDid(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.INVALID_DID)
         } else if (isEmpty(this.selected)) {
@@ -485,14 +795,12 @@ export default {
           return this.notifyErr("Expiry time should be gretter than current date & time");
         }
         this.isLoading = true
-        const fields = Object.assign({}, attributeMap)
+        const fields = attributeMap
         const schemaId = this.selected
-        const issuerDid = this.user.id
+        const issuerDid = this.issuerDid
         const subjectDid = this.holderDid
-        const expiryDate = this.expiryDateTime
-
+        const expirationDate = this.expiryDateTime
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
-
         const headers = {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.authToken}`
@@ -502,7 +810,7 @@ export default {
           schemaId,
           issuerDid,
           subjectDid,
-          expiryDate,
+          expirationDate,
           orgDid:this.$store.state.selectedOrgDid
         };
         this.QrData.data = creadData
@@ -518,7 +826,6 @@ export default {
               this.$store.dispatch("insertAcredential", creadRecord)
               const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
               this.openWallet(URL)
-
               this.ssePopulateCredStatus(creadRecord._id, this.$store)
               this.openSlider();
              
@@ -536,6 +843,7 @@ export default {
       }
     },
     clearAll() {    
+      this.issuerDid = ""
       this.holderDid = "";
       this.expiryDateTime = null
       this.issueCredAttributes = []
