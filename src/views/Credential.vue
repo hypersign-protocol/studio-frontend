@@ -43,6 +43,10 @@ h5 span {
   background: #fff;
   padding: 0 10px;
 }
+.scrollit {
+    overflow:scroll;
+    height:600px;
+}
 </style>
 <template>
   <div :class="isContainerShift ?'homeShift':'home'">
@@ -50,7 +54,7 @@ h5 span {
 
     <div class="row">
       <div class="col-md-12" style="text-align: left">
-        <Info :message="description" />
+        <!-- <Info :message="description" /> -->
           <div class="form-group" style="display:flex">
            <h3 v-if="vcList.length > 0" class="mt-4" style="text-align: left;">
             <i class="fa fa-id-card mr-2" ></i>Credentials</h3>
@@ -79,12 +83,12 @@ h5 span {
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
-                    <div class="form-group" v-if="isEdit===false">
+                    <!-- <div class="form-group" v-if="isEdit===false">
                       <tool-tip infoMessage="Enter Issuer DID for this Credential"></tool-tip>
                       <label for="fordid"><strong>Issuer DID<span style="color: red">*</span>:</strong></label>                      
                       <input type="text" class="form-control" placeholder="Issuer did (did:hs:...)"
                         v-model="issuerDid" />
-                    </div>
+                    </div> -->
                     <div v-else>
                     <div class="form-group">
                       <tool-tip infoMessage="Credential issued to this DID"></tool-tip>
@@ -221,7 +225,7 @@ h5 span {
       </div>
     </div>
     <div class="row" style="margin-top: 2%;" v-if="vcList.length > 0">
-      <div class="col-md-12">
+      <div class="col-md-12 scrollit">
         <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
@@ -239,13 +243,14 @@ h5 span {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in vcList" :key="row.vc_id">
+            <tr v-for="row in vcList" :key="row._id">
             
               <td>
-                <a :href="`${row.vc_id}:`" target="_blank>">{{ row.vc_id ? removeUrl(row.vc_id) : '-' }}</a>
+                <a v-if="row.vc" :href="`${$config.explorer.BASE_URL}revocationRegistry/${removeUrl(row.vc.id)}`" target="_blank>">{{ row.vc.id ? shorten((row.vc.id)) : '-' }}</a>
+                <span v-else>-</span>
               </td>
               <td>
-                <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.SCHEMA_GET_REST}${row.schemaId}:`" target="_blank">{{ shorten(row.schemaId) }}</a>
+                <a :href="`${$config.explorer.BASE_URL}schemas/${row.schemaId}`" target="_blank">{{ shorten(row.schemaId) }}</a>
               </td>
               <td>{{ shorten(row.subjectDid) }}</td>
               <td>{{ row.credStatus ? new Date(row.credStatus.issuanceDate).toLocaleString(): "-"}}</td>
@@ -294,7 +299,7 @@ h5 span {
 
 <script>
 import fetch from "node-fetch";
-import Info from '@/components/Info.vue'
+// import Info from '@/components/Info.vue'
 import UtilsMixin from '../mixins/utils';
 import HfPopUp from "../components/element/hfPopup.vue";
 import Loading from "vue-loading-overlay";
@@ -309,10 +314,10 @@ import Datepicker from 'vuejs-datetimepicker'
 import VueQr from "vue-qr"
 export default {
   name: "Credential",
-  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip, Datepicker, VueQr },
+  components: { HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip, Datepicker, VueQr },
   computed: {
     vcList(){
-      return this.$store.state.vcList;
+      return this.$store.getters.vcList;
     },
     selectOptions(){
       return this.$store.getters.listOfAllSchemaOptions;
@@ -335,7 +340,7 @@ export default {
       issuerDid:'',
       authToken: localStorage.getItem('authToken'),
       isEdit:false,
-      description: "An issuer can issue a credential to a subject (or holder) which can be verfied by the verifier independently, without having him to connect with the issuer. They are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries.  For example: an airline company can issue a flight ticket (\"verfiable credential\") using schema (issued by DGCA) to the passenger.",
+      // description: "An issuer can issue a credential to a subject (or holder) which can be verfied by the verifier independently, without having him to connect with the issuer. They are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries.  For example: an airline company can issue a flight ticket (\"verfiable credential\") using schema (issued by DGCA) to the passenger.",
       active: 0,
       host: location.hostname,
       user: {},
@@ -526,7 +531,7 @@ export default {
     },
     removeUrl(url) {
       const chars = url.split('credential/');
-      return this.shorten(chars[1])      
+      return chars[0]
     },
     copyToClip(textToCopy,contentType) {
         if (textToCopy) {
@@ -776,11 +781,14 @@ export default {
         const ToDate = new Date();
         if (isEmpty(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.EMPTY_HOLDER_DID)
-        } else if(isEmpty(this.issuerDid)) {
-          return this.notifyErr(message.CREDENTIAL.EMPTY_ISSUER_DID)
-        } else if(!isValidDid(this.issuerDid)) {
-          return this.notifyErr(message.CREDENTIAL.INVALID_DID)
-        } else if (!isValidDid(this.holderDid)) {
+        } 
+        // else if(isEmpty(this.issuerDid)) {
+        //   return this.notifyErr(message.CREDENTIAL.EMPTY_ISSUER_DID)
+        // } 
+        // else if(!isValidDid(this.issuerDid)) {
+        //   return this.notifyErr(message.CREDENTIAL.INVALID_DID)
+        // } 
+        else if (!isValidDid(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.INVALID_DID)
         } else if (isEmpty(this.selected)) {
           return this.notifyErr(message.CREDENTIAL.SELECT_SCHEMA)
@@ -797,7 +805,7 @@ export default {
         this.isLoading = true
         const fields = attributeMap
         const schemaId = this.selected
-        const issuerDid = this.issuerDid
+        const issuerDid = this.user.id
         const subjectDid = this.holderDid
         const expirationDate = this.expiryDateTime
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
@@ -828,7 +836,7 @@ export default {
               this.openWallet(URL)
               this.ssePopulateCredStatus(creadRecord._id, this.$store)
               this.openSlider();
-             
+              this.$store.commit('increaseOrgDataCount','credentialsCount')
            } else {
              console.log(json)
              throw new Error(`${json.message}`)

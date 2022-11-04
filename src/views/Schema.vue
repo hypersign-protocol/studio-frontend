@@ -106,6 +106,14 @@
   background-color: transparent !important;
   color: #212529;
 }
+.scrollit {
+    overflow:scroll;
+    height:600px;
+}
+.head{
+  position: fixed;
+  z-index: 400;
+}
 </style>
 <template>
   <div :class="isContainerShift ?'homeShift':'home'">
@@ -113,7 +121,7 @@
 
     <div class="row">
       <div class="col-md-12" style="text-align: left">
-        <Info :message="description" />
+        <!-- <Info :message="description" /> -->
           <div class="form-group" style="display:flex">
            <h3 v-if="schemaList.length > 0" class="mt-4" style="text-align: left;">
             <i class="fa fa-table mr-2"></i>Schemas</h3>
@@ -259,7 +267,7 @@
       </div>
     </div>
     <div class="row" style="margin-top: 2%;" v-if="schemaList.length > 0">
-      <div class="col-md-12">
+      <div class="col-md-12 scrollit">
         <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
@@ -277,22 +285,26 @@
           <tbody>
             <tr v-for="row in schemaList" :key="row._id">
               <td>
-                <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.SCHEMA_GET_REST}${row.schemaId}:`"
+                <a v-if="row.schemaId" :href="`${$config.explorer.BASE_URL}schemas/${row.schemaId}`"
                   target="_blank">{{ row.schemaId ? shorten(row.schemaId) : "-" }}</a>
+                  <span v-else>-</span>
               </td>
 
               <td>{{ row.schemaDetails ? row.schemaDetails.name : "-" }}</td>
               <td>{{ row.schemaDetails ? row.schemaDetails.modelVersion : "-" }}</td>
               <td class="word-wrap">{{ row.schemaDetails ? row.schemaDetails.schema.description : "-" }}</td>
-              <td v-if="row.schemaDetails">
+              <td>
+              <div v-if="row.schemaDetails">
               <div v-for="prop in Object.keys(row.schemaDetails.schema.properties)" style="display:inline-block;">
               <span class="schemaProp card rounded m-1 p-1 d">
                 {{prop}}
                 </span>
               </div>
+              </div>
+              <span v-else>-</span>
               </td>
 
-              <td>{{ row.schemaDetails ? new Date(row.schemaDetails.authored).toLocaleString() : "-" }}</td>
+              <td>{{ row.createdAt ? new Date(row.createdAt).toLocaleString() : "-" }}</td>
 
               <td style="word-wrap: break-word;min-width: 200px;max-width: 200px;">
                 <a target="_blank"
@@ -314,7 +326,7 @@
 <script>
 import fetch from "node-fetch";
 import QrcodeVue from "qrcode.vue";
-import Info from '@/components/Info.vue';
+// import Info from '@/components/Info.vue';
 import UtilsMixin from '../mixins/utils';
 import Loading from "vue-loading-overlay";
 import StudioSideBar from "../components/element/StudioSideBar.vue";
@@ -326,7 +338,7 @@ import { isValidURL, isEmpty, ifSpaceExists, isValidSchemaAttrName } from '../mi
 import message from '../mixins/messages'
 export default {
   name: "Schema",
-  components: { QrcodeVue, Info, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip },
+  components: { QrcodeVue, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip },
   computed: {
     schemaList() {
       return this.$store.state.schemaList;
@@ -344,7 +356,7 @@ export default {
       counter:0,
       flash:null,
       isAdd:true,
-      description: "Credential Schema defines what information will go inside a verifiable credential. For example: Directorate General of Civil Aviation (DGCA) can define a schema (or format) for flights tickets, being issued by all airline companies in India.",
+      // description: "Credential Schema defines what information will go inside a verifiable credential. For example: Directorate General of Civil Aviation (DGCA) can define a schema (or format) for flights tickets, being issued by all airline companies in India.",
       active: 0,
       host: location.hostname,
       user: {},
@@ -490,6 +502,9 @@ export default {
       } else if(!isValidSchemaAttrName(this.selected.attributeName)){
         isValid = false
         return this.notifyErr(message.SCHEMA.NAME_CAMELCASE)
+      } else if(this.isPresent(this.selected.attributeName)){
+        isValid = false
+        return this.notifyErr(message.SCHEMA.DUPLICATE_ATTRIBUTE)
       } else if (this.selected.attributeTypes === ' ' || this.selected.attributeTypes === null) {
         isValid = false
         return this.notifyErr(message.SCHEMA.EMPTY_ATTRIBUTE_TYPE)
@@ -499,6 +514,13 @@ export default {
       //   return this.notifyErr(message.SCHEMA.INVALID_FORMAT)
       // }
     return isValid
+    },
+    isPresent(attr) {
+    const element = this.attributes.find((x) => {
+            return x.name === attr;
+        });
+        return typeof element === "undefined" ? false : true;
+    
     },
     addBlankAttrBox() {
       let isValid = this.handleValidation()
@@ -583,17 +605,14 @@ export default {
             const { QR_DATA } = j.data
             if (j.message === 'success') {
               this.notifySuccess("Schema creation initiated. Please approve the transaction from your wallet");
-              // TODO: Why this is hardcoded?
-              // this.credentialName = 'Schema';
-
               // Store the information in store.
               this.$store.dispatch('insertAschema', j.data.schema);
-
               // Open the wallet for trasanctional approval.
               const URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
               this.openWallet(URL)
               this.ssePopulateSchema(j.data.schema._id, this.$store)
               this.openSlider();
+              this.$store.commit('increaseOrgDataCount','schemasCount')
             } else {
               throw new Error(`${j.error}`);
             }
