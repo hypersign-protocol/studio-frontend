@@ -252,7 +252,7 @@ h5 span {
               <td>{{ row.credStatus ? new Date(row.credStatus.expirationDate).toLocaleString() : "-"}}</td>
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
               <td> {{ row.credStatus ? row.credStatus.claim.currentStatus : row.status}}</td>
-              <td :v-b-tooltip.hover="row.credStatus ? row.credStatus.claim.statusReason : ''">{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
+              <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
               <td v-if="row.credStatus">
               <div style="display:flex;">
               <i class="fa fa-paper-plane mr-2"

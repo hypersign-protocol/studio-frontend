@@ -44,7 +44,7 @@
   margin-top: auto;
 }
 .container-collapsed {
-  margin-left: 17em;
+  margin-left: 15em;
 }
 .far{
 cursor: pointer;
