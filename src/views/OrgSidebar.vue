@@ -64,22 +64,27 @@
     <div class="row scroll" v-if="orgList.length > 0">
       <div class="col-lg-4" v-for="eachOrg in orgList" :key="eachOrg._id">
 
-        <b-card :title="truncate(eachOrg.name,20)" tag="article" style="max-width: 30rem; margin-top: 10px; max-height:25rem"
+        <b-card :title="truncate(eachOrg.name,20)" tag="article" style="max-width: 30rem; margin-top: 10px; height:13rem"
           class="mb-2 eventCard" img-top>
           <ul style="list-style-type: none;padding-left: 0px;min-height: 80px;">            
             <img style="float:right;" :src="`${getProfileIcon(eachOrg.name)}`" class="mr-2" alt="center" width="70px"/>            
-            <li>
+            <li v-if="eachOrg.status ==='Registered'">
+              <i class="fa fa-user mr-2"></i>
               <span class="card-title"><a target="_blank" :href="`${$config.explorer.BASE_URL}identity/${eachOrg.orgDid}`">{{ truncate(eachOrg.orgDid,45) }}</a></span>
               <span v-if="eachOrg.status === 'Registered'" @click="copyToClip(eachOrg.orgDid,'Org DID')"
               ><i class="far fa-copy"></i></span>
             </li>
+            <div v-if="eachOrg.status ==='Registered'">
             <li>
-              <span class="card-title">{{ eachOrg.network }}</span>
-
+              <span class="card-title"><i class="fa fa-id-card mr-2"></i>Credentials: {{(eachOrg.credentialsCount)}}</span>
             </li>
             <li>
-              <span class="card-title">{{truncate(eachOrg.domain,40)}}</span>
+              <span class="card-title"><i class="fa fa-table mr-2"></i>Schemas: {{eachOrg.schemasCount}}</span>
             </li>
+            <li>
+              <span class="card-title"><i class="fa fa-desktop mr-2"></i>Templates: {{eachOrg.templatesCount}}</span>
+            </li>
+            </div>
           </ul>
           <footer>
             <div class="form-group row" style="margin-bottom: 0rem;">
@@ -102,7 +107,7 @@
             </li>
             </ul>
             </div>
-                <div class="pt-1 pl-2" v-if="eachOrg.status === 'Registered'">            
+                <div class="pl-2" v-if="eachOrg.status === 'Registered'">            
                 <i class="fas fa-pencil-alt"
                 @click="editOrg(eachOrg._id)" title="Click to edit this event" style="cursor: pointer"
                 ></i>

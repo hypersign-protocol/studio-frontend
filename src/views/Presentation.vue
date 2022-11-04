@@ -16,6 +16,10 @@
     text-decoration: underline;
     cursor: pointer;
 }
+.scrollit {
+    overflow:scroll;
+    height:600px;
+}
 </style>
 <template>
   <div :class="isContainerShift ?'homeShift':'home'">
@@ -23,7 +27,7 @@
 
     <div class="row">
       <div class="col-md-12" style="text-align: left">
-        <Info :message="description" />
+        <!-- <Info :message="description" /> -->
         
           <div class="form-group" style="display:flex">
            <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">
@@ -117,7 +121,7 @@
       </div>
     </div>
     <div class="row" style="margin-top: 2%;" v-if="templateList.length >0">
-      <div class="col-md-12">
+      <div class="col-md-12 scrollit">
         <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
@@ -147,7 +151,7 @@
               <!-- <td>{{row.issuerDid.toString()}}</td> -->
               <td class="align-middle">{{ shorten(row.schemaId)}}</td>
               <td class="align-middle">{{row.reason}}</td>
-              <td class="align-middle">{{row.callbackUrl}}</td>
+              <td class="align-middle" :title="row.callbackUrl">{{truncate(row.callbackUrl,40)}}</td>
               <td class="align-middle">
               <div style="display:flex">
               <i 
@@ -205,7 +209,7 @@ import HfButtons from "../components/element/HfButtons.vue"
 import conf from '../config';
 const { hypersignSDK } = conf;
 import QrcodeVue from "qrcode.vue";
-import Info from '@/components/Info.vue'
+// import Info from '@/components/Info.vue'
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
@@ -215,7 +219,7 @@ import message from '../mixins/messages'
 import { isEmpty, isValidURL, isValidDid } from '../mixins/fieldValidation'
 export default {
   name: "Presentation",
-  components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading, HfSelectDropDown, ToolTip, HfPopUp},
+  components: { QrcodeVue , StudioSideBar, HfButtons, Loading, HfSelectDropDown, ToolTip, HfPopUp},
   computed:{
     templateList(){
       return this.$store.state.templateList;
@@ -237,17 +241,17 @@ export default {
       maxChar:105,
       remainingCharText:'Remaining 105 characters',
       tempToDelete:'',    
-      description: "The subject (or holder) generates verifiable presentation from one or more verifiable \
-      credentials, issued by one or more issuers, that is shared with a specific verifier. \
-      A verifiable presentation is a tamper-evident presentation encoded in such a way that \
-      authorship of the data can be trusted after a process of cryptographic verification. \
-      Certain types of verifiable presentations might contain data that is synthesized from, \
-      but do not contain, the original verifiable credentials for example, in order to proof the \
-      subject that he/she is an adult, she/he does not have to tell his/her actual age \
-      (i.e. Zero knowledge proof). The airline passenger might not have to show the complete ticket\
-      to the secruity personal to pass the security check. The passenger will have ability to show \
-      just one document (the verifiable presentation) derived from his passport and air ticket to\
-      show at the security check.",
+      // description: "The subject (or holder) generates verifiable presentation from one or more verifiable \
+      // credentials, issued by one or more issuers, that is shared with a specific verifier. \
+      // A verifiable presentation is a tamper-evident presentation encoded in such a way that \
+      // authorship of the data can be trusted after a process of cryptographic verification. \
+      // Certain types of verifiable presentations might contain data that is synthesized from, \
+      // but do not contain, the original verifiable credentials for example, in order to proof the \
+      // subject that he/she is an adult, she/he does not have to tell his/her actual age \
+      // (i.e. Zero knowledge proof). The airline passenger might not have to show the complete ticket\
+      // to the secruity personal to pass the security check. The passenger will have ability to show \
+      // just one document (the verifiable presentation) derived from his passport and air ticket to\
+      // show at the security check.",
       presentationTemplate: {
         queryType: 'QueryByExample',
         domain: "",
@@ -371,6 +375,7 @@ export default {
                   this.$store.commit('deleteTemplate',id)
                   this.notifySuccess(`Template with ${id} id deleted successfully`)
                   this.$root.$emit('modal-close')
+                  this.$store.commit('DecreaseOrgTemplateCount','templatesCount')
                 }          
           } else {
             this.notifyErr('Please enter correct template id')
@@ -549,6 +554,7 @@ export default {
           } else{
             this.$store.commit('insertApresentationTemplate', json.data.presentationTemplateObj)
             this.notifySuccess('Template Successfully created')
+            this.$store.commit('increaseOrgDataCount','templatesCount')
           }
           // this.openSlider();
           this.clearAll()

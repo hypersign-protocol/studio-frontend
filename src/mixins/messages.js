@@ -6,6 +6,7 @@ const ORGANIZATION = {
 }
 
 const SCHEMA = {
+    DUPLICATE_ATTRIBUTE: "Duplicate attribute name not allowed",
     PROTECTED_TERM: "is protected term you can't use it",
     NO_SPACE: "There should not be space in attribute name",
     NAME_CAMELCASE: "Name should be camelCase",
