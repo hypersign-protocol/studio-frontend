@@ -53,7 +53,12 @@
   background: #f5dda71c;
   color: #888b8f;
 }
-
+.far{
+  color: gray;
+  font-size: 1.5em;
+  padding-top: 10px;
+  cursor: pointer;
+}
 .sm-tiles:hover {
   float: left;
   padding: 5px;
@@ -107,8 +112,11 @@
   color: #212529;
 }
 .scrollit {
-    overflow:scroll;
-    height:600px;
+  overflow:hidden;  
+  height:600px;
+}
+.scrollit:hover{
+  overflow-y: auto;
 }
 .head{
   position: fixed;
@@ -124,7 +132,7 @@
         <!-- <Info :message="description" /> -->
           <div class="form-group" style="display:flex">
            <h3 v-if="schemaList.length > 0" class="mt-4" style="text-align: left;">
-            <i class="fa fa-table mr-2"></i>Schemas</h3>
+            Schemas</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first schema!</h3>      
             <hf-buttons 
               name="+ Create"
@@ -266,8 +274,8 @@
           </StudioSideBar>
       </div>
     </div>
-    <div class="row" style="margin-top: 2%;" v-if="schemaList.length > 0">
-      <div class="col-md-12 scrollit">
+    <div class="row scrollit" style="margin-top: 2%;" v-if="schemaList.length > 0">
+      <div class="col-md-12">
         <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
@@ -276,7 +284,7 @@
               <th>Model Version</th>
               <th>Description</th>
               <th>Properties</th>
-              <th>Created At</th>
+              <th>Created At (UTC)</th>
               <th>Transaction Hash</th>
               <th>Status</th>
             </tr>
@@ -285,8 +293,15 @@
           <tbody>
             <tr v-for="row in schemaList" :key="row._id">
               <td>
-                <a v-if="row.schemaId" :href="`${$config.explorer.BASE_URL}schemas/${row.schemaId}`"
+                <div v-if="row.schemaId">
+                <a :href="`${$config.explorer.BASE_URL}schemas/${row.schemaId}`"
                   target="_blank">{{ row.schemaId ? shorten(row.schemaId) : "-" }}</a>
+                <i class="far fa-copy ml-1"
+                style="cursor:pointer;"
+                title="Click to copy Schema Id"
+                @click="copyToClip(row.schemaId,'Schema Id')"
+                ></i>
+                  </div>
                   <span v-else>-</span>
               </td>
 
@@ -304,12 +319,19 @@
               <span v-else>-</span>
               </td>
 
-              <td>{{ row.createdAt ? new Date(row.createdAt).toLocaleString() : "-" }}</td>
+              <td>{{ row.createdAt ? new Date(row.createdAt).toLocaleString('en-us', { timeZone: 'UTC' }) : "-" }}</td>
 
               <td style="word-wrap: break-word;min-width: 200px;max-width: 200px;">
+                <div v-if="row.transactionHash">
                 <a target="_blank"
                   :href="`${$config.explorer.BASE_URL}tx/${row.transactionHash}`"
-                  v-if="row.transactionHash">{{ shorten(row.transactionHash) }}</a>
+                  >{{ shorten(row.transactionHash) }}</a>
+                <i class="far fa-copy ml-1"
+                style="cursor:pointer;"
+                title="Click to copy Transaction Hash"
+                @click="copyToClip(row.transactionHash,'Transaction Hash')"
+                ></i>
+                </div>
                 <span v-else>-</span>
               </td>
               <td>{{ row.status }}</td>

@@ -17,8 +17,17 @@
     cursor: pointer;
 }
 .scrollit {
-    overflow:scroll;
-    height:600px;
+  overflow:hidden;  
+  height:600px;
+}
+.scrollit:hover{
+  overflow-y: auto;
+}
+.far{
+  color: gray;
+  font-size: 1.5em;
+  /* padding-top: 10px; */
+  cursor: pointer;
 }
 </style>
 <template>
@@ -31,7 +40,7 @@
         
           <div class="form-group" style="display:flex">
            <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">
-            <i class="fa fa-desktop mr-2"></i>Presentation Templates</h3>
+            Presentation Templates</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first presentation template!</h3>            
             <hf-buttons 
               name="+ Create"
@@ -111,6 +120,12 @@
                   </form>
                   <hr />
                   <hf-buttons 
+                  v-if="isEdit === true"
+                    name="Update"                    
+                    @executeAction="generatePresentation()"
+                  ></hf-buttons>
+                  <hf-buttons 
+                    v-else
                     name="Save"                    
                     @executeAction="generatePresentation()"
                   ></hf-buttons>
@@ -120,8 +135,8 @@
           
       </div>
     </div>
-    <div class="row" style="margin-top: 2%;" v-if="templateList.length >0">
-      <div class="col-md-12 scrollit">
+    <div class="row scrollit" style="margin-top: 2%;" v-if="templateList.length >0">
+      <div class="col-md-12">
         <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
@@ -139,7 +154,7 @@
             <tr v-for="row in templateList" :key="row">
               <td class="align-middle">
                 <div class="align-middle" style="display:flex;">
-                <span class="mr-1">{{shorten(row._id)}}</span>
+                <span class="mr-1">{{row._id}}</span>
                 <i class="far fa-copy"
                 style="cursor:pointer;"
                 title="Click to copy Template Id"
@@ -149,7 +164,15 @@
               </td>              
               <td class="align-middle">{{row.name}}</td>
               <!-- <td>{{row.issuerDid.toString()}}</td> -->
-              <td class="align-middle">{{ shorten(row.schemaId)}}</td>
+              <td class="align-middle">
+                 <a :href="`${$config.explorer.BASE_URL}schemas/${row.schemaId}`" target="_blank">{{ shorten(row.schemaId)}}
+                </a>
+                <i class="far fa-copy"
+                style="cursor:pointer;"
+                title="Click to copy Schema Id"
+                @click="copyToClip(row.schemaId,'Schema Id')"
+                ></i>
+              </td>
               <td class="align-middle">{{row.reason}}</td>
               <td class="align-middle" :title="row.callbackUrl">{{truncate(row.callbackUrl,40)}}</td>
               <td class="align-middle">
@@ -315,23 +338,6 @@ export default {
       } else {
         let remainingChar = this.maxChar - this.presentationTemplate.reason.length;
         this.remainingCharText = "Remaining"+" "+remainingChar+" "+"characters."      
-        }
-    },
-    copyToClip(textToCopy,contentType) {
-        if (textToCopy) {
-            navigator.clipboard
-                .writeText(textToCopy)
-                .then(() => {
-                    this.notifySuccess(
-                        `${contentType} copied!`
-                    );
-                })
-                .catch((err) => {
-                    this.notifyErr(
-                        'Error while copying',
-                        err
-                    );
-                });
         }
     },
     editTemp(temp) {
