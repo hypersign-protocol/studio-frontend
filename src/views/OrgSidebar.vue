@@ -21,7 +21,7 @@
           <input type="text" class="form-control" id="orgDid" v-model="orgStore.orgDid" aria-describedby="orgNameHelp"
             disabled>
           <small id="orgNameHelp" class="form-text text-muted">
-            <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.DID_RESOLVE_EP}${orgStore.orgDid}:`"
+            <a :href="`${$config.explorer.BASE_URL}identity/${orgStore.orgDid}`"
               target="_blank">Resolve DID</a>
           </small>
         </div>
@@ -53,6 +53,7 @@
                       <label for="region"><strong>Network:</strong></label>
                       <input type="text" class="form-control" id="region" v-model="orgStore.network" aria-describedby="regionHelp" placeholder="Select your region">
                   </div> -->
+        <hr />
         <div class="form-group" v-if="edit">
          <hf-buttons name="Update" class="btn btn-primary" @executeAction="createAnOrg()"></hf-buttons>
         </div>

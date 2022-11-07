@@ -16,8 +16,8 @@
 }
 .far{
   color: gray;
-  font-size: 20px;
-  padding-top: 10px;
+  font-size: 1.5em;
+  display: inline;
   cursor: pointer;
 }
 .datetime-picker{
@@ -44,8 +44,11 @@ h5 span {
   padding: 0 10px;
 }
 .scrollit {
-    overflow:scroll;
-    height:600px;
+  overflow:hidden;  
+  height:600px;
+}
+.scrollit:hover{
+  overflow-y: auto;
 }
 </style>
 <template>
@@ -57,7 +60,7 @@ h5 span {
         <!-- <Info :message="description" /> -->
           <div class="form-group" style="display:flex">
            <h3 v-if="vcList.length > 0" class="mt-4" style="text-align: left;">
-            <i class="fa fa-id-card mr-2" ></i>Credentials</h3>
+            Credentials</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Issue your first credential!</h3>
             <hf-buttons 
               name="+ Create"
@@ -162,14 +165,14 @@ h5 span {
                       <tool-tip infoMessage="Issuance Date of the issued credential"></tool-tip>
                       <label for="fordid"><strong>Issuance Date:</strong></label>                      
                       <input type="text" class="form-control"                      
-                      v-model="new Date(issuanceDate).toLocaleString()" disabled
+                      v-model="new Date(issuanceDate).toLocaleString('en-us', { timeZone: 'UTC' })" disabled
                          />
                     </div>
                      <div class="form-group pt-2" v-if="isEdit === true">
                       <tool-tip infoMessage="Expiry Date for the issued credential"></tool-tip>
                       <label for="fordid"><strong>Expiry Date:</strong></label>                      
                       <input type="text" class="form-control"
-                      v-model="new Date(expiryDateTime).toLocaleString()" disabled
+                      v-model="new Date(expiryDateTime).toLocaleString('en-us', { timeZone: 'UTC' })" disabled
                          />
                     </div>
                     <!-- <div class="form-group" v-if="isEdit===true">
@@ -224,16 +227,16 @@ h5 span {
               </StudioSideBar>
       </div>
     </div>
-    <div class="row" style="margin-top: 2%;" v-if="vcList.length > 0">
-      <div class="col-md-12 scrollit">
+    <div class="row scrollit" style="margin-top: 2%;" v-if="vcList.length > 0">
+      <div class="col-md-12">
         <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
             <tr>
               <th>VC Id</th>
               <th>Schema Id</th>
               <th>Subject DID</th>
-              <th>Issuance Date</th>
-              <th>Expiration Date</th>
+              <th>Issuance Date (UTC)</th>
+              <th>Expiration Date (UTC)</th>
               <!-- <th>Credential Hash</th> -->
               <th>Status</th>
               <th>Status Reason</th>
@@ -246,15 +249,40 @@ h5 span {
             <tr v-for="row in vcList" :key="row._id">
             
               <td>
-                <a v-if="row.vc" :href="`${$config.explorer.BASE_URL}revocationRegistry/${removeUrl(row.vc.id)}`" target="_blank>">{{ row.vc.id ? shorten((row.vc.id)) : '-' }}</a>
+                <div v-if="row.vc">
+                <a :href="`${$config.explorer.BASE_URL}revocationRegistry/${removeUrl(row.vc.id)}`" target="_blank>">{{ row.vc.id ? shorten((row.vc.id)) : '-' }}</a>
+                <i class="far fa-copy ml-1"
+                style="cursor:pointer;"
+                title="Click to copy VC Id"
+                @click="copyToClip(removeUrl(row.vc.id),'VC Id')"
+                ></i>
+                </div>
                 <span v-else>-</span>
               </td>
               <td>
-                <a :href="`${$config.explorer.BASE_URL}schemas/${row.schemaId}`" target="_blank">{{ shorten(row.schemaId) }}</a>
+                <div style="display:flex;">
+                <a :href="`${$config.explorer.BASE_URL}schemas/${row.schemaId}`" target="_blank">{{ shorten(row.schemaId) }}
+                </a>
+                <i class="far fa-copy ml-1"
+                style="cursor:pointer;"
+                title="Click to copy Schema Id"
+                @click="copyToClip(row.schemaId,'Schema Id')"
+                ></i>
+                </div>
               </td>
-              <td>{{ shorten(row.subjectDid) }}</td>
-              <td>{{ row.credStatus ? new Date(row.credStatus.issuanceDate).toLocaleString(): "-"}}</td>
-              <td>{{ row.credStatus ? new Date(row.credStatus.expirationDate).toLocaleString() : "-"}}</td>
+              <td>
+                <div style="display:flex;">
+                <a :href="`${$config.explorer.BASE_URL}identity/${row.subjectDid}`" target="_blank">{{ shorten(row.subjectDid) }}
+                </a>                
+                <i class="far fa-copy ml-1"
+                style="cursor:pointer;"
+                title="Click to copy Subject DID"
+                @click="copyToClip(row.subjectDid,'Subject DID')"
+                ></i>
+                </div>
+              </td>
+              <td>{{ row.credStatus ? new Date(row.credStatus.issuanceDate).toLocaleString('en-us', { timeZone: 'UTC' }): "-"}}</td>
+              <td>{{ row.credStatus ? new Date(row.credStatus.expirationDate).toLocaleString('en-us', { timeZone: 'UTC' }) : "-"}}</td>
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
               <td> {{ row.credStatus ? row.credStatus.claim.currentStatus : row.status}}</td>
               <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
@@ -414,7 +442,7 @@ export default {
       this.holderDid = cred.subjectDid
       this.issuerDid = cred.issuerDid
       this.credHash = cred.credStatus.credentialHash
-      this.expiryDateTime = cred.expiryDate
+      this.expiryDateTime = cred.credStatus.expirationDate     
       this.issuanceDate = cred.credStatus.issuanceDate
       this.preStatusSelect = cred.credStatus.claim.currentStatus
       this.statusReason = cred.credStatus.claim.statusReason
@@ -533,23 +561,6 @@ export default {
       const chars = url.split('credential/');
       return chars[0]
     },
-    copyToClip(textToCopy,contentType) {
-        if (textToCopy) {
-            navigator.clipboard
-                .writeText(textToCopy)
-                .then(() => {
-                    this.notifySuccess(
-                        `${contentType} copied!`
-                    );
-                })
-                .catch((err) => {
-                    this.notifyErr(
-                        'Error while copying',
-                        err
-                    );
-                });
-        }
-    },
     goToSchema() {
       this.$router.push('schema')
     },
@@ -601,7 +612,7 @@ export default {
       const resp =await res.json()
       this.credUrl = resp.data.url;
       this.$root.$emit('modal-show')
-      this.notifySuccess("Cred Url Generated Successfully")
+      this.notifySuccess("Credential URL Generated Successfully")
     },
     openWallet(url) {
       if (url != "") {
