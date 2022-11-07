@@ -30,6 +30,9 @@ export default new Vuex.Store({
         }
     },
     getters: {
+        vcList(state) {
+            return state.vcList
+        },
         userDetails(state) {
             return state.userProfile.details
         },
@@ -101,6 +104,23 @@ export default new Vuex.Store({
                     templatesCount:0,
                 }
             }
+        },
+        increaseOrgDataCount(state,payload) {            
+            state.orgList.find((x)=>{
+                if(x._id === state.selectedOrgDid){                    
+                    x[payload] += 1                    
+                }
+            })
+        },
+        DecreaseOrgTemplateCount(state,payload) {
+            state.orgList.find((x)=>{
+                if(x._id === state.selectedOrgDid){
+                    if(x[payload]!==0){
+                    x[payload] -= 1
+                    }            
+                                 
+                }
+            })
         },
         shiftContainer(state,payload) {
             state.containerShift = payload

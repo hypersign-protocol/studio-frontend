@@ -1,5 +1,22 @@
 export default {
     methods: {
+        copyToClip(textToCopy,contentType) {
+            if (textToCopy) {
+                navigator.clipboard
+                    .writeText(textToCopy)
+                    .then(() => {
+                        this.notifySuccess(
+                            `${contentType} copied!`
+                        );
+                    })
+                    .catch((err) => {
+                        this.notifyErr(
+                            'Error while copying',
+                            err
+                        );
+                    });
+            }
+        },
         shorten(str){
             if(!str || str === 'undefined'){
                 return ""
