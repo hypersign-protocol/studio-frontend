@@ -268,6 +268,7 @@ export default {
     addController() {
       this.isAdd = true
       this.orgStore.controller.push(this.controllerValue)
+      this.controllerValue = ""
     },
     getProfileIcon(name) {
       return "https://avatars.dicebear.com/api/identicon/" + name + ".svg"
