@@ -39,6 +39,12 @@
           <input type="text" class="form-control" id="domain" v-model="orgStore.domain" aria-describedby="domainHelp"
             placeholder="Enter your domain name">
         </div>
+        <div class="form-group">
+          <tool-tip infoMessage="Organistaion Controller"></tool-tip>
+          <label for="controller"><strong>Controllers<span style="color: red">*</span>:</strong></label>        
+          <input type="text" class="form-control" id="controllers" v-model="orgStore.controller" aria-describedby="controllerHelp"
+            placeholder="Controller ids">
+        </div>
         <!-- <div class="form-group">
           <label for="logo"><strong>Logo URL:</strong></label>
           <input type="text" class="form-control" id="logo" v-model="orgStore.logo" aria-describedby="logoHelp"
@@ -193,6 +199,7 @@ export default {
         orgDid: "",
         userDid: "",
         status: "",
+        controller: [],
       },
       authToken: localStorage.getItem("authToken"),
       isLoading: true,
@@ -276,6 +283,7 @@ export default {
     openSlider() {
       this.edit = false
       this.clearAll();
+      this.orgStore.controller=[this.$store.state.userProfile.details.did]
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
     },
     editOrg(orgDid) {
@@ -292,6 +300,11 @@ export default {
         return this.notifyErr(messages.ORGANIZATION.DOMAIN_NAME_EMPTY)
        } else if (!this.orgStore.domain.includes('http://localhost') && !validator.isURL(this.orgStore.domain)){
         return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
+      }
+      try{
+      this.orgStore.controller=this.orgStore.controller.split(',')
+      }catch(e){
+this.orgStore.controller=this.orgStore.controller
       }
       let url
       let method
@@ -322,12 +335,11 @@ export default {
         .then((j) => {
   
           const { org } = j.data
-          if (!this.edit) {
+          
             let QR_DATA = j.data.QrData
             let URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
 
-            this.openWallet(URL)
-          }
+            this.openWallet(URL)          
           if (j.error === false) {
             if(!this.edit) {
             this.$store.commit('insertAnOrg', j.data.org);
@@ -371,6 +383,7 @@ export default {
         orgDid: "",
         userDid: "",
         status: "",
+        controller: [],
       }
     },
   },
