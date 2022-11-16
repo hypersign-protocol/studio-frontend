@@ -16,6 +16,19 @@
     text-decoration: underline;
     cursor: pointer;
 }
+.scrollit {
+  overflow:hidden;  
+  height:600px;
+}
+.scrollit:hover{
+  overflow-y: auto;
+}
+.far{
+  color: gray;
+  font-size: 1.5em;
+  /* padding-top: 10px; */
+  cursor: pointer;
+}
 </style>
 <template>
   <div :class="isContainerShift ?'homeShift':'home'">
@@ -23,11 +36,11 @@
 
     <div class="row">
       <div class="col-md-12" style="text-align: left">
-        <Info :message="description" />
+        <!-- <Info :message="description" /> -->
         
           <div class="form-group" style="display:flex">
            <h3 v-if="templateList.length > 0" class="mt-4" style="text-align: left;">
-            <i class="fa fa-desktop mr-2"></i>Presentation Templates</h3>
+            Presentation Templates</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Create your first presentation template!</h3>            
             <hf-buttons 
               name="+ Create"
@@ -107,6 +120,12 @@
                   </form>
                   <hr />
                   <hf-buttons 
+                  v-if="isEdit === true"
+                    name="Update"                    
+                    @executeAction="generatePresentation()"
+                  ></hf-buttons>
+                  <hf-buttons 
+                    v-else
                     name="Save"                    
                     @executeAction="generatePresentation()"
                   ></hf-buttons>
@@ -116,7 +135,7 @@
           
       </div>
     </div>
-    <div class="row" style="margin-top: 2%;" v-if="templateList.length >0">
+    <div class="row scrollit" style="margin-top: 2%;" v-if="templateList.length >0">
       <div class="col-md-12">
         <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
@@ -135,7 +154,7 @@
             <tr v-for="row in templateList" :key="row">
               <td class="align-middle">
                 <div class="align-middle" style="display:flex;">
-                <span class="mr-1">{{shorten(row._id)}}</span>
+                <span class="mr-1">{{row._id}}</span>
                 <i class="far fa-copy"
                 style="cursor:pointer;"
                 title="Click to copy Template Id"
@@ -145,9 +164,17 @@
               </td>              
               <td class="align-middle">{{row.name}}</td>
               <!-- <td>{{row.issuerDid.toString()}}</td> -->
-              <td class="align-middle">{{ shorten(row.schemaId)}}</td>
+              <td class="align-middle">
+                 <a :href="`${$config.explorer.BASE_URL}schemas/${row.schemaId}`" target="_blank">{{ shorten(row.schemaId)}}
+                </a>
+                <i class="far fa-copy"
+                style="cursor:pointer;"
+                title="Click to copy Schema Id"
+                @click="copyToClip(row.schemaId,'Schema Id')"
+                ></i>
+              </td>
               <td class="align-middle">{{row.reason}}</td>
-              <td class="align-middle">{{row.callbackUrl}}</td>
+              <td class="align-middle" :title="row.callbackUrl">{{truncate(row.callbackUrl,40)}}</td>
               <td class="align-middle">
               <div style="display:flex">
               <i 
@@ -205,7 +232,7 @@ import HfButtons from "../components/element/HfButtons.vue"
 import conf from '../config';
 const { hypersignSDK } = conf;
 import QrcodeVue from "qrcode.vue";
-import Info from '@/components/Info.vue'
+// import Info from '@/components/Info.vue'
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import HfSelectDropDown from "../components/element/HfSelectDropDown.vue"
@@ -215,7 +242,7 @@ import message from '../mixins/messages'
 import { isEmpty, isValidURL, isValidDid } from '../mixins/fieldValidation'
 export default {
   name: "Presentation",
-  components: { QrcodeVue, Info , StudioSideBar, HfButtons, Loading, HfSelectDropDown, ToolTip, HfPopUp},
+  components: { QrcodeVue , StudioSideBar, HfButtons, Loading, HfSelectDropDown, ToolTip, HfPopUp},
   computed:{
     templateList(){
       return this.$store.state.templateList;
@@ -237,17 +264,17 @@ export default {
       maxChar:105,
       remainingCharText:'Remaining 105 characters',
       tempToDelete:'',    
-      description: "The subject (or holder) generates verifiable presentation from one or more verifiable \
-      credentials, issued by one or more issuers, that is shared with a specific verifier. \
-      A verifiable presentation is a tamper-evident presentation encoded in such a way that \
-      authorship of the data can be trusted after a process of cryptographic verification. \
-      Certain types of verifiable presentations might contain data that is synthesized from, \
-      but do not contain, the original verifiable credentials for example, in order to proof the \
-      subject that he/she is an adult, she/he does not have to tell his/her actual age \
-      (i.e. Zero knowledge proof). The airline passenger might not have to show the complete ticket\
-      to the secruity personal to pass the security check. The passenger will have ability to show \
-      just one document (the verifiable presentation) derived from his passport and air ticket to\
-      show at the security check.",
+      // description: "The subject (or holder) generates verifiable presentation from one or more verifiable \
+      // credentials, issued by one or more issuers, that is shared with a specific verifier. \
+      // A verifiable presentation is a tamper-evident presentation encoded in such a way that \
+      // authorship of the data can be trusted after a process of cryptographic verification. \
+      // Certain types of verifiable presentations might contain data that is synthesized from, \
+      // but do not contain, the original verifiable credentials for example, in order to proof the \
+      // subject that he/she is an adult, she/he does not have to tell his/her actual age \
+      // (i.e. Zero knowledge proof). The airline passenger might not have to show the complete ticket\
+      // to the secruity personal to pass the security check. The passenger will have ability to show \
+      // just one document (the verifiable presentation) derived from his passport and air ticket to\
+      // show at the security check.",
       presentationTemplate: {
         queryType: 'QueryByExample',
         domain: "",
@@ -313,23 +340,6 @@ export default {
         this.remainingCharText = "Remaining"+" "+remainingChar+" "+"characters."      
         }
     },
-    copyToClip(textToCopy,contentType) {
-        if (textToCopy) {
-            navigator.clipboard
-                .writeText(textToCopy)
-                .then(() => {
-                    this.notifySuccess(
-                        `${contentType} copied!`
-                    );
-                })
-                .catch((err) => {
-                    this.notifyErr(
-                        'Error while copying',
-                        err
-                    );
-                });
-        }
-    },
     editTemp(temp) {
       this.isEdit = true
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
@@ -371,6 +381,7 @@ export default {
                   this.$store.commit('deleteTemplate',id)
                   this.notifySuccess(`Template with ${id} id deleted successfully`)
                   this.$root.$emit('modal-close')
+                  this.$store.commit('DecreaseOrgTemplateCount','templatesCount')
                 }          
           } else {
             this.notifyErr('Please enter correct template id')
@@ -550,6 +561,7 @@ export default {
           } else{
             this.$store.commit('insertApresentationTemplate', json.data.presentationTemplateObj)
             this.notifySuccess('Template Successfully created')
+            this.$store.commit('increaseOrgDataCount','templatesCount')
           }
           // this.openSlider();
           this.clearAll()

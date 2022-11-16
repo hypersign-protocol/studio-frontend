@@ -16,8 +16,8 @@
 }
 .far{
   color: gray;
-  font-size: 20px;
-  padding-top: 10px;
+  font-size: 1.5em;
+  display: inline;
   cursor: pointer;
 }
 .datetime-picker{
@@ -43,6 +43,13 @@ h5 span {
   background: #fff;
   padding: 0 10px;
 }
+.scrollit {
+  overflow:hidden;  
+  height:600px;
+}
+.scrollit:hover{
+  overflow-y: auto;
+}
 </style>
 <template>
   <div :class="isContainerShift ?'homeShift':'home'">
@@ -50,10 +57,10 @@ h5 span {
 
     <div class="row">
       <div class="col-md-12" style="text-align: left">
-        <Info :message="description" />
+        <!-- <Info :message="description" /> -->
           <div class="form-group" style="display:flex">
            <h3 v-if="vcList.length > 0" class="mt-4" style="text-align: left;">
-            <i class="fa fa-id-card mr-2" ></i>Credentials</h3>
+            Credentials</h3>
             <h3 v-else class="mt-4" style="text-align: left;">Issue your first credential!</h3>
             <hf-buttons 
               name="+ Create"
@@ -79,7 +86,6 @@ h5 span {
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
-                    
                     <div v-else>
                     <div class="form-group">
                       <tool-tip infoMessage="Credential issued to this DID"></tool-tip>
@@ -153,14 +159,14 @@ h5 span {
                       <tool-tip infoMessage="Issuance Date of the issued credential"></tool-tip>
                       <label for="fordid"><strong>Issuance Date:</strong></label>                      
                       <input type="text" class="form-control"                      
-                      v-model="new Date(issuanceDate).toLocaleString()" disabled
+                      v-model="new Date(issuanceDate).toLocaleString('en-us', { timeZone: 'UTC' })" disabled
                          />
                     </div>
                      <div class="form-group pt-2" v-if="isEdit === true">
                       <tool-tip infoMessage="Expiry Date for the issued credential"></tool-tip>
                       <label for="fordid"><strong>Expiry Date:</strong></label>                      
                       <input type="text" class="form-control"
-                      v-model="new Date(expiryDateTime).toLocaleString()" disabled
+                      v-model="new Date(expiryDateTime).toLocaleString('en-us', { timeZone: 'UTC' })" disabled
                          />
                     </div>
                     <!-- <div class="form-group" v-if="isEdit===true">
@@ -215,7 +221,7 @@ h5 span {
               </StudioSideBar>
       </div>
     </div>
-    <div class="row" style="margin-top: 2%;" v-if="vcList.length > 0">
+    <div class="row scrollit" style="margin-top: 2%;" v-if="vcList.length > 0">
       <div class="col-md-12">
         <table class="table table-bordered event-card" style="background:#FFFF">
           <thead class="thead-light">
@@ -223,8 +229,8 @@ h5 span {
               <th>VC Id</th>
               <th>Schema Id</th>
               <th>Subject DID</th>
-              <th>Issuance Date</th>
-              <th>Expiration Date</th>
+              <th>Issuance Date (UTC)</th>
+              <th>Expiration Date (UTC)</th>
               <!-- <th>Credential Hash</th> -->
               <th>Status</th>
               <th>Status Reason</th>
@@ -234,17 +240,43 @@ h5 span {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in vcList" :key="row.vc_id">
+            <tr v-for="row in vcList" :key="row._id">
             
               <td>
-                <a :href="`${row.vc_id}:`" target="_blank>">{{ row.vc_id ? removeUrl(row.vc_id) : '-' }}</a>
+                <div v-if="row.vc">
+                <a :href="`${$config.explorer.BASE_URL}revocationRegistry/${removeUrl(row.vc.id)}`" target="_blank>">{{ row.vc.id ? shorten((row.vc.id)) : '-' }}</a>
+                <i class="far fa-copy ml-1"
+                style="cursor:pointer;"
+                title="Click to copy VC Id"
+                @click="copyToClip(removeUrl(row.vc.id),'VC Id')"
+                ></i>
+                </div>
+                <span v-else>-</span>
               </td>
               <td>
-                <a :href="`${$config.nodeServer.BASE_URL_REST}${$config.nodeServer.SCHEMA_GET_REST}${row.schemaId}:`" target="_blank">{{ shorten(row.schemaId) }}</a>
+                <div style="display:flex;">
+                <a :href="`${$config.explorer.BASE_URL}schemas/${row.schemaId}`" target="_blank">{{ shorten(row.schemaId) }}
+                </a>
+                <i class="far fa-copy ml-1"
+                style="cursor:pointer;"
+                title="Click to copy Schema Id"
+                @click="copyToClip(row.schemaId,'Schema Id')"
+                ></i>
+                </div>
               </td>
-              <td>{{ shorten(row.subjectDid) }}</td>
-              <td>{{ row.credStatus ? new Date(row.credStatus.issuanceDate).toLocaleString(): "-"}}</td>
-              <td>{{ row.credStatus ? new Date(row.credStatus.expirationDate).toLocaleString() : "-"}}</td>
+              <td>
+                <div style="display:flex;">
+                <a :href="`${$config.explorer.BASE_URL}identity/${row.subjectDid}`" target="_blank">{{ shorten(row.subjectDid) }}
+                </a>                
+                <i class="far fa-copy ml-1"
+                style="cursor:pointer;"
+                title="Click to copy Subject DID"
+                @click="copyToClip(row.subjectDid,'Subject DID')"
+                ></i>
+                </div>
+              </td>
+              <td>{{ row.credStatus ? new Date(row.credStatus.issuanceDate).toLocaleString('en-us', { timeZone: 'UTC' }): "-"}}</td>
+              <td>{{ row.credStatus ? new Date(row.credStatus.expirationDate).toLocaleString('en-us', { timeZone: 'UTC' }) : "-"}}</td>
               <!-- <td>{{ row.credStatus ?  row.credStatus.credentialHash : "-"}}</td>  -->
               <td> {{ row.credStatus ? row.credStatus.claim.currentStatus : row.status}}</td>
               <td>{{ row.credStatus ? row.credStatus.claim.statusReason  : "-"}}</td>
@@ -289,7 +321,7 @@ h5 span {
 
 <script>
 import fetch from "node-fetch";
-import Info from '@/components/Info.vue'
+// import Info from '@/components/Info.vue'
 import UtilsMixin from '../mixins/utils';
 import HfPopUp from "../components/element/hfPopup.vue";
 import Loading from "vue-loading-overlay";
@@ -304,10 +336,10 @@ import Datepicker from 'vuejs-datetimepicker'
 import VueQr from "vue-qr"
 export default {
   name: "Credential",
-  components: { Info, HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip, Datepicker, VueQr },
+  components: { HfPopUp, Loading, StudioSideBar, HfButtons, HfSelectDropDown, ToolTip, Datepicker, VueQr },
   computed: {
     vcList(){
-      return this.$store.state.vcList;
+      return this.$store.getters.vcList;
     },
     selectOptions(){
       return this.$store.getters.listOfAllSchemaOptions;
@@ -330,7 +362,7 @@ export default {
       issuerDid:'',
       authToken: localStorage.getItem('authToken'),
       isEdit:false,
-      description: "An issuer can issue a credential to a subject (or holder) which can be verfied by the verifier independently, without having him to connect with the issuer. They are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries.  For example: an airline company can issue a flight ticket (\"verfiable credential\") using schema (issued by DGCA) to the passenger.",
+      // description: "An issuer can issue a credential to a subject (or holder) which can be verfied by the verifier independently, without having him to connect with the issuer. They are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries.  For example: an airline company can issue a flight ticket (\"verfiable credential\") using schema (issued by DGCA) to the passenger.",
       active: 0,
       host: location.hostname,
       user: {},
@@ -404,7 +436,7 @@ export default {
       this.holderDid = cred.subjectDid
       this.issuerDid = cred.issuerDid
       this.credHash = cred.credStatus.credentialHash
-      this.expiryDateTime = cred.expiryDate
+      this.expiryDateTime = cred.credStatus.expirationDate     
       this.issuanceDate = cred.credStatus.issuanceDate
       this.preStatusSelect = cred.credStatus.claim.currentStatus
       this.statusReason = cred.credStatus.claim.statusReason
@@ -521,24 +553,7 @@ export default {
     },
     removeUrl(url) {
       const chars = url.split('credential/');
-      return this.shorten(chars[1])      
-    },
-    copyToClip(textToCopy,contentType) {
-        if (textToCopy) {
-            navigator.clipboard
-                .writeText(textToCopy)
-                .then(() => {
-                    this.notifySuccess(
-                        `${contentType} copied!`
-                    );
-                })
-                .catch((err) => {
-                    this.notifyErr(
-                        'Error while copying',
-                        err
-                    );
-                });
-        }
+      return chars[0]
     },
     goToSchema() {
       this.$router.push('schema')
@@ -593,7 +608,7 @@ export default {
       const resp =await res.json()
       this.credUrl = resp.data.url;
       this.$root.$emit('modal-show')
-      this.notifySuccess("Cred Url Generated Successfully")
+      this.notifySuccess("Credential URL Generated Successfully")
     },
     openWallet(url) {
       if (url != "") {
@@ -773,11 +788,14 @@ export default {
         const ToDate = new Date();
         if (isEmpty(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.EMPTY_HOLDER_DID)
-        } else if(isEmpty(this.issuerDid)) {
-          return this.notifyErr(message.CREDENTIAL.EMPTY_ISSUER_DID)
-        } else if(!isValidDid(this.issuerDid)) {
-          return this.notifyErr(message.CREDENTIAL.INVALID_DID)
-        } else if (!isValidDid(this.holderDid)) {
+        } 
+        // else if(isEmpty(this.issuerDid)) {
+        //   return this.notifyErr(message.CREDENTIAL.EMPTY_ISSUER_DID)
+        // } 
+        // else if(!isValidDid(this.issuerDid)) {
+        //   return this.notifyErr(message.CREDENTIAL.INVALID_DID)
+        // } 
+        else if (!isValidDid(this.holderDid)) {
           return this.notifyErr(message.CREDENTIAL.INVALID_DID)
         } else if (isEmpty(this.selected)) {
           return this.notifyErr(message.CREDENTIAL.SELECT_SCHEMA)
@@ -794,7 +812,7 @@ export default {
         this.isLoading = true
         const fields = attributeMap
         const schemaId = this.selected
-        const issuerDid = this.issuerDid
+        const issuerDid = this.user.id
         const subjectDid = this.holderDid
         const expirationDate = this.expiryDateTime
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
@@ -825,7 +843,7 @@ export default {
               this.openWallet(URL)
               this.ssePopulateCredStatus(creadRecord._id, this.$store)
               this.openSlider();
-             
+              this.$store.commit('increaseOrgDataCount','credentialsCount')
            } else {
              console.log(json)
              throw new Error(`${json.message}`)
