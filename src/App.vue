@@ -69,7 +69,8 @@ cursor: pointer;
     </b-navbar-brand>
     <b-collapse id="nav-collapse" is-nav style="width: 30%;">
       <b-navbar-nav class="ml-auto">
-
+        <a class="mr-3" href="https://docs.hypersign.id/entity-studio/introduction"
+        target="blank" style="color:grey; margin-top:1.3em;" title="Documentation"><b-icon  scale="3" icon="file-earmark-text"></b-icon></a>
         <b-nav-item-dropdown right v-if="showIcon">
           <template #button-content>
             <b-iconstack font-scale="3">
