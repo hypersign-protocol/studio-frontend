@@ -560,9 +560,10 @@ export default {
           return this.notifyErr(message.SCHEMA.EMPTY_SCHEMA_ATTRIBUTE)
         }
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.SAVE_SCHEMA_EP}`;
+        const {orgDid}=this.$store.getters.getSelectedOrg;
         const schemaData = {
           name: this.credentialName,
-          author: this.user.id,
+          author: orgDid,
           fields: this.attributes,
           description: this.credentialDescription,
           // additionalProperties: this.additionalProperties,
