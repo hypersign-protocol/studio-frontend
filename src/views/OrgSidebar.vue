@@ -2,17 +2,14 @@
   <div class="">
     <div class="" style="display:flex">
       <h3 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">
-      <i class="fa fa-university mr-2"></i>Organizations</h3>
+        <i class="fa fa-university mr-2"></i>Organizations
+      </h3>
       <h4 v-else class="mt-4" style="text-align: left;">Create your first organization!</h4>
 
-      <hf-buttons 
-      name="+ Create"
-      style="text-align: right;"
-      class="ml-auto mt-4"
-      @executeAction="openSlider()"
-      ></hf-buttons>
+      <hf-buttons name="+ Create" style="text-align: right;" class="ml-auto mt-4" @executeAction="openSlider()">
+      </hf-buttons>
     </div>
-    <StudioSideBar :title="edit? 'Edit Organization' : 'Add Organization'">
+    <StudioSideBar :title="edit ? 'Edit Organization' : 'Add Organization'">
       <div class="container">
 
         <div class="form-group" v-if="edit === true">
@@ -28,22 +25,51 @@
 
         <div class="form-group">
           <tool-tip infoMessage="Your Organization Name"></tool-tip>
-          <label for="orgName"><strong>Name<span style="color: red">*</span>:</strong></label>          
+          <label for="orgName"><strong>Name<span style="color: red">*</span>:</strong></label>
           <input type="text" class="form-control" id="orgName" v-model="orgStore.name" aria-describedby="orgNameHelp"
             placeholder="Enter your org name">
           <!-- <small id="orgNameHelp" class="form-text text-muted">Some help text</small> -->
         </div>
         <div class="form-group">
           <tool-tip infoMessage="Your Organization Domain Name"></tool-tip>
-          <label for="domain"><strong>Domain<span style="color: red">*</span>:</strong></label>        
+          <label for="domain"><strong>Domain<span style="color: red">*</span>:</strong></label>
           <input type="text" class="form-control" id="domain" v-model="orgStore.domain" aria-describedby="domainHelp"
             placeholder="Enter your domain name">
         </div>
+     
         <div class="form-group">
           <tool-tip infoMessage="Organistaion Controller"></tool-tip>
-          <label for="controller"><strong>Controllers<span style="color: red">*</span>:</strong></label>        
-          <input type="text" class="form-control" id="controllers" v-model="orgStore.controller" aria-describedby="controllerHelp"
-            placeholder="Controller ids">
+          <label for="controller"><strong>Controllers<span style="color: red">*</span>:</strong></label>
+          <div class="selected-media-wrapper d-flex p-2 mb-4" style="overflow-y: auto"
+          v-if="orgStore.controller.length > 0">
+          <div v-for="ctl in orgStore.controller" v-bind:key="ctl">
+            <div :class="
+          flash == ctl
+            ? 'flash card rounded m-1 p-1 d-flex flex-row align-items-center'
+            : 'card rounded m-1 p-1 d-flex flex-row align-items-center pointer'"
+              @click="selectController(ctl)" style="min-width:90px;" :title="ctl">
+              {{ ctl }}
+              <span style="color: gray; padding-left: 5px">
+                <i style="" class="fas fa-minus-circle"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+          <input type="text" class="form-control" id="controllers" v-model="controllerValue"
+            aria-describedby="controllerHelp" placeholder="Controller ids" v-if="isAdd">
+
+          <div v-if="isAdd">
+            <hf-buttons name="Add" @executeAction="addController()"> </hf-buttons>
+          </div>
+          <div v-else>
+            <hf-buttons name="Delete" @executeAction="deleteController()"> </hf-buttons>
+
+            <hf-buttons name="Cancel" @executeAction="cancelController()"> </hf-buttons>
+
+          </div>
+
+
+
         </div>
         <!-- <div class="form-group">
           <label for="logo"><strong>Logo URL:</strong></label>
@@ -61,7 +87,7 @@
                   </div> -->
         <hr />
         <div class="form-group" v-if="edit">
-         <hf-buttons name="Update" class="btn btn-primary" @executeAction="createAnOrg()"></hf-buttons>
+          <hf-buttons name="Update" class="btn btn-primary" @executeAction="createAnOrg()"></hf-buttons>
         </div>
         <div class="form-group" v-else>
           <hf-buttons name="Save" @executeAction="createAnOrg()"></hf-buttons>
@@ -119,61 +145,69 @@
                 @click="editOrg(eachOrg._id)" title="Click to edit this event" style="cursor: pointer"
                 ></i>
                 <span class="ml-3"></span>
-                <i class="fas fa-sync" aria-hidden="true"
-                @click="switchOrg(eachOrg._id)" title="Click to switch to org" style="cursor: pointer"
-                ></i>
-                </div>
-            </div> 
+                <i class="fas fa-sync" aria-hidden="true" @click="switchOrg(eachOrg._id)" title="Click to switch to org"
+                  style="cursor: pointer"></i>
+              </div>
+            </div>
           </footer>
         </b-card>
       </div>
     </div>
   </div>
 </template>
-  <style scoped>
-  .far{
-cursor: pointer;
-color: grey;
-display: inline;
-padding-left: 5px;
+<style scoped>
+.far {
+  cursor: pointer;
+  color: grey;
+  display: inline;
+  padding-left: 5px;
 }
-  
-  .container {
-    padding: 20px;
-    text-align: left;
-  }
-  
-  .eventCard {
-    border-left: 10px solid var(--ds-background-accent-red-subtler, rgba(241, 179, 25, 0.24));
-  }
-  
-  .eventCard:hover {
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 10px;
-    cursor: pointer;
-  }
-  
-  .card {}
-  
-  .card-body {
-    -ms-flex: 1 1 auto;
-    -webkit-box-flex: 1;
-    flex: 1 1 auto;
-    min-height: 1px;
-    padding: 1.25rem;
-  
-  }
-  .scroll{
-    padding-top: 1em;
-    overflow: auto;
-    height:490px;
-  }
-  </style>
 
-  <script>
+.container {
+  padding: 20px;
+  text-align: left;
+}
+
+.flash {
+  cursor: pointer;
+  background-color: #1faa596b;
+  border: 0;
+  box-shadow: 2px 0 10px rgb(0 0 0 / 10%);
+  animation: flash 0.4s cubic-bezier(1, 0, 0, 1);
+}
+
+.eventCard {
+  border-left: 10px solid var(--ds-background-accent-red-subtler, rgba(241, 179, 25, 0.24));
+}
+
+.eventCard:hover {
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 10px;
+  cursor: pointer;
+}
+
+.card {}
+
+.card-body {
+  -ms-flex: 1 1 auto;
+  -webkit-box-flex: 1;
+  flex: 1 1 auto;
+  min-height: 1px;
+  padding: 1.25rem;
+
+}
+
+.scroll {
+  padding-top: 1em;
+  overflow: auto;
+  height: 490px;
+}
+</style>
+
+<script>
 import HfPopUp from "../components/element/hfPopup.vue";
 import StudioSideBar from "../components/element/StudioSideBar.vue";
 import UtilsMixin from '../mixins/utils';
-import {isEmpty, isValidURL} from '../mixins/fieldValidation'
+import { isEmpty, isValidURL } from '../mixins/fieldValidation'
 import 'vue-loading-overlay/dist/vue-loading.css';
 import validator from 'validator';
 import Loading from "vue-loading-overlay";
@@ -190,6 +224,8 @@ export default {
   data() {
     return {
       edit: false,
+      flash: null,
+      isAdd: true,
       orgStore: {
         name: "Hypermine Pvt Ltd",
         domain: "hypermine.in",
@@ -213,8 +249,29 @@ export default {
   },
   components: { HfPopUp, Loading, StudioSideBar, HfButtons, ToolTip },
   methods: {
+
+    selectController(id) {
+      this.isAdd=false
+      this.flash = id
+    },
+    deleteController(){
+      this.orgStore.controller.splice(this.flash, 1)
+      this.flash = null
+      this.isAdd=true
+    }
+    ,
+    cancelController(){
+      this.flash = null
+      this.isAdd=true
+    
+    },
+    addController() {
+      this.isAdd = true
+      this.orgStore.controller.push(this.controllerValue)
+      this.controllerValue = ""
+    },
     getProfileIcon(name) {
-      return "https://avatars.dicebear.com/api/identicon/"+name+".svg"
+      return "https://avatars.dicebear.com/api/identicon/" + name + ".svg"
     },
     ssePopulateOrg(id, store) {
       const sse = new EventSource(`${this.$config.studioServer.ORG_SSE}${id}`);
@@ -254,36 +311,36 @@ export default {
 
       }
     },
-    copyToClip(textToCopy,contentType) {
-        if (textToCopy) {
-            navigator.clipboard
-                .writeText(textToCopy)
-                .then(() => {
-                    this.notifySuccess(
-                        `${contentType} copied!`
-                    );
-                })
-                .catch((err) => {
-                    this.notifyErr(
-                        'Error while copying',
-                        err
-                    );
-                });
-        }
+    copyToClip(textToCopy, contentType) {
+      if (textToCopy) {
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(() => {
+            this.notifySuccess(
+              `${contentType} copied!`
+            );
+          })
+          .catch((err) => {
+            this.notifyErr(
+              'Error while copying',
+              err
+            );
+          });
+      }
     },
     switchOrg(orgDid) {
-      localStorage.setItem('selectedOrg',orgDid)
-      this.$store.commit('updateSideNavStatus',true)
+      localStorage.setItem('selectedOrg', orgDid)
+      this.$store.commit('updateSideNavStatus', true)
       this.$store.commit('selectAnOrg', orgDid)
       this.$router.push('/studio/credential')
       this.$store.dispatch('fetchAllOrgDataOnOrgSelect')
-      this.$store.commit('shiftContainer',false)
-      
+      this.$store.commit('shiftContainer', false)
+
     },
     openSlider() {
       this.edit = false
       this.clearAll();
-      this.orgStore.controller=[this.$store.state.userProfile.details.did]
+      this.orgStore.controller = [this.$store.state.userProfile.details.did]
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
     },
     editOrg(orgDid) {
@@ -292,19 +349,19 @@ export default {
       Object.assign(this.orgStore, { ...this.$store.getters.findOrgByOrgID(orgDid) })
     },
     createAnOrg() {
-      if(isEmpty(this.orgStore.name)) {
-       return this.notifyErr(messages.ORGANIZATION.ORGANIZATION_NAME_EMPTY)
-      } else if(isValidURL(this.orgStore.name)){
+      if (isEmpty(this.orgStore.name)) {
+        return this.notifyErr(messages.ORGANIZATION.ORGANIZATION_NAME_EMPTY)
+      } else if (isValidURL(this.orgStore.name)) {
         return this.notifyErr(messages.ORGANIZATION.INVALID_ORG_NAME)
-      } else if(isEmpty(this.orgStore.domain)) {
+      } else if (isEmpty(this.orgStore.domain)) {
         return this.notifyErr(messages.ORGANIZATION.DOMAIN_NAME_EMPTY)
-       } else if (!this.orgStore.domain.includes('http://localhost') && !validator.isURL(this.orgStore.domain)){
+      } else if (!this.orgStore.domain.includes('http://localhost') && !validator.isURL(this.orgStore.domain)) {
         return this.notifyErr(messages.ORGANIZATION.INVALID_DOMAIN_NAME)
       }
-      try{
-      this.orgStore.controller=this.orgStore.controller.split(',')
-      }catch(e){
-this.orgStore.controller=this.orgStore.controller
+      try {
+        this.orgStore.controller = this.orgStore.controller.split(',')
+      } catch (e) {
+        this.orgStore.controller = this.orgStore.controller
       }
       let url
       let method
@@ -333,24 +390,24 @@ this.orgStore.controller=this.orgStore.controller
         headers,
       }).then((res) => res.json())
         .then((j) => {
-  
+
           const { org } = j.data
-          
-            let QR_DATA = j.data.QrData
-            let URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
 
-            this.openWallet(URL)          
+          let QR_DATA = j.data.QrData
+          let URL = `${this.$config.webWalletAddress}/deeplink?url=${JSON.stringify(QR_DATA)}`
+
+          this.openWallet(URL)
           if (j.error === false) {
-            if(!this.edit) {
-            this.$store.commit('insertAnOrg', j.data.org);
-            this.$store.commit('selectAnOrg', j.data.org._id)
-            this.isProcessFinished = true;
-            this.openSlider();
+            if (!this.edit) {
+              this.$store.commit('insertAnOrg', j.data.org);
+              this.$store.commit('selectAnOrg', j.data.org._id)
+              this.isProcessFinished = true;
+              this.openSlider();
 
-            this.notifySuccess("Org Created successfull");
-            this.ssePopulateOrg(org._id, this.$store)
+              this.notifySuccess("Org Created successfull");
+              this.ssePopulateOrg(org._id, this.$store)
             }
-            
+
             if (this.edit === true) {
               this.$store.commit('updateAnOrg', j.data.org)
               this.notifySuccess("Org Edited successfull");
@@ -375,6 +432,9 @@ this.orgStore.controller=this.orgStore.controller
     },
     clearAll() {
       this.orgStore = {
+      flash: null,
+      isAdd: true,
+
         name: "",
         domain: "",
         // logo: "",
