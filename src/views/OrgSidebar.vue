@@ -48,7 +48,7 @@
             ? 'flash card rounded m-1 p-1 d-flex flex-row align-items-center'
             : 'card rounded m-1 p-1 d-flex flex-row align-items-center pointer'"
               @click="selectController(ctl)" style="min-width:90px;" :title="ctl">
-              {{ truncate(ctl,10)  }}
+              {{ truncate(ctl,15)  }}
               <span style="color: gray; padding-left: 5px">
                 <i style="" class="fas fa-minus-circle"></i>
               </span>
