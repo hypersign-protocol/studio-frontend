@@ -86,12 +86,6 @@ h5 span {
                       <input type="text" class="form-control" placeholder="Issued To (did:hs:...)"
                         v-model="holderDid" />
                     </div>
-                    <!-- <div class="form-group" v-if="isEdit===false">
-                      <tool-tip infoMessage="Enter Issuer DID for this Credential"></tool-tip>
-                      <label for="fordid"><strong>Issuer DID<span style="color: red">*</span>:</strong></label>                      
-                      <input type="text" class="form-control" placeholder="Issuer did (did:hs:...)"
-                        v-model="issuerDid" />
-                    </div> -->
                     <div v-else>
                     <div class="form-group">
                       <tool-tip infoMessage="Credential issued to this DID"></tool-tip>
@@ -566,7 +560,9 @@ export default {
     },
     openSlider() {
       this.isEdit = false
+      
       this.clearAll();
+      this.issuerDid=this.$store.getters.getSelectedOrg.orgDid      
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
     },
     ssePopulateCredStatus(id,store){

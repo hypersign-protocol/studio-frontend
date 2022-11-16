@@ -73,7 +73,7 @@
                       <label><strong> Issuer DID<span style="color: red">*</span>:</strong></label>                      
 
                       <input class="form-control" type="text" v-model="presentationTemplate.issuerDid"
-                      placeholder="Issuer did (did:hs:...)"/>
+                      placeholder="Issuer did (did:hs:...)" disabled/>
 
 
                     </div>
@@ -419,6 +419,7 @@ export default {
     },
     openSlider() {
       this.clearAll()
+      this.presentationTemplate.issuerDid=this.$store.getters.getSelectedOrg.orgDid
       // this.presentationTemplate.issuerDid = JSON.parse(localStorage.getItem("user")).id
       this.presentationTemplate.domain = this.selectedOrg.domain;
       this.$root.$emit("bv::toggle::collapse", "sidebar-right");
