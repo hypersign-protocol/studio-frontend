@@ -812,7 +812,7 @@ export default {
         this.isLoading = true
         const fields = attributeMap
         const schemaId = this.selected
-        const issuerDid = this.user.id
+        const issuerDid = this.$store.getters.getSelectedOrg.orgDid   
         const subjectDid = this.holderDid
         const expirationDate = this.expiryDateTime
         const url = `${this.$config.studioServer.BASE_URL}${this.$config.studioServer.CRED_ISSUE_EP}`;
