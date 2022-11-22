@@ -1,6 +1,6 @@
 <template>
-  <div class="">
-    <div class="" style="display:flex">
+  <div>
+    <div style="display:flex">
       <h3 v-if="orgList.length > 0" class="mt-4" style="text-align: left;">
         <i class="fa fa-university mr-2"></i>Organizations
       </h3>
@@ -101,21 +101,21 @@
           class="mb-2 eventCard" img-top>
           <ul style="list-style-type: none;padding-left: 0px;min-height: 80px;">            
             <img style="float:right;" :src="`${getProfileIcon(eachOrg.name)}`" class="mr-2" alt="center" width="70px"/>            
-            <li v-if="eachOrg.status ==='Registered'">
+            <li class="" v-if="eachOrg.status ==='Registered'" style="">
               <i class="fa fa-user mr-2"></i>
-              <span class="card-title"><a target="_blank" :href="`${$config.explorer.BASE_URL}identity/${eachOrg.orgDid}`">{{ truncate(eachOrg.orgDid,45) }}</a></span>
+              <span class=""><a target="_blank" :href="`${$config.explorer.BASE_URL}identity/${eachOrg.orgDid}`">{{ truncate(eachOrg.orgDid,45) }}</a></span>
               <span v-if="eachOrg.status === 'Registered'" @click="copyToClip(eachOrg.orgDid,'Org DID')"
               ><i class="far fa-copy"></i></span>
             </li>
             <div v-if="eachOrg.status ==='Registered'">
-            <li>
-              <span class="card-title"><i class="fa fa-id-card mr-2"></i>Credentials: {{(eachOrg.credentialsCount)}}</span>
+            <li class="">
+              <span><i class="fa fa-id-card mr-2"></i>Credentials : <span class="badge badge-secondary badge-pill">{{eachOrg.credentialsCount}}</span></span>
             </li>
-            <li>
-              <span class="card-title"><i class="fa fa-table mr-2"></i>Schemas: {{eachOrg.schemasCount}}</span>
+            <li class="">
+              <span><i class="fa fa-table mr-2"></i>Schemas   : <span class="badge badge-secondary badge-pill">{{eachOrg.schemasCount}}</span></span>
             </li>
-            <li>
-              <span class="card-title"><i class="fa fa-desktop mr-2"></i>Templates: {{eachOrg.templatesCount}}</span>
+            <li class="">
+              <span><i class="fa fa-desktop mr-2"></i>Templates : <span class="badge badge-secondary badge-pill">{{eachOrg.templatesCount}}</span></span>
             </li>
             </div>
           </ul>

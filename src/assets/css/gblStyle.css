@@ -17,7 +17,7 @@
 }
 
 .event-card {
-    border: 0;
+    /* border: 0; */
     border-radius: 10px;
     -webkit-box-shadow: 2px 0 10px rgb(0 0 0 / 10%);
     box-shadow: 2px 0 10px rgb(0 0 0 / 10%);
@@ -34,6 +34,7 @@
     border-radius: 0px 0px 0px 5px;
     color: #212529;
     background: rgba(241, 179, 25, 0.24);
+    border:0;
 }
 
 .home{
