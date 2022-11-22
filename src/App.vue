@@ -64,8 +64,7 @@ cursor: pointer;
   <div id="app">
    <b-navbar toggleable="lg" type="dark" variant="white" class="navStyle" v-if="showIcon" sticky>
     <b-navbar-brand href="#" style="display:flex; width: 80%; margin-left: 1em;">
-      <img src="https://thumb.tildacdn.com/tild3065-3765-4865-b331-393637653931/-/resize/150x/-/format/webp/hypersign_Yellow.png" alt="">
-      <h5 class="subtitle">| {{ $config.app.name }} ({{ $config.app.version }})</h5>
+      <img src="./assets/Entity_full.png" alt="" style="height:5vh; opacity: 80%;">
     </b-navbar-brand>
     <b-collapse id="nav-collapse" is-nav style="width: 30%;">
       <b-navbar-nav class="ml-auto">

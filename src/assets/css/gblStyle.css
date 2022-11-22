@@ -1,7 +1,6 @@
 #app {
     text-align: left;
     background-color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     font-size: 13px;
     font-style: normal;
     font-weight: 400;
@@ -49,4 +48,5 @@
     }
 body{
     color: #636363;
+    
 }

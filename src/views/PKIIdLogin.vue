@@ -116,7 +116,7 @@ h5 span {
 </style>
 <template>
 <div style="justify-content: center; padding-top:3%">
-    <img class="align-center" style="margin-bottom: 20px" height="60px" src="../assets/icon.png" />
+    <img class="align-center" style="margin-bottom: 20px" height="60px" src="../assets/Entity_full.png" />
     <b-card no-body class="loginContent event-card ">
       <loading :active.sync="isLoading" :can-cancel="true" :is-full-page="fullPage"></loading>
       <h4>Admin Login</h4>
