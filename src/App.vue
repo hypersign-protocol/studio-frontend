@@ -63,7 +63,7 @@ cursor: pointer;
 <template>
   <div id="app">
    <b-navbar toggleable="lg" type="dark" variant="white" class="navStyle" v-if="showIcon" sticky>
-    <b-navbar-brand href="#" style="display:flex; width: 80%; margin-left: 1em;">
+    <b-navbar-brand href="#" style="display:flex; width: 80%; margin-left: 0.2em;">
       <img src="./assets/Entity_full.png" alt="" style="height:5vh; opacity: 80%;">
     </b-navbar-brand>
     <b-collapse id="nav-collapse" is-nav style="width: 30%;">
