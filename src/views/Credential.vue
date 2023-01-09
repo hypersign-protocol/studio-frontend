@@ -485,7 +485,7 @@ export default {
 		// 	data:{
     //   status: this.selected,
     //   vcId: this.vcId,
-    //   credentialStatusUrl:`https://jagrat.hypersign.id/rest/hypersign-protocol/hidnode/ssi/credential/${this.vcId}`,
+    //   credentialStatusUrl:`https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/credential/${this.vcId}`,
 		// 		}
     // }
     try {
